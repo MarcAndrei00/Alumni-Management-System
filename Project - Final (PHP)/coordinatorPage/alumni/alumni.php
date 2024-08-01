@@ -340,7 +340,6 @@ if (isset($_GET['ide'])) {
                                     <a style="text-decoration: none;" href='./add_alumni.php'>
                                         <button id="add-new-btn" >Add New +</button>
                                     </a>
-                                    <a class='btn btn-secondary border border-dark' href='./pendingAccount/pending.php' style="margin-left: 1%; padding-left: 4.1px; padding-right: 5.4px; white-space: nowrap;">Pending Account</a>
                                 </div>
                             </div>
                         </div>
@@ -382,7 +381,6 @@ if (isset($_GET['ide'])) {
                                             <?php
                                             echo "
                                                 <td class='inline act'>
-                                                    <a class='btn btn-warning btn-sm' href='./update_info.php?id=$row[alumni_id]' style='font-size: 11.8px;'>Update</a>
                                                     <a class='btn btn-danger btn-sm archive' href='./del_alumni.php?id=$row[alumni_id]' style='font-size: 11.8px;'>Archive</a>
                                                     <a class='btn btn-info btn-sm' href='./alumni_info.php?id=$row[alumni_id]' style='font-size: 11.8px;'>More Info</a>
                                                 </td>

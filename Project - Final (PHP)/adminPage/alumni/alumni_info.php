@@ -393,7 +393,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
                                     <?php
                                     echo "
-                                        <a class='btn btn-warning' href='./update_info.php?id=$row[alumni_id]'>Update Info</a>
                                         <a class='btn btn-danger' href='./del_alumni.php?id=$row[alumni_id]'>Archive</a>
                                         <a class='btn btn-danger' href='./alumni.php'>Cancel</a>
                                     "; ?>

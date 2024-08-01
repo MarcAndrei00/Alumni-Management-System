@@ -48,7 +48,6 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
         exit();
     }
     $stmt->close();
-    
 } else {
     header('Location: ../../homepage.php');
     exit();
@@ -109,7 +108,7 @@ if (isset($_GET['ide'])) {
         });
     </script>
     ";
-    }
+}
 ?>
 
 
@@ -222,7 +221,7 @@ if (isset($_GET['ide'])) {
 
         <div class="side-content">
             <div class="profile">
-            <i class="bi bi-person-circle"></i>
+                <i class="bi bi-person-circle"></i>
                 <h4><?php echo $user['fname']; ?></h4>
                 <small style="color: white;"><?php echo $user['email']; ?></small>
                 <!-- <h4>ADMIN</h4>
@@ -346,7 +345,10 @@ if (isset($_GET['ide'])) {
                                 <tr>
                                     <th scope="col" class="inline">ID</th>
                                     <th scope="col" class="inline">TITLE</th>
-                                    <th scope="col" class="inline">SCHEDULE</th>
+                                    <th scope="col" class="inline">DATE</th>
+                                    <th scope="col" class="inline">TIME</th>
+                                    <th scope="col" class="inline">VENUE</th>
+                                    <th scope="col" class="inline">ADDRESS</th>
                                     <th scope="col" class="inline">DESCRIPTION</th>
                                     <th scope="col" class="inline">GOING</th>
                                     <th scope="col" class="inline">INTERESTED</th>
@@ -359,12 +361,16 @@ if (isset($_GET['ide'])) {
                                 <?php
                                 if ($result->num_rows > 0) {
                                     while ($row = $result->fetch_assoc()) {
-                                        
+                                        $time = $row["start_time"] . " - " . $row["end_time"];
+
                                 ?>
                                         <tr>
                                             <td class="inline"><?php echo $row['event_id'] ?></td>
                                             <td class="inline"><?php echo $row['title'] ?></td>
-                                            <td class="inline"><?php echo $row['schedule']?></td>
+                                            <td class="inline"><?php echo $row['date'] ?></td>
+                                            <td class="inline"><?php echo htmlspecialchars($time) ?></td>
+                                            <td class="inline"><?php echo $row['venue'] ?></td>
+                                            <td class="inline"><?php echo $row['address'] ?></td>
                                             <td class="inline"><?php echo $row['description'] ?></td>
                                             <td class="inline"><?php echo $row['going'] ?></td>
                                             <td class="inline"><?php echo $row['interested'] ?></td>

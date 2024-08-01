@@ -350,12 +350,15 @@ if (isset($_GET['ide'])) {
                                 <tr>
                                     <th scope="col" class="inline">ID</th>
                                     <th scope="col" class="inline">TITLE</th>
-                                    <th scope="col" class="inline">SCHEDULE</th>
+                                    <th scope="col" class="inline">DATE</th>
+                                    <th scope="col" class="inline">TIME</th>
+                                    <th scope="col" class="inline">VENUE</th>
+                                    <th scope="col" class="inline">ADDRESS</th>
                                     <th scope="col" class="inline">DESCRIPTION</th>
                                     <th scope="col" class="inline">GOING</th>
                                     <th scope="col" class="inline">INTERESTED</th>
                                     <th scope="col" class="inline">NOT INTERESTED</th>
-                                    <th scope="col" class="inline">DATE ARCHIVED</th>
+                                    <th scope="col" class="inline">DATE CREATED</th>
                                     <th scope="col" class="inline">ACTION</th>
                                 </tr>
                             </thead>
@@ -363,22 +366,27 @@ if (isset($_GET['ide'])) {
                                 <?php
                                 if ($result->num_rows > 0) {
                                     while ($row = $result->fetch_assoc()) {
-                                        
+                                        $time = $row["start_time"] . " - " . $row["end_time"];
+
                                 ?>
                                         <tr>
                                             <td class="inline"><?php echo $row['event_id'] ?></td>
                                             <td class="inline"><?php echo $row['title'] ?></td>
-                                            <td class="inline"><?php echo $row['schedule']?></td>
+                                            <td class="inline"><?php echo $row['date'] ?></td>
+                                            <td class="inline"><?php echo htmlspecialchars($time) ?></td>
+                                            <td class="inline"><?php echo $row['venue'] ?></td>
+                                            <td class="inline"><?php echo $row['address'] ?></td>
                                             <td class="inline"><?php echo $row['description'] ?></td>
                                             <td class="inline"><?php echo $row['going'] ?></td>
                                             <td class="inline"><?php echo $row['interested'] ?></td>
                                             <td class="inline"><?php echo $row['not_interested'] ?></td>
-                                            <td class="inline"><?php echo $row['date_archived'] ?></td>
+                                            <td class="inline"><?php echo $row['date_created'] ?></td>
                                             <?php
                                             echo "
                                                 <td class='inline act'>
                                                     <div class='button'>
-                                                        <a class='btn btn-success btn-sm archive' href='./restore_event.php?id=$row[event_id]' style='font-size: 11.8px;'>Restore</a>
+                                                        <a class='btn btn-warning btn-sm' href='./update_event.php?id=$row[event_id]' style='font-size: 11.8px;'>Update</a>
+                                                        <a class='btn btn-danger btn-sm archive' href='./del_event.php?id=$row[event_id]' style='font-size: 11.8px;'>Archive</a>
                                                     </div>
                                                 </td>
                                             "; ?>

@@ -59,8 +59,8 @@ if (isset($_GET['id'])) {
 
 
     // Insert data into table event_archive from event
-    $sql_archive = "INSERT INTO event_archive (event_id, title, schedule, description, image, going, interested, not_interested, date_created)" .
-        " SELECT event_id, title, schedule, description, image, going, interested, not_interested, date_created FROM event WHERE event_id=$event_id";
+    $sql_archive = "INSERT INTO event_archive (event_id, title, date, start_time, end_time, venue, address, description, image, going, interested, not_interested, date_created)" .
+        " SELECT event_id, title, date, start_time, end_time, venue, address, description, image, going, interested, not_interested, date_created FROM event WHERE event_id=$event_id";
     $conn->query($sql_archive);
 
     // Delete data from table event

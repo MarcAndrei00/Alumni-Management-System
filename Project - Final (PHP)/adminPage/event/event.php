@@ -69,7 +69,7 @@ if (isset($_GET['query']) && !empty($_GET['query'])) {
     // Modify SQL query to include search filter
     $sql .= "WHERE event_id LIKE '%$search_query%' 
             OR title LIKE '%$search_query%' 
-            OR scheddule LIKE '%$search_query%'
+            OR date LIKE '%$search_query%'
             OR description LIKE '%$search_query%'";
 }
 
@@ -82,7 +82,7 @@ $total_records_query = "SELECT COUNT(*) FROM event";
 if (isset($_GET['query']) && !empty($_GET['query'])) {
     $total_records_query .= " WHERE event_id LIKE '%$search_query%' 
                               OR title LIKE '%$search_query%' 
-                              OR scheddule LIKE '%$search_query%'
+                              OR date LIKE '%$search_query%'
                               OR description LIKE '%$search_query%'";
 }
 $total_records_result = mysqli_query($conn, $total_records_query);
@@ -349,7 +349,10 @@ echo "
                                 <tr>
                                     <th scope="col" class="inline">ID</th>
                                     <th scope="col" class="inline">TITLE</th>
-                                    <th scope="col" class="inline">SCHEDULE</th>
+                                    <th scope="col" class="inline">DATE</th>
+                                    <th scope="col" class="inline">TIME</th>
+                                    <th scope="col" class="inline">VENUE</th>
+                                    <th scope="col" class="inline">ADDRESS</th>
                                     <th scope="col" class="inline">DESCRIPTION</th>
                                     <th scope="col" class="inline">GOING</th>
                                     <th scope="col" class="inline">INTERESTED</th>
@@ -362,12 +365,16 @@ echo "
                                 <?php
                                 if ($result->num_rows > 0) {
                                     while ($row = $result->fetch_assoc()) {
+                                        $time = $row["start_time"] . " - " . $row["end_time"];
 
                                 ?>
                                         <tr>
                                             <td class="inline"><?php echo $row['event_id'] ?></td>
                                             <td class="inline"><?php echo $row['title'] ?></td>
-                                            <td class="inline"><?php echo $row['schedule'] ?></td>
+                                            <td class="inline"><?php echo $row['date'] ?></td>
+                                            <td class="inline"><?php echo htmlspecialchars($time) ?></td>
+                                            <td class="inline"><?php echo $row['venue'] ?></td>
+                                            <td class="inline"><?php echo $row['address'] ?></td>
                                             <td class="inline"><?php echo $row['description'] ?></td>
                                             <td class="inline"><?php echo $row['going'] ?></td>
                                             <td class="inline"><?php echo $row['interested'] ?></td>

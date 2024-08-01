@@ -265,7 +265,10 @@ $result = $conn->query($sql);
                                 <div class="card-body">
                                     <h5 class="card-title"><?php echo $row['title']; ?></h5>
                                     <p class="card-text"><?php echo $row['description']; ?></p>
-                                    <p class="card-text"><small class="text-muted"><?php echo $row['schedule']; ?></small></p>
+                                    <p class="card-text"><small class="text-muted"><b>DATE: </b><?php echo $row['date']; ?></small></p>
+                                    <p class="card-text"><small class="text-muted"><b>TIME: </b><?php echo $row['start_time']; ?> To <?php echo $row['end_time']; ?></small></p>
+                                    <p class="card-text"><small class="text-muted"><b>VENUE: </b><?php echo $row['venue']; ?></small></p>
+                                    <p class="card-text"><small class="text-muted"><b>ADRESS: </b><?php echo $row['address']; ?></small></p>
                                 </div>
                             </div>
                         </div>

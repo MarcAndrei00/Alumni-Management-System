@@ -83,27 +83,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 
     // email and user existing check
-    $emailCheck = mysqli_query($conn, "SELECT * FROM alumni WHERE email='$email'");
-    $emailCheck_decline = mysqli_query($conn, "SELECT * FROM declined_account WHERE email='$email'");
-    $idCheck = mysqli_query($conn, "SELECT * FROM alumni WHERE student_id='$stud_id'");
-    $idCheck_decline = mysqli_query($conn, "SELECT * FROM declined_account WHERE student_id='$stud_id'");
+    $alumni_idCheck = mysqli_query($conn, "SELECT * FROM list_of_graduate WHERE student_id='$stud_id'");
 
-    if (mysqli_num_rows($emailCheck) > 0) {
-        $errorMessage = "Email Already Exists";
-    } else if (mysqli_num_rows($emailCheck_decline) > 0) {
-        $errorMessage = "Email Already Exists";
-    } else if (mysqli_num_rows($idCheck) > 0) {
-        $errorMessage = "Student ID Already Exists";
-    } else if (mysqli_num_rows($idCheck_decline) > 0) {
-        $errorMessage = "Student ID Already Exists";
-    } else {
+    if (mysqli_num_rows($alumni_idCheck) > 0) {
 
         // email and user existing check
-        $emailCheck = mysqli_query($conn, "SELECT * FROM pending WHERE email='$email'");
+        $emailCheck = mysqli_query($conn, "SELECT * FROM alumni WHERE email='$email'");
         $emailCheck_archive = mysqli_query($conn, "SELECT * FROM alumni_archive WHERE email='$email'");
-        $idCheck = mysqli_query($conn, "SELECT * FROM pending WHERE student_id='$stud_id'");
+        $idCheck = mysqli_query($conn, "SELECT * FROM alumni WHERE student_id='$stud_id'");
         $idCheck_archive = mysqli_query($conn, "SELECT * FROM alumni_archive WHERE student_id='$stud_id'");
-
 
         if (mysqli_num_rows($emailCheck) > 0) {
             $errorMessage = "Email Already Exists";
@@ -120,6 +108,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             $sql = "INSERT INTO alumni SET student_id='$stud_id', fname='$fname', mname='$mname', lname='$lname', gender='$gender', course='$course', batch_startYear='$fromYear', batch_endYear='$toYear', contact='$contact', address='$address', email='$email', password='$temp_password', picture='$imageDataEscaped'";
             $result = $conn->query($sql);
+
+            //delete data in table list_of_graduate
+            $sql_delete = "DELETE FROM list_of_graduate WHERE student_id=$stud_id";
+            $conn->query($sql_delete);
+
             echo "
             <script>
                 // Wait for the document to load
@@ -139,6 +132,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </script>
             ";
         }
+    } else {
+        echo "<script>
+            // Wait for the document to load
+            document.addEventListener('DOMContentLoaded', function() {
+                // Use SweetAlert2 for the alert
+                Swal.fire({
+                    title: 'No Alumni Student with student Id of $stud_id; ',
+                    timer: 4000,
+                    showConfirmButton: true, // Show the confirm button
+                    confirmButtonColor: '#4CAF50', // Set the button color to green
+                    confirmButtonText: 'OK' // Change the button text if needed
+                });
+            });
+        </script>";
     }
 }
 ?>

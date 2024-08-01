@@ -60,12 +60,6 @@ $result = $conn->query($sql);
 $row = $result->fetch_assoc();
 $count = $row['alumni_count'];
 
-// PENDING ACCOUNT
-$sql_pending = "SELECT COUNT(student_id) AS alumni_pending_count FROM pending";
-$result_pending = $conn->query($sql_pending);
-$row_pending = $result_pending->fetch_assoc();
-$count_pending = $row_pending['alumni_pending_count'];
-
 // EVENT COUNT
 $sql_event = "SELECT COUNT(event_id) AS events_count FROM event";
 $result_event = $conn->query($sql_event);
@@ -206,25 +200,6 @@ $event_count = $row_event['events_count'];
                                         </div>
                                     </div>
                                     <a href="alumni/alumni.php" class="card-footer d-flex justify-content-between text-white" style="text-decoration: none;">
-                                        <span>View Details</span>
-                                        <i class="las la-arrow-circle-right"></i>
-                                    </a>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="card bg-danger text-white mb-4">
-                                    <div class="card-body">
-                                        <div class="d-flex align-items-center">
-                                            <i class="las la-user-graduate fa-3x" style="font-size: 25px;"></i>
-                                                <div class="row mb-3">
-                                                        <!-- display Alumni Total Count -->
-                                                        <label style="font-size: 20px;">Pending Alumni Account:</label>
-                                                        <!-- display alumni count in database -->
-                                                        <label class="col-sm-10 col-form-label" style="font-size: 40px;"><?php echo $count_pending; ?></label>
-                                                </div>
-                                        </div>
-                                    </div>
-                                    <a href="./alumni/pendingAccount/pending.php" class="card-footer d-flex justify-content-between text-white" style="text-decoration: none;">
                                         <span>View Details</span>
                                         <i class="las la-arrow-circle-right"></i>
                                     </a>
