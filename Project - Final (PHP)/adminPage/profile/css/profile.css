@@ -1,7 +1,4 @@
-
-
-
-@import url('https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 :root {
     --main-color: #2a9134;
@@ -15,7 +12,7 @@
     text-decoration: none;
     list-style-type: none;
     box-sizing: border-box;
-    font-family: 'Merriweather', sans-serif;
+    font-family: 'Poppins', sans-serif;
     overflow-x: hidden;
 }
 
@@ -268,7 +265,6 @@ main {
 
 
 .container-fluid .content-header{
-
     display: flex;
     justify-content: center;
     align-items: center;
@@ -377,4 +373,12 @@ main {
     color: #fff;
     font-size: 80px;
     font-weight: lighter;
+}
+.password-container {
+    position: relative;
+}
+.password-container input[type="password"],
+.password-container input[type="text"] {
+    flex: 1;
+    padding-right: 40px; /* Adjust the padding to make space for the icon */
 }

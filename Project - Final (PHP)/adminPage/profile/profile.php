@@ -203,7 +203,7 @@ if ($result->num_rows > 0) {
                         <div class="container-fluid">
                             <div class="container-fluid" id="content-container">
                                 <div class="information">
-                                    <form>
+                                    <form enctype="multipart/form-data">
                                         <fieldset disabled>
                                             <div class="mb-3">
                                                 <label for="disabledTextInput" class="form-label">ADMIN FULL NAME</label>
@@ -217,9 +217,16 @@ if ($result->num_rows > 0) {
                                                 <label for="disabledTextInput" class="form-label">EMAIL ADDRESS</label>
                                                 <input email="email" id="disabledTextInput" class="form-control" placeholder="Email" value="<?php echo htmlspecialchars($email); ?>" />
                                             </div>
-                                            <div class="mb-3">
-                                                <label for="disabledTextInput" class="form-label">PASSWORD</label>
-                                                <input password="email" id="disabledTextInput" class="form-control" placeholder="Password" value="<?php echo htmlspecialchars($password); ?>" />
+                                            <div class="form-group password-container" style="position: relative;">
+                                                <label for="password">Password</label>
+                                                <input type="password" class="form-control" id="password" name="password" value="<?php echo htmlspecialchars($password); ?>" style="flex: 1; padding-right: 10px;"/>
+                                                <img id="togglePassword" src="eye-close.png" alt="Show/Hide Password" onclick="togglePasswordVisibility()" style="height: 25px; width: 30px;
+                                                position: absolute;
+                                                right: 10px;
+                                                top: 55%;
+`                                               transform: translateY(-50%);
+                                                cursor: pointer;
+                                                ">
                                             </div>
                                     </form>
                                 </div>
@@ -253,6 +260,19 @@ if ($result->num_rows > 0) {
                 toggleButton.textContent = 'Show';
             }
         });
+    </script>
+    <script>
+        function togglePasswordVisibility() {
+            var passwordField = document.getElementById('password');
+            var toggleIcon = document.getElementById('togglePassword');
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                toggleIcon.src = 'eye-open.png';
+            } else {
+                passwordField.type = 'password';
+                toggleIcon.src = 'eye-close.png';
+            }
+        }
     </script>
 </body>
 
