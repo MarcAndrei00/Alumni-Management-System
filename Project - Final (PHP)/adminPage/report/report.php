@@ -411,8 +411,8 @@ if ($res_alumniCount->num_rows > 0) {
                 },
                 jsPDF: {
                     unit: 'in',
-                    format: 'letter',
-                    orientation: 'portrait'
+                    format: 'legal',
+                    orientation: 'landscape'
                 }
             };
 
