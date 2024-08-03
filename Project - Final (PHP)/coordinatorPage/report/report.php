@@ -89,7 +89,7 @@ if ($result->num_rows > 0) {
 }
 
 // EVENT COUNT EVERY MONTH
-$query_event = "SELECT MONTH(schedule) as month, COUNT(*) as count FROM event GROUP BY MONTH(schedule)";
+$query_event = "SELECT MONTH(date) as month, COUNT(*) as count FROM event GROUP BY MONTH(date)";
 $res_event = $conn->query($query_event);
 
 $labels_event = ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.'];
@@ -237,12 +237,8 @@ if ($res_alumniCount->num_rows > 0) {
                             <p><?php echo $count_alumni; ?></p>
                         </div>
                         <div class="summary-box" id="coordinator">
-                            <h2>Total Coordinators Registered</h2>
+                            <h2>Total Events Posted </h2>
                             <p><?php echo $coordinator_count; ?></p>
-                        </div>
-                        <div class="summary-box" id="events">
-                            <h2>Total Events Posted</h2>
-                            <p><?php echo $event_count; ?></p>
                         </div>
                     </div>
                     <div class="charts">

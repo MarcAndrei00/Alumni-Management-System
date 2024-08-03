@@ -179,7 +179,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <div class="side-content">
             <div class="profile">
                 <i class="bi bi-person-circle"></i>
-                <h4><?php echo $user['fname']; ?></h4>
+                <h4 style="overflow-y: hidden;"><?php echo $user['fname']; ?></h4>
                 <small style="color: white;"><?php echo $user['email']; ?></small>
             </div>
 
@@ -253,7 +253,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         <main>
             <div class="page-header">
-                <h1><strong>Alumni</strong></h1>
+                <h1 style="overflow-y: hidden;"><strong >Alumni</strong></h1>
             </div>
         </main>
         <div class="container" id="container-full">

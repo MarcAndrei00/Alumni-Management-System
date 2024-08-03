@@ -70,6 +70,7 @@ $result = $conn->query($sql);
     <title>Event</title>
     <link rel="shortcut icon" href="assets/cvsu.png" type="image/svg+xml">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
             background-color: #f8f9fa;
@@ -150,6 +151,19 @@ $result = $conn->query($sql);
         }
         .event-card .card-body {
             flex: 1;
+        }
+        .button-container {
+            display: flex;
+            justify-content: center; /* Center horizontally */
+            gap: 15px; /* Space between buttons */
+            margin-top: 20px; /* Optional: add some space above the buttons */
+            margin-bottom: 20px;
+        }
+        .button-container button {
+            width: 130px; /* Fixed width for both buttons */
+            height: 50px;
+            border-radius: 5px; /* Fully rounded corners */
+            padding: 5px 5px;
         }
         .footer {
             background-color: #2e2f34;
@@ -269,6 +283,14 @@ $result = $conn->query($sql);
                                     <p class="card-text"><small class="text-muted"><b>TIME: </b><?php echo $row['start_time']; ?> To <?php echo $row['end_time']; ?></small></p>
                                     <p class="card-text"><small class="text-muted"><b>VENUE: </b><?php echo $row['venue']; ?></small></p>
                                     <p class="card-text"><small class="text-muted"><b>ADRESS: </b><?php echo $row['address']; ?></small></p>
+                                </div>
+                                <div class="button-container">
+                                    <button type="button" class="btn btn-success">
+                                    <i class="fas fa-donate"></i> Donate
+                                    </button>
+                                    <button type="button" class="btn btn-primary">
+                                    <i class="fas fa-info-circle"></i> View Details
+                                    </button>
                                 </div>
                             </div>
                         </div>

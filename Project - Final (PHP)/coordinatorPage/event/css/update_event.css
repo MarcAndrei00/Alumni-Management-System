@@ -2,13 +2,7 @@
 
 
 
-@import url('https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@300;400;500;600&display=swap');
-
-:root {
-    --main-color: #2a9134;
-    --color-dark: #34425A;
-    --text-grey: #B0B0B0;
-}
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 * {
     margin: 0;
@@ -16,9 +10,16 @@
     text-decoration: none;
     list-style-type: none;
     box-sizing: border-box;
-    font-family: 'Merriweather', sans-serif;
-    overflow-x: hidden;
+    font-family: 'Poppins', sans-serif;
+    scroll-behavior: smooth;
 }
+
+:root {
+    --main-color: #2a9134;
+    --color-dark: #34425A;
+    --text-grey: #B0B0B0;
+}
+
 
 #menu-toggle {
     display: none;

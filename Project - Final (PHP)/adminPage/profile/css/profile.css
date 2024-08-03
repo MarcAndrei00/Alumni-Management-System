@@ -13,7 +13,6 @@
     list-style-type: none;
     box-sizing: border-box;
     font-family: 'Poppins', sans-serif;
-    overflow-x: hidden;
 }
 
 #menu-toggle {
