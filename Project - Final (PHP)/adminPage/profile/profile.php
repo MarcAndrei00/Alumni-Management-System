@@ -217,16 +217,12 @@ if ($result->num_rows > 0) {
                                                 <label for="disabledTextInput" class="form-label">EMAIL ADDRESS</label>
                                                 <input email="email" id="disabledTextInput" class="form-control" placeholder="Email" value="<?php echo htmlspecialchars($email); ?>" />
                                             </div>
-                                            <div class="form-group password-container" style="position: relative;">
-                                                <label for="password">Password</label>
-                                                <input type="password" class="form-control" id="password" name="password" value="<?php echo htmlspecialchars($password); ?>" style="flex: 1; padding-right: 10px;"/>
-                                                <img id="togglePassword" src="eye-close.png" alt="Show/Hide Password" onclick="togglePasswordVisibility()" style="height: 25px; width: 30px;
-                                                position: absolute;
-                                                right: 10px;
-                                                top: 55%;
-`                                               transform: translateY(-50%);
-                                                cursor: pointer;
-                                                ">
+                                            <div class="mb-3">
+                                                <label for="password" style="margin-right: 10px;">PASSWORD</label>
+                                                <div class="form-group password-container" style="position: relative; display: flex; align-items: center;">
+                                                    <input type="password" class="form-control" id="password" name="password" value="<?php echo htmlspecialchars($password); ?>" style="flex: 1; padding-right: 40px;" />
+                                                    <img id="togglePassword" src="eye-close.png" alt="Show/Hide Password" onclick="togglePasswordVisibility()" style="height: 25px; width: 30px; position: absolute; right: 10px; cursor: pointer;" />
+                                                </div>
                                             </div>
                                     </form>
                                 </div>

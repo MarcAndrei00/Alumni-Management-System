@@ -20,7 +20,6 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     if ($user_result->num_rows > 0) {
         // User is an admin
         $user = $user_result->fetch_assoc();
-        
     }
     $stmt->close();
 
@@ -49,7 +48,6 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
         exit();
     }
     $stmt->close();
-    
 } else {
     header('Location: ../../homepage.php');
     exit();
@@ -230,7 +228,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </div>
 
             <div class="container-fluid" id="page-content">
-            <?php
+                <?php
                 if (!empty($errorMessage)) {
                     echo "<script>";
                     echo "Swal.fire({";
@@ -253,16 +251,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <br>
                             <form method="POST" onsubmit="return submitForm(this);">
                                 <div class="mb-3">
-                                    <label for="formGroupExampleInput" class="form-label">Enter Current Password</label>
-                                    <input type="text" name="currentPass" class="form-control" id="formGroupExampleInput" required>
+                                    <label for="currentPass" class="form-label">Enter Current Password</label>
+                                    <div class="form-group password-container" style="position: relative; display: flex; align-items: center;">
+                                        <input type="password" id="currentPass" name="currentPass" class="form-control" required>
+                                        <img id="toggleCurrentPass" src="eye-close.png" alt="Show/Hide Password" onclick="togglePasswordVisibility('currentPass', 'toggleCurrentPass')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;" />
+                                    </div>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="formGroupExampleInput2" class="form-label">Change Password</label>
-                                    <input type="password" name="newPass" class="form-control" id="formGroupExampleInput2" required>
+                                    <label for="newPass" class="form-label">Change Password</label>
+                                    <div class="form-group password-container" style="position: relative; display: flex; align-items: center;">
+                                        <input type="password" id="newPass" name="newPass" class="form-control" required>
+                                        <img id="toggleNewPass" src="eye-close.png" alt="Show/Hide Password" onclick="togglePasswordVisibility('newPass', 'toggleNewPass')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;" />
+                                    </div>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="formGroupExampleInput2" class="form-label">Confirm Password</label>
-                                    <input type="password" name="confirmPass" class="form-control" id="formGroupExampleInput2" required>
+                                    <label for="confirmPass" class="form-label">Confirm Password</label>
+                                    <div class="form-group password-container" style="position: relative; display: flex; align-items: center;">
+                                        <input type="password" id="confirmPass" name="confirmPass" class="form-control" required>
+                                        <img id="toggleConfirmPass" src="eye-close.png" alt="Show/Hide Password" onclick="togglePasswordVisibility('confirmPass', 'toggleConfirmPass')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;" />
+                                    </div>
                                 </div>
                                 <div class="row">
                                     <div class="container-fluid">
@@ -294,6 +301,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     }
                 });
             return false; // Prevent default form submission
+        }
+
+        function togglePasswordVisibility(passwordId, toggleId) {
+            var passwordField = document.getElementById(passwordId);
+            var toggleIcon = document.getElementById(toggleId);
+
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                toggleIcon.src = 'eye-open.png'; // Use the image for showing password
+            } else {
+                passwordField.type = 'password';
+                toggleIcon.src = 'eye-close.png'; // Use the image for hiding password
+            }
         }
     </script>
 </body>

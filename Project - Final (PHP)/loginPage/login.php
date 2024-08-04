@@ -357,12 +357,14 @@ function check_alumni($conn, $table, $log_email, $pass)
                     <input type="email" placeholder="Email" name="email" value="<?php echo htmlspecialchars($email); ?>" required />
                     <label></label>
                 </div>
-                <div class="infield">
-                    <input type="password" placeholder="Password" name="password" value="<?php echo htmlspecialchars($password); ?>" min="0" required />
+                <div class="infield" style="position: relative;">
+                    <input type="password" placeholder="Password" id="password" name="password" value="<?php echo htmlspecialchars($password); ?>" min="0" required />
+                    <img id="togglePassword" src="eye-close.png" alt="Show/Hide Password" onclick="togglePasswordVisibility('password', 'togglePassword')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;" />
                     <label></label>
                 </div>
-                <div class="infield">
-                    <input type="password" placeholder="Confirm Password" name="confirm_password" value="<?php echo htmlspecialchars($confirm_password); ?>" required />
+                <div class="infield" style="position: relative;">
+                    <input type="password" placeholder="Confirm Password" id="confirm_password" name="confirm_password" value="<?php echo htmlspecialchars($confirm_password); ?>" required />
+                    <img id="toggleConfirmPassword" src="eye-close.png" alt="Show/Hide Password" onclick="togglePasswordVisibility('confirm_password', 'toggleConfirmPassword')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;" />
                     <label></label>
                 </div>
                 <button type="submit" name="submit">Sign Up</button>
@@ -377,8 +379,9 @@ function check_alumni($conn, $table, $log_email, $pass)
                     <input type="text" placeholder="Student ID / Email" name="log_email" required />
                     <label></label>
                 </div>
-                <div class="infield">
-                    <input type="password" placeholder="Password" name="log_password" required />
+                <div class="infield" style="position: relative;">
+                    <input type="password" placeholder="Password" id="log_password" name="log_password" required style="padding-right: 30px;" />
+                    <img id="toggleLogPassword" src="eye-close.png" alt="Show/Hide Password" onclick="togglePasswordVisibility('log_password', 'toggleLogPassword')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;" />
                     <label></label>
                 </div>
                 <br>
@@ -441,7 +444,7 @@ function check_alumni($conn, $table, $log_email, $pass)
                 container.classList.remove('right-panel-active');
             });
         });
-    
+
         document.addEventListener('DOMContentLoaded', function() {
             const startYearSelect = document.getElementById('startYear');
             const endYearSelect = document.getElementById('endYear');
@@ -492,6 +495,19 @@ function check_alumni($conn, $table, $log_email, $pass)
                 studentIdInput.value = value;
             });
         });
+
+        function togglePasswordVisibility(passwordId, toggleId) {
+            var passwordField = document.getElementById(passwordId);
+            var toggleIcon = document.getElementById(toggleId);
+
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                toggleIcon.src = 'eye-open.png'; // Use the image for showing password
+            } else {
+                passwordField.type = 'password';
+                toggleIcon.src = 'eye-close.png'; // Use the image for hiding password
+            }
+        }
     </script>
 </body>
 
