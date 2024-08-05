@@ -21,7 +21,7 @@ Manage alumni of CvSU.
     * (Change from master to main)
 * git branch -m main
     * (one time only | Pag naka pag init kana di mo na kilangan pa ulit mag init pa)
-* git remote add origin "<GIT REPOSITORY LINK>"
+* git remote add origin "--GIT REPOSITORY LINK--"
     * (one time only | Pag naka pag remote add kana di mo na kilangan pa ulit mag remote)
  
       
@@ -29,7 +29,7 @@ Manage alumni of CvSU.
     * (retrieve data from git repository)
 * git add .
     * (Add all data in folder to repository)
-* git commit -m "<COMMENT>"
+* git commit -m "--COMMENT--"
     * (Save and Add comment in file)
 * git push origin main
     * (one time only | Pag naka pag init kana di mo na kilangan pa ulit mag init pa)
