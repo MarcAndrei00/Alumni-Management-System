@@ -1,6 +1,7 @@
 <p align="center">
 <!--   <img src="YOUR_LOGO_IMAGE_URL" alt="Logo" width="200"/> -->
 </p>
+
 # ALUMNI MANAGEMENT SYSTEM 
 
 ITEC 75A - Simple Project
