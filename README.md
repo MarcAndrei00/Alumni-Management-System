@@ -67,7 +67,9 @@ Contributors
 * ver.1.0
     * [Alumni Management System 1](https://github.com/L-iVANS/Alumni-Management-System)
     * ITEC 60A - Group (Contributors: Ivans, Drei, Yrria, Nix, Jps, Seigh, Tan)
+      
 * ver.2.0
+    * [Alumni Management System 2](https://github.com/MarcAndrei00/Alumni-Management-System)
     * ITEC 75A - Group
     * Latest
 
