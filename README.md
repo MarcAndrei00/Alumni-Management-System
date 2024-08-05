@@ -54,13 +54,13 @@ Manage alumni of CvSU.
 ## Authors
 
 Contributors
-* Drei
-* Jam
-* Yrria
-* DH-Nyel
-* Jps
-* Nix
-* Par
+* [Drei](https://github.com/MarcAndrei00)
+* [Jam](https://github.com/Babynashji)
+* [Yrria](https://github.com/Yrria)
+* [DH-Nyel](https://github.com/karinaonly)
+* [Jps](https://github.com)
+* [Nix](https://github.com/6nix)
+* [Par](https://github.com)
 
 ## Version History
 
