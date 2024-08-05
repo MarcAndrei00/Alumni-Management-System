@@ -1,3 +1,7 @@
+<p align="center">
+<!--   <img src="YOUR_LOGO_IMAGE_URL" alt="Logo" width="200"/> -->
+</p>
+
 # ALUMNI MANAGEMENT SYSTEM 
 
 ITEC 75A - Simple Project
@@ -6,12 +10,12 @@ Manage alumni of CvSU.
 
 ## Features
 
-* Admin and Coordinators manage alumni sccounts.
+* Admin and Coordinators manage alumni accounts.
 * Login three types of account (Admin, Coordinator, and Alumni) | Auto filter login.
-* Forgot Password with OTP / recovery code send through email.
-* Sign Up with authentication code send through email.
-* Add new alumni in the list of graduates using import excel files.
-* Add new alumni or register alumni .
+* Forgot Password with OTP / recovery code sent through email.
+* Sign Up with authentication code sent through email.
+* Add new alumni to the list of graduates using import excel files.
+* Add new alumni or register alumni.
 * Manage events
 * Integrated system (API)
 
@@ -43,7 +47,7 @@ Manage alumni of CvSU.
 
 ### NOTE (FOR CONTRIBUTORS)
 * Always back up your files before pulling from the repository.
-    * To prevent lost of your new update.
+    * To prevent loss of your new updates.
 
 ## Authors
 
@@ -67,7 +71,7 @@ Contributors
 
 ## Purpose
 
-This project is for education ppurpose only. It is used to fulfill the requirements for a course subject ITEC 75A - SYSTEM INTEGRATION AND ARCHITECTURE 1.
+This project is for educational purposes only. It is used to fulfill the requirements for a course subject ITEC 75A - SYSTEM INTEGRATION AND ARCHITECTURE 1.
 
 ## Acknowledgments
 
