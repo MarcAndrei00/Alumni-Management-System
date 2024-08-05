@@ -60,7 +60,7 @@ Contributors
 ## Version History
 
 * ver.1.0
-    * [Alumni Management System 1]([https://github.com/matiassingers/awesome-readme](https://github.com/L-iVANS/Alumni-Management-System))
+    * [Alumni Management System 1](https://github.com/L-iVANS/Alumni-Management-System)
     * ITEC 60A - Group
 * ver.2.0
     * ITEC 75A - Group
