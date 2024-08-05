@@ -74,5 +74,6 @@ This project is for educational purposes only. It is used to fulfill the require
 
 ## Acknowledgments
 
-Inspiration, code snippets, etc.
-* [awesome-readme](https://github.com/matiassingers/awesome-readme)
+Inspiration, code snippets, reference etc.
+* [College Alumni System using PHP and MySQL](https://github.com/matiassingers/awesome-readme)
+* [A simple README.md template by: Dominique Pizzie](https://gist.github.com/DomPizzie/7a5ff55ffa9081f2de27c315f5018afc)
