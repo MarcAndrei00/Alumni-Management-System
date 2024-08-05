@@ -16,8 +16,10 @@ Manage alumni of CvSU.
 * Sign Up with authentication code sent through email.
 * Add new alumni to the list of graduates using import excel files.
 * Add new alumni or register alumni.
-* Manage events
-* Integrated system (API)
+* Manage events.
+* Accept donation for events.
+* Export PDF files for Reports aswell as list of alumni, etc.
+* Integrated system - Mailer and E-wallet donation (API).
 
 ## Help And Guide ( Git Commands )
 
@@ -26,23 +28,23 @@ Manage alumni of CvSU.
 * **git init**
     * (Change from master to main)
 * **git branch -m main**
-    * (one time only | Pag naka pag init kana di mo na kilangan pa ulit mag init pa)
+    * (one time only | Pag naka pag init kana di mo na kilangan pa ulit mag init pa).
 * **git remote add origin "--GIT REPOSITORY LINK--"**
-    * (one time only | Pag naka pag remote add kana di mo na kilangan pa ulit mag remote)
+    * (one time only | Pag naka pag remote add kana di mo na kilangan pa ulit mag remote).
  
 ### Retrieve Data from Github Repository
 
 * **git pull origin main**
-    * (retrieve data from git repository)
+    * (retrieve data from git repository).
       
 ### Upload New Update to Github Repository
 
 * **git add .**
-    * (Add all data in folder to repository)
+    * (Add all data in folder to repository).
 * **git commit -m "--COMMENT--"**
-    * (Save and Add comment in file)
+    * (Save and Add comment in file).
 * **git push origin main**
-    * (Upload the file to GIT repository )
+    * (Upload the file to GIT repository ).
 <br/>
 
 ### NOTE (FOR CONTRIBUTORS)
