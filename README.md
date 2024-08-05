@@ -17,24 +17,33 @@ Manage alumni of CvSU.
 
 ## Help And Guide ( Git Commands )
 
-* git init
+### Initialize repository
+
+* **git init**
     * (Change from master to main)
-* git branch -m main
+* **git branch -m main**
     * (one time only | Pag naka pag init kana di mo na kilangan pa ulit mag init pa)
-* git remote add origin "--GIT REPOSITORY LINK--"
+* **git remote add origin "--GIT REPOSITORY LINK--"**
     * (one time only | Pag naka pag remote add kana di mo na kilangan pa ulit mag remote)
  
-      
-* git pull origin main
+### Retrieve Data from Github Repository
+
+* **git pull origin main**
     * (retrieve data from git repository)
-* git add .
+      
+### Upload New Update to Github Repository
+
+* **git add .**
     * (Add all data in folder to repository)
-* git commit -m "--COMMENT--"
+* **git commit -m "--COMMENT--"**
     * (Save and Add comment in file)
-* git push origin main
-    * (one time only | Pag naka pag init kana di mo na kilangan pa ulit mag init pa)
-* git init
+* **git push origin main**
     * (Upload the file to GIT repository )
+<br/>
+
+### NOTE (FOR CONTRIBUTORS)
+* Always back up your files before pulling from the repository.
+    * To prevent lost of your new update.
 
 ## Authors
 
