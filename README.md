@@ -26,9 +26,9 @@ Manage alumni of CvSU.
 ### Initialize repository
 
 * **git init**
-    * (Change from master to main)
-* **git branch -m main**
     * (one time only | Pag naka pag init kana di mo na kilangan pa ulit mag init pa).
+* **git branch -m main**
+    * (Change from master to main).
 * **git remote add origin "--GIT REPOSITORY LINK--"**
     * (one time only | Pag naka pag remote add kana di mo na kilangan pa ulit mag remote).
  
