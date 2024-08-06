@@ -7,75 +7,79 @@ $db_password = "";
 $db_name = "alumni_management_system";
 $conn = new mysqli($servername, $db_username, $db_password, $db_name);
 
+if ($conn->connect_error) {
+  die("Connection failed: " . $conn->connect_error);
+}
+
 if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
   $account = $_SESSION['user_id'];
   $account_email = $_SESSION['user_email'];
+
   // Check if user is an alumni
   $stmt = $conn->prepare("SELECT * FROM alumni WHERE alumni_id = ? AND email = ?");
   $stmt->bind_param("ss", $account, $account_email);
   $stmt->execute();
   $user_result = $stmt->get_result();
+  $row = $user_result->fetch_assoc();
 
   if ($user_result->num_rows > 0) {
-
-    $code = "sample123";
-    $sql = "SELECT * FROM alumni WHERE alumni_id=$account";
-    $result = $conn->query($sql);
-    $row = $result->fetch_assoc();
+    // Fetch the recovery code
+    $stmt2 = $conn->prepare("SELECT code FROM recovery_code WHERE email = ? ORDER BY creation_date DESC LIMIT 1");
+    $stmt2->bind_param("s", $account_email);
+    $stmt2->execute();
+    $result2 = $stmt2->get_result();
+    $row2 = $result2->fetch_assoc();
+    $code = $row2['code'];
 
     if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
       $inputCode = $_POST['inputCode'];
 
       if ($code == $inputCode) {
-        if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
-          $account = $_SESSION['user_id'];
-          $account_email = $_SESSION['user_email'];
+        $stmt = $conn->prepare("UPDATE alumni SET status = 'Verified' WHERE alumni_id = ?");
+        $stmt->bind_param("s", $account);
+        $stmt->execute();
 
-          $sql_archive = "UPDATE alumni SET status = 'Verified' WHERE alumni_id=$account";
-          $conn->query($sql_archive);
-
-          echo "<script>
-            // Wait for the document to load
-            document.addEventListener('DOMContentLoaded', function() {
-              // Use SweetAlert2 for the alert
-              Swal.fire({
-                title: 'Verification successfully',
-                timer: 2000,
-                showConfirmButton: true, // Show the confirm button
-                confirmButtonColor: '#4CAF50', // Set the button color to green
-                confirmButtonText: 'OK' // Change the button text if needed
-              }).then(function() {
-                // Redirect after the alert closes
-                window.location.href = '../alumniPage/dashboard_user.php';
-              });
-            });
-          </script>";
-        }
+        echo "<script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        Swal.fire({
+                            title: 'Verification successful',
+                            timer: 2000,
+                            showConfirmButton: true,
+                            confirmButtonColor: '#4CAF50',
+                            confirmButtonText: 'OK'
+                        }).then(function() {
+                            window.location.href = '../alumniPage/dashboard_user.php';
+                        });
+                    });
+                </script>";
       } else {
         echo "<script>
-            // Wait for the document to load
-            document.addEventListener('DOMContentLoaded', function() {
-              // Use SweetAlert2 for the alert
-              Swal.fire({
-                title: 'Invalid Code',
-                timer: 2000,
-                showConfirmButton: true, // Show the confirm button
-                confirmButtonColor: '#4CAF50', // Set the button color to green
-                confirmButtonText: 'OK' // Change the button text if needed
-              });
-            });
-          </script>";
+                    document.addEventListener('DOMContentLoaded', function() {
+                        Swal.fire({
+                            title: 'Invalid Code',
+                            timer: 2000,
+                            showConfirmButton: true,
+                            confirmButtonColor: '#4CAF50',
+                            confirmButtonText: 'OK'
+                        });
+                    });
+                </script>";
+      }
+    } else {
+
+      // Check if the user is already verified
+      if ($row['status'] == "Verified") {
+        header('Location: ../alumniPage/dashboard_user.php');
+        exit();
       }
     }
-
-    if ($row['status'] == "Verified") {
-      header('Location: ../alumniPage/dashboard_user.php');
-      exit();
-    }
+  } else {
+    header('Location: ./login.php');
+    exit();
   }
 } else {
   header('Location: ./login.php');
-      exit();
+  exit();
 }
 ?>
 
@@ -98,7 +102,6 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 
     .background {
       background-image: url('bg2.png');
-      /* Update the path accordingly if necessary */
       background-position: center;
       background-repeat: no-repeat;
       background-size: cover;
@@ -168,7 +171,6 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
       </div>
     </div>
   </div>
-
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>

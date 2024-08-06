@@ -1,7 +1,6 @@
 <?php
 session_start();
 
-
 $servername = "localhost";
 $db_username = "root";
 $db_password = "";
@@ -38,6 +37,37 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     }
     $stmt->close();
 
+
+    // Check if user is a alumni_archive
+    $stmt = $conn->prepare("SELECT * FROM alumni_archive WHERE alumni_id = ? AND email = ?");
+    $stmt->bind_param("ss", $account, $account_email);
+    $stmt->execute();
+    $user_result = $stmt->get_result();
+
+    if ($user_result->num_rows > 0) {
+        $_SESSION = array();
+        session_destroy();
+        header("Location: ./login.php");
+
+        // $sql = "SELECT * FROM alumni_archive WHERE alumni_id=$account";
+        // $result = $conn->query($sql);
+        // $row = $result->fetch_assoc();
+
+        // if ($row['status'] == "Verified") {
+        //     // User is a verified alumni
+        //     header('Location: ../alumniPage/dashboard_user.php');
+        //     exit();
+        // } else {
+        //     // $_SESSION = array();
+        //     // session_destroy();
+        //     // header("Location: ./login.php");
+
+        //     header("Location: ./verificationcode.php");
+        //     exit;
+        // }
+    }
+    $stmt->close();
+
     // Check if user is an alumni
     $stmt = $conn->prepare("SELECT * FROM alumni WHERE alumni_id = ? AND email = ?");
     $stmt->bind_param("ss", $account, $account_email);
@@ -60,7 +90,6 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 
             header("Location: ./verificationcode.php");
             exit;
-            
         }
     }
     $stmt->close();
@@ -95,6 +124,46 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
         $user = check_login($conn, 'coordinator', $log_email, $pass);
         $user_type = 'coordinator';
     }
+    if (!$user) {
+        $user = check_alumni_archive($conn, 'alumni_archive', $log_email, $pass);
+        $user_type = 'alumni_archive';
+    }
+
+    // if ($user_type == 'alumni_archive') {
+
+    //     $_SESSION['user_id'] = $user['alumni_id'];
+    //     $_SESSION['user_email'] = $user['email'];
+    //     if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
+    //         $account = $_SESSION['user_id'];
+    //         $account_email = $_SESSION['user_email'];
+
+    //         $sql = "SELECT * FROM alumni_archive WHERE alumni_id=$account";
+    //         $result = $conn->query($sql);
+    //         $row = $result->fetch_assoc();
+
+    //         if ($row['status'] == "Inactive") {
+    //             // Redirect to ALUMNI DASHBOARD
+    //             echo "<script>
+    //                 // Wait for the document to load
+    //                 document.addEventListener('DOMContentLoaded', function() {
+    //                     // Use SweetAlert2 for the alert
+    //                     Swal.fire({
+    //                             title: 'Your Account is in active, Verified your Account First to continue.',
+    //                             timer: 2000,
+    //                             showConfirmButton: true, // Show the confirm button
+    //                             confirmButtonColor: '#4CAF50', // Set the button color to green
+    //                             confirmButtonText: 'OK' // Change the button text if needed
+    //                     }).then(function() {
+    //                         // Redirect after the alert closes
+    //                         window.location.href = './inactiveVerification.php';
+    //                     });
+    //                 });
+    //             </script>";
+    //         }
+    //     }
+    // }
+
+
     if ($user) {
         // Login success, set session variables
         switch ($user_type) {
@@ -110,8 +179,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                 $_SESSION['user_id'] = $user['coor_id'];
                 $_SESSION['user_email'] = $user['email'];
                 break;
+            case 'alumni_archive':
+                $_SESSION['user_id'] = $user['alumni_id'];
+                $_SESSION['user_email'] = $user['email'];
+                break;
         }
-
         if ($user_type == 'admin') {
             // Redirect to a ADMIN DASHBOARD
             echo "
@@ -150,6 +222,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                     });
                 });
             </script>";
+        } else if ($user_type == 'alumni_archive') {
+            // ARCHIVE
+            if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
+                $account = $_SESSION['user_id'];
+                $account_email = $_SESSION['user_email'];
+
+                $sql = "SELECT * FROM alumni_archive WHERE alumni_id=$account";
+                $result = $conn->query($sql);
+                $row = $result->fetch_assoc();
+
+                if ($row['status'] == "Inactive") {
+                    // Redirect to ALUMNI DASHBOARD
+                    echo "<script>
+                        // Wait for the document to load
+                        document.addEventListener('DOMContentLoaded', function() {
+                            // Use SweetAlert2 for the alert
+                            Swal.fire({
+                                    title: 'Your Account is in active, Verified your Account First to continue.',
+                                    timer: 2000,
+                                    showConfirmButton: true, // Show the confirm button
+                                    confirmButtonColor: '#4CAF50', // Set the button color to green
+                                    confirmButtonText: 'OK' // Change the button text if needed
+                            }).then(function() {
+                                // Redirect after the alert closes
+                                window.location.href = './inactiveVerification.php';
+                            });
+                        });
+                    </script>";
+                }
+            }
         } else {
 
             if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
@@ -180,21 +282,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                     </script>";
                 } else {
                     echo "<script>
-                    // Wait for the document to load
-                    document.addEventListener('DOMContentLoaded', function() {
-                        // Use SweetAlert2 for the alert
-                        Swal.fire({
-                                title: 'Verified your Account First',
-                                timer: 2000,
-                                showConfirmButton: true, // Show the confirm button
-                                confirmButtonColor: '#4CAF50', // Set the button color to green
-                                confirmButtonText: 'OK' // Change the button text if needed
-                        }).then(function() {
-                            // Redirect after the alert closes
-                            window.location.href = './verificationcode.php';
+                        // Wait for the document to load
+                        document.addEventListener('DOMContentLoaded', function() {
+                            // Use SweetAlert2 for the alert
+                            Swal.fire({
+                                    title: 'Verified your Account First',
+                                    timer: 2000,
+                                    showConfirmButton: true, // Show the confirm button
+                                    confirmButtonColor: '#4CAF50', // Set the button color to green
+                                    confirmButtonText: 'OK' // Change the button text if needed
+                            }).then(function() {
+                                // Redirect after the alert closes
+                                window.location.href = './verificationcode.php';
+                            });
                         });
-                    });
-                </script>";
+                    </script>";
                 }
             }
         }
@@ -203,16 +305,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
         echo "<script>
             // Wait for the document to load
             document.addEventListener('DOMContentLoaded', function() {
-                // Use SweetAlert2 for the alert
-                Swal.fire({
-                    title: 'Incorrect Student ID / Email and Password',
-                    timer: 4000,
-                    showConfirmButton: true, // Show the confirm button
-                    confirmButtonColor: '#4CAF50', // Set the button color to green
-                    confirmButtonText: 'OK' // Change the button text if needed
+            // Use SweetAlert2 for the alert
+            Swal.fire({
+                title: 'Incorrect Student ID / Email and Password',
+                timer: 4000,
+                showConfirmButton: true, // Show the confirm button
+                confirmButtonColor: '#4CAF50', // Set the button color to green
+                confirmButtonText: 'OK' // Change the button text if needed
                 });
             });
-        </script>";
+            </script>";
     }
 } else if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
     $stud_id = $_POST['student_id'];
@@ -356,6 +458,20 @@ function check_login($conn, $table, $log_email, $pass)
 }
 
 function check_alumni($conn, $table, $log_email, $pass)
+{
+    $sql = "SELECT * FROM $table WHERE (student_id = ? OR email = ?) AND password = ? LIMIT 1";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("sss", $log_email, $log_email, $pass);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        return $result->fetch_assoc();
+    }
+    return false;
+}
+
+function check_alumni_archive($conn, $table, $log_email, $pass)
 {
     $sql = "SELECT * FROM $table WHERE (student_id = ? OR email = ?) AND password = ? LIMIT 1";
     $stmt = $conn->prepare($sql);
