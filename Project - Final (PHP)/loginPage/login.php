@@ -1,17 +1,16 @@
 <?php
 session_start();
 
+
 $servername = "localhost";
 $db_username = "root";
 $db_password = "";
 $db_name = "alumni_management_system";
 $conn = new mysqli($servername, $db_username, $db_password, $db_name);
 
-
 if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     $account = $_SESSION['user_id'];
     $account_email = $_SESSION['user_email'];
-    $status = "unverified";
 
     // Check if user is an admin
     $stmt = $conn->prepare("SELECT * FROM admin WHERE admin_id = ? AND email = ?");
@@ -41,17 +40,32 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 
     // Check if user is an alumni
     $stmt = $conn->prepare("SELECT * FROM alumni WHERE alumni_id = ? AND email = ?");
-    $stmt->bind_param("sss", $account, $account_email);
+    $stmt->bind_param("ss", $account, $account_email);
     $stmt->execute();
     $user_result = $stmt->get_result();
 
     if ($user_result->num_rows > 0) {
-        // User is an alumni
-        header('Location: ../alumniPage/dashboard_user.php');
-        exit();
+        $sql = "SELECT * FROM alumni WHERE alumni_id=$account";
+        $result = $conn->query($sql);
+        $row = $result->fetch_assoc();
+
+        if ($row['status'] == "Verified") {
+            // User is a verified alumni
+            header('Location: ../alumniPage/dashboard_user.php');
+            exit();
+        } else {
+            // $_SESSION = array();
+            // session_destroy();
+            // header("Location: ./login.php");
+
+            header("Location: ./verificationcode.php");
+            exit;
+            
+        }
     }
     $stmt->close();
 
+    // Redirect to login if no matching user found
     header('Location: ./login.php');
     exit();
 }
@@ -137,23 +151,52 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                 });
             </script>";
         } else {
-            // Redirect to ALUMNI DASHBOARD
-            echo "<script>
-                // Wait for the document to load
-                document.addEventListener('DOMContentLoaded', function() {
-                    // Use SweetAlert2 for the alert
-                    Swal.fire({
-                            title: 'Login Successfully',
-                            timer: 2000,
-                            showConfirmButton: true, // Show the confirm button
-                            confirmButtonColor: '#4CAF50', // Set the button color to green
-                            confirmButtonText: 'OK' // Change the button text if needed
-                    }).then(function() {
-                        // Redirect after the alert closes
-                        window.location.href = '../alumniPage/dashboard_user.php';
+
+            if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
+                $account = $_SESSION['user_id'];
+                $account_email = $_SESSION['user_email'];
+
+                $sql = "SELECT * FROM alumni WHERE alumni_id=$account";
+                $result = $conn->query($sql);
+                $row = $result->fetch_assoc();
+
+                if ($row['status'] == "Verified") {
+                    // Redirect to ALUMNI DASHBOARD
+                    echo "<script>
+                        // Wait for the document to load
+                        document.addEventListener('DOMContentLoaded', function() {
+                            // Use SweetAlert2 for the alert
+                            Swal.fire({
+                                    title: 'Login Successfully',
+                                    timer: 2000,
+                                    showConfirmButton: true, // Show the confirm button
+                                    confirmButtonColor: '#4CAF50', // Set the button color to green
+                                    confirmButtonText: 'OK' // Change the button text if needed
+                            }).then(function() {
+                                // Redirect after the alert closes
+                                window.location.href = '../alumniPage/dashboard_user.php';
+                            });
+                        });
+                    </script>";
+                } else {
+                    echo "<script>
+                    // Wait for the document to load
+                    document.addEventListener('DOMContentLoaded', function() {
+                        // Use SweetAlert2 for the alert
+                        Swal.fire({
+                                title: 'Verified your Account First',
+                                timer: 2000,
+                                showConfirmButton: true, // Show the confirm button
+                                confirmButtonColor: '#4CAF50', // Set the button color to green
+                                confirmButtonText: 'OK' // Change the button text if needed
+                        }).then(function() {
+                            // Redirect after the alert closes
+                            window.location.href = './verificationcode.php';
+                        });
                     });
-                });
-            </script>";
+                </script>";
+                }
+            }
         }
     } else {
         // Login failed
@@ -279,12 +322,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                 document.addEventListener('DOMContentLoaded', function() {
                     // Use SweetAlert2 for the alert
                     Swal.fire({
-                            title: 'Account Successfully Registered',
-                            timer: 2000,
-                            showConfirmButton: true, // Show the confirm button
-                            confirmButtonColor: '#4CAF50', // Set the button color to green
-                            confirmButtonText: 'OK' // Change the button text if needed
-                    }).then(function() {
+                        title: 'Account Successfully Registered',
+                        timer: 2000,
+                        showConfirmButton: true, // Show the confirm button
+                        confirmButtonColor: '#4CAF50', // Set the button color to green
+                        confirmButtonText: 'OK' // Change the button text if needed
+                        }).then(function() {
                         // Redirect after the alert closes
                         window.location.href = './login.php';
                     });
@@ -387,8 +430,8 @@ function check_alumni($conn, $table, $log_email, $pass)
                     <label></label>
                 </div>
                 <br>
-                <a href="forgetpassword.php" class="forgot">Forgot your password?</a>
-                <button type="submit" name="login_btn">Log In</button>
+                <a href="#" class="forgot">Forgot your password?</a>
+                <button>Log In</button>
             </form>
         </div>
         <div class="overlay-container" id="overlayCon">
