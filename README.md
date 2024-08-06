@@ -14,6 +14,7 @@ Manage alumni of CvSU.
 * Login three types of account (Admin, Coordinator, and Alumni) | Auto filter login.
 * Forgot Password with OTP / recovery code sent through email.
 * Sign Up with authentication code sent through email.
+    * (Need to verify your account first to continue using alumni management system.)
 * Add new alumni to the list of graduates using import excel files.
 * Add new alumni or register alumni.
 * Manage events.
