@@ -49,7 +49,7 @@ Manage alumni of CvSU.
 
 ### NOTE (FOR CONTRIBUTORS)
 * Always back up your files before pulling from the repository.
-    * To prevent loss of your new updates.
+    * To prevent lost of your new updates.
 
 ## Authors
 
