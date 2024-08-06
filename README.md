@@ -75,7 +75,7 @@ Contributors
 
 ## Purpose
 
-This project is for educational purposes only. It is used to fulfill the requirements for a course subjec.
+This project is for educational purposes only. It is used to fulfill the requirements for a course subject.
 <br/>
 ITEC 75A - SYSTEM INTEGRATION AND ARCHITECTURE 1.
 
