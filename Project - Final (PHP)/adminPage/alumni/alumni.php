@@ -77,7 +77,7 @@ if (isset($_GET['query']) && !empty($_GET['query'])) {
             OR (gender LIKE '%$search_query%' AND gender != 'fe') ";
 }
 
-$sql .= "ORDER BY student_id ASC ";
+$sql .= "ORDER BY lname ASC ";
 $sql .= "LIMIT $start_from, $records_per_page";
 
 $result = $conn->query($sql);
@@ -372,7 +372,11 @@ if (isset($_GET['ide'])) {
                                 <?php
                                 if ($result->num_rows > 0) {
                                     while ($row = $result->fetch_assoc()) {
-                                        $fullname = $row["fname"] . " " . $row["mname"] . " " . $row["lname"];
+                                        if(!empty($row["mname"])){
+                                        $fullname = $row["lname"] . ", " . $row["fname"] . ", " . $row["mname"] . ".";
+                                    }else {
+                                        $fullname = $row["lname"] . ", " . $row["fname"];
+                                    }
                                         $batch = $row["batch_startYear"] . " - " . $row["batch_endYear"];
                                 ?>
                                         <tr>

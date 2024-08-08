@@ -37,6 +37,20 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     }
     $stmt->close();
 
+
+    // Check if user is a alumni_archive
+    $stmt = $conn->prepare("SELECT * FROM alumni_archive WHERE alumni_id = ? AND email = ?");
+    $stmt->bind_param("ss", $account, $account_email);
+    $stmt->execute();
+    $user_result = $stmt->get_result();
+
+    if ($user_result->num_rows > 0) {
+        $_SESSION = array();
+        session_destroy();
+        header("Location: ./loginPage/login.php");
+    }
+    $stmt->close();
+
     // Check if user is an alumni
     $stmt = $conn->prepare("SELECT * FROM alumni WHERE alumni_id = ? AND email = ?");
     $stmt->bind_param("ss", $account, $account_email);
@@ -44,14 +58,44 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     $user_result = $stmt->get_result();
 
     if ($user_result->num_rows > 0) {
-        // User is an alumni
-        header('Location: ./alumniPage/dashboard_user.php');
-        exit();
-    }
-    $stmt->close();
+        $sql = "SELECT * FROM alumni WHERE alumni_id=$account";
+        $result = $conn->query($sql);
+        $row = $result->fetch_assoc();
 
-    header('Location: ./contact.php');
+        if ($row['status'] == "Verified") {
+            // User is a verified alumni
+            header('Location: ./alumniPage/dashboard_user.php');
+            exit();
+        } else {
+
+            // $_SESSION = array();
+            // session_destroy();
+            // header("Location: ./login.php");
+
+            $_SESSION['email'] = $account_email;
+            echo "<script>
+                            // Wait for the document to load
+                            document.addEventListener('DOMContentLoaded', function() {
+                                // Use SweetAlert2 for the alert
+                                Swal.fire({
+                                        title: 'Verify Your Account First',
+                                        timer: 5000,
+                                        showConfirmButton: true, // Show the confirm button
+                                        confirmButtonColor: '#4CAF50', // Set the button color to green
+                                        confirmButtonText: 'OK' // Change the button text if needed
+                                }).then(function() {
+                                    // Redirect after the alert closes
+                                    window.location.href = './loginPage/verification_code.php';
+                                    exit();
+                                });
+                            });
+                        </script>";
+        }
+    } else {
+    // Redirect to login if no matching user found
+    header('Location: ./homepage.php');
     exit();
+    }
 }
 ?>
 

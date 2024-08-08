@@ -54,95 +54,89 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
       header('Location: ../alumniPage/dashboard_user.php');
       exit();
     } else {
-      echo "<script>
-                            // Wait for the document to load
-                            document.addEventListener('DOMContentLoaded', function() {
-                                // Use SweetAlert2 for the alert
-                                Swal.fire({
-                                        title: 'Verify Your Account First',
-                                        timer: 5000,
-                                        showConfirmButton: true, // Show the confirm button
-                                        confirmButtonColor: '#4CAF50', // Set the button color to green
-                                        confirmButtonText: 'OK' // Change the button text if needed
-                                }).then(function() {
-                                    // Redirect after the alert closes
-                                    window.location.href = './verification_code.php';
-                                });
-                            });
-                        </script>";
-    }
-  }
-  $stmt->close();
+      if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['verif_code']) && isset($_POST['submit_code'])) {
+        $verif_code = $_POST['verif_code'];
 
-  // Check if user is an alumni_archive
-  $stmt = $conn->prepare("SELECT * FROM alumni_archive WHERE alumni_id = ? AND email = ?");
-  $stmt->bind_param("ss", $account, $account_email);
-  $stmt->execute();
-  $user_result = $stmt->get_result();
+        $check_verifcode_qry = mysqli_query($conn, "SELECT verification_code FROM recovery_code WHERE verification_code = '$verif_code'");
 
-  if ($user_result->num_rows > 0) {
-    if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['verif_code']) && isset($_POST['submit_code'])) {
-      $verif_code = $_POST['verif_code'];
+        if (mysqli_num_rows($check_verifcode_qry) > 0) {
+          $stmt = $conn->prepare("UPDATE alumni SET status = 'Verified' WHERE alumni_id = ?");
+          $stmt->bind_param("s", $account);
+          $stmt->execute();
 
-      $check_verifcode_qry = mysqli_query($conn, "SELECT verification_code FROM recovery_code WHERE verification_code = '$verif_code'");
-
-      if (mysqli_num_rows($check_verifcode_qry) > 0) {
-        $delete_qry = mysqli_query($conn, "DELETE FROM recovery_code WHERE verification_code = '$verif_code'");
-        $sql_restore = "INSERT INTO alumni (alumni_id, student_id, fname, mname, lname, gender, course, batch_startYear, batch_endYear, contact, address, email, password, status, picture, date_created)" .
-          "SELECT alumni_id, student_id, fname, mname, lname, gender, course, batch_startYear, batch_endYear, contact, address, email, password, status, picture, date_created FROM alumni_archive WHERE alumni_id=$account";
-        $conn->query($sql_restore);
-
-        //delete data in table alumni
-        $sql_delete = "DELETE FROM alumni_archive WHERE alumni_id=$account";
-        $conn->query($sql_delete);
-
-
-        $sql_archive = "UPDATE alumni SET status = 'Verified' WHERE alumni_id=$account";
-        $conn->query($sql_archive);
-
+          $delete_qry = mysqli_query($conn, "DELETE FROM recovery_code WHERE email='$account_email'");
+          echo "<script>
+                  document.addEventListener('DOMContentLoaded', function() {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Verification code match!',
+                        text: 'Now proceed to Alumni Dashboard.',
+                        customClass: {
+                            popup: 'swal-custom'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = '../alumniPage/dashboard_user.php';
+                            exit();
+                        }
+                    });
+                });
+              </script>";
+        } else {
+          echo "verification code doesn't match!";
+        }
+      }
+      // BACK BUTTON
+      else if (isset($_POST['back_btn'])) {
         $sql_delete = "DELETE FROM recovery_code WHERE email='$account_email'";
         $conn->query($sql_delete);
-
-        $_SESSION = array();
         session_destroy();
-
-        echo "<script>
-                      document.addEventListener('DOMContentLoaded', function() {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Verification code match!',
-                            text: 'Activation of account Successfully',
-                            customClass: {
-                                popup: 'swal-custom'
-                            }
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                window.location.href = 'login.php';
-                                exit();
-                            }
-                        });
-                    });
-                  </script>";
-      } else {
-        echo "verification code doesn't match!";
+        header('Location: ./login.php');
+        exit();
       }
-    } // BACK BUTTON
-    else if (isset($_POST['back_btn'])) {
-      $sql_delete = "DELETE FROM recovery_code WHERE email='$account_email'";
-      $conn->query($sql_delete);
-      session_destroy();
-      header('Location: ./login.php');
-      exit();
     }
+  } else {
+    header('Location: ../homepage.php');
+    exit();
   }
-  $stmt->close();
-  // header('Location: ../homepage.php');
-  // exit();
+  // FOR CHANGE PASSWORD
+} else if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['verif_code']) && isset($_POST['submit_code'])) {
+  $verif_code = $_POST['verif_code'];
 
+  $check_verifcode_qry = mysqli_query($conn, "SELECT verification_code FROM recovery_code WHERE verification_code = '$verif_code'");
+
+  if (mysqli_num_rows($check_verifcode_qry) > 0) {
+    $delete_qry = mysqli_query($conn, "DELETE FROM recovery_code WHERE verification_code = '$verif_code'");
+    echo "<script>
+                document.addEventListener('DOMContentLoaded', function() {
+                  Swal.fire({
+                      icon: 'success',
+                      title: 'Verification code match!',
+                      text: 'Now proceed to changing your password.',
+                      customClass: {
+                          popup: 'swal-custom'
+                      }
+                  }).then((result) => {
+                      if (result.isConfirmed) {
+                          window.location.href = 'newpassword.php';
+                          exit();
+                      }
+                  });
+              });
+            </script>";
+  } else {
+    echo "verification code doesn't match!";
+  }
+} // BACK BUTTON
+else if (isset($_POST['back_btn'])) {
+  $sql_delete = "DELETE FROM recovery_code WHERE email='$account_email'";
+  $conn->query($sql_delete);
+  session_destroy();
+  header('Location: ./forgetpassword.php');
+  exit();
 }
 
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 

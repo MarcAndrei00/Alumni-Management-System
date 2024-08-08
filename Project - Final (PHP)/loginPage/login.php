@@ -1,11 +1,11 @@
 <?php
 session_start();
 
-$servername = "localhost";
-$db_username = "root";
-$db_password = "";
-$db_name = "alumni_management_system";
-$conn = new mysqli($servername, $db_username, $db_password, $db_name);
+$conn = new mysqli("localhost", "root", "", "alumni_management_system");
+
+use PHPMailer\PHPMailer\PHPMailer;
+
+require '../vendor/autoload.php';
 
 if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     $account = $_SESSION['user_id'];
@@ -48,23 +48,6 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
         $_SESSION = array();
         session_destroy();
         header("Location: ./login.php");
-
-        // $sql = "SELECT * FROM alumni_archive WHERE alumni_id=$account";
-        // $result = $conn->query($sql);
-        // $row = $result->fetch_assoc();
-
-        // if ($row['status'] == "Verified") {
-        //     // User is a verified alumni
-        //     header('Location: ../alumniPage/dashboard_user.php');
-        //     exit();
-        // } else {
-        //     // $_SESSION = array();
-        //     // session_destroy();
-        //     // header("Location: ./login.php");
-
-        //     header("Location: ./verificationcode.php");
-        //     exit;
-        // }
     }
     $stmt->close();
 
@@ -84,19 +67,35 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
             header('Location: ../alumniPage/dashboard_user.php');
             exit();
         } else {
+
             // $_SESSION = array();
             // session_destroy();
             // header("Location: ./login.php");
 
-            header("Location: ./verificationcode.php");
-            exit;
+            $_SESSION['email'] = $account_email;
+            echo "<script>
+                            // Wait for the document to load
+                            document.addEventListener('DOMContentLoaded', function() {
+                                // Use SweetAlert2 for the alert
+                                Swal.fire({
+                                        title: 'Verify Your Account First',
+                                        timer: 5000,
+                                        showConfirmButton: true, // Show the confirm button
+                                        confirmButtonColor: '#4CAF50', // Set the button color to green
+                                        confirmButtonText: 'OK' // Change the button text if needed
+                                }).then(function() {
+                                    // Redirect after the alert closes
+                                    window.location.href = './verification_code.php';
+                                    exit();
+                                });
+                            });
+                        </script>";
         }
+    } else {
+        // Redirect to login if no matching user found
+        header('Location: ./login.php');
+        exit();
     }
-    $stmt->close();
-
-    // Redirect to login if no matching user found
-    header('Location: ./login.php');
-    exit();
 }
 
 
@@ -129,41 +128,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
         $user_type = 'alumni_archive';
     }
 
-    // if ($user_type == 'alumni_archive') {
-
-    //     $_SESSION['user_id'] = $user['alumni_id'];
-    //     $_SESSION['user_email'] = $user['email'];
-    //     if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
-    //         $account = $_SESSION['user_id'];
-    //         $account_email = $_SESSION['user_email'];
-
-    //         $sql = "SELECT * FROM alumni_archive WHERE alumni_id=$account";
-    //         $result = $conn->query($sql);
-    //         $row = $result->fetch_assoc();
-
-    //         if ($row['status'] == "Inactive") {
-    //             // Redirect to ALUMNI DASHBOARD
-    //             echo "<script>
-    //                 // Wait for the document to load
-    //                 document.addEventListener('DOMContentLoaded', function() {
-    //                     // Use SweetAlert2 for the alert
-    //                     Swal.fire({
-    //                             title: 'Your Account is in active, Verified your Account First to continue.',
-    //                             timer: 2000,
-    //                             showConfirmButton: true, // Show the confirm button
-    //                             confirmButtonColor: '#4CAF50', // Set the button color to green
-    //                             confirmButtonText: 'OK' // Change the button text if needed
-    //                     }).then(function() {
-    //                         // Redirect after the alert closes
-    //                         window.location.href = './inactiveVerification.php';
-    //                     });
-    //                 });
-    //             </script>";
-    //         }
-    //     }
-    // }
-
-
     if ($user) {
         // Login success, set session variables
         switch ($user_type) {
@@ -186,6 +150,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
         }
         if ($user_type == 'admin') {
             // Redirect to a ADMIN DASHBOARD
+
+            $user_id = $_SESSION['user_id'];
+
+            // Update the last_login time
+            $sql2 = "UPDATE admin SET last_login = NOW() WHERE admin_id = ?";
+            $stmt = $conn->prepare($sql2);
+            $stmt->bind_param("i", $user_id);
+            $stmt->execute();
+            $stmt->close();
+
             echo "
             <script>
                 // Wait for the document to load
@@ -193,7 +167,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                     // Use SweetAlert2 for the alert
                     Swal.fire({
                             title: 'Login Successfully',
-                            timer: 2000,
+                            timer: 5000,
                             showConfirmButton: true, // Show the confirm button
                             confirmButtonColor: '#4CAF50', // Set the button color to green
                             confirmButtonText: 'OK' // Change the button text if needed
@@ -206,13 +180,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
             ";
         } else if ($user_type == 'coordinator') {
             // Redirect to COORDINATOR
+
+            $user_id = $_SESSION['user_id'];
+
+            // Update the last_login time
+            $sql2 = "UPDATE coordinator SET last_login = NOW() WHERE coor_id = ?";
+            $stmt = $conn->prepare($sql2);
+            $stmt->bind_param("i", $user_id);
+            $stmt->execute();
+            $stmt->close();
+
             echo "<script>
                 // Wait for the document to load
                 document.addEventListener('DOMContentLoaded', function() {
                     // Use SweetAlert2 for the alert
                     Swal.fire({
                             title: 'Login Successfully',
-                            timer: 2000,
+                            timer: 5000,
                             showConfirmButton: true, // Show the confirm button
                             confirmButtonColor: '#4CAF50', // Set the button color to green
                             confirmButtonText: 'OK' // Change the button text if needed
@@ -233,23 +217,51 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                 $row = $result->fetch_assoc();
 
                 if ($row['status'] == "Inactive") {
-                    // Redirect to ALUMNI DASHBOARD
+                    // VERIFY ALUMNI_ARCHIVE INACTIVE ACCOUNT
+                    $email = $_POST['log_email'];
+                    $verification_code = sprintf("%06d", mt_rand(1, 999999));
+                    $email = mysqli_real_escape_string($conn, $email);
+                    $verification_code = mysqli_real_escape_string($conn, $verification_code);
+
+                    $insert_verifcodes_qry = mysqli_query($conn, "INSERT INTO recovery_code(email,verification_code)
+                                                             VALUES('$email','$verification_code')");
+                    $mail = new PHPMailer(true);
+
+                    $mail->isSMTP();
+                    $mail->Host       = 'smtp.gmail.com';
+                    $mail->SMTPAuth   = true;
+                    $mail->Username   = 'alumni.management07@gmail.com';
+                    $mail->Password   = 'kcio bmde ffvc sfar';
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                    $mail->Port       = 587;
+
+                    $mail->setFrom('alumni.management07@gmail.com', 'Alumni Management');
+                    $mail->addAddress($email);
+
+                    $mail->isHTML(true);
+                    $mail->Subject = 'Verification Code';
+                    $mail->Body    = 'Your verification code is <b>' . $verification_code . '</b>';
+                    $mail->AltBody = 'Your verification code is ' . $verification_code;
+
+                    $mail->send();
+                    $_SESSION['email'] = $email;
+
                     echo "<script>
-                        // Wait for the document to load
-                        document.addEventListener('DOMContentLoaded', function() {
-                            // Use SweetAlert2 for the alert
-                            Swal.fire({
-                                    title: 'Your Account is in active, Verified your Account First to continue.',
-                                    timer: 2000,
-                                    showConfirmButton: true, // Show the confirm button
-                                    confirmButtonColor: '#4CAF50', // Set the button color to green
-                                    confirmButtonText: 'OK' // Change the button text if needed
-                            }).then(function() {
-                                // Redirect after the alert closes
-                                window.location.href = './inactiveVerification.php';
+                            // Wait for the document to load
+                            document.addEventListener('DOMContentLoaded', function() {
+                                // Use SweetAlert2 for the alert
+                                Swal.fire({
+                                        title: 'Your Account is Inactive, Verified your Account First to continue.',
+                                        timer: 5000,
+                                        showConfirmButton: true, // Show the confirm button
+                                        confirmButtonColor: '#4CAF50', // Set the button color to green
+                                        confirmButtonText: 'OK' // Change the button text if needed
+                                }).then(function() {
+                                    // Redirect after the alert closes
+                                    window.location.href = './inactiveVerification.php';
+                                });
                             });
-                        });
-                    </script>";
+                        </script>";
                 }
             }
         } else {
@@ -264,13 +276,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
 
                 if ($row['status'] == "Verified") {
                     // Redirect to ALUMNI DASHBOARD
+
+                    $user_id = $_SESSION['user_id'];
+
+                    // Update the last_login time
+                    $sql2 = "UPDATE alumni SET last_login = NOW() WHERE alumni_id = ?";
+                    $stmt = $conn->prepare($sql2);
+                    $stmt->bind_param("i", $user_id);
+                    $stmt->execute();
+                    $stmt->close();
+
                     echo "<script>
                         // Wait for the document to load
                         document.addEventListener('DOMContentLoaded', function() {
                             // Use SweetAlert2 for the alert
                             Swal.fire({
                                     title: 'Login Successfully',
-                                    timer: 2000,
+                                    timer: 5000,
                                     showConfirmButton: true, // Show the confirm button
                                     confirmButtonColor: '#4CAF50', // Set the button color to green
                                     confirmButtonText: 'OK' // Change the button text if needed
@@ -281,22 +303,54 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                         });
                     </script>";
                 } else {
+
+                    $email = $_SESSION['user_email'];
+                    $verification_code = sprintf("%06d", mt_rand(1, 999999));
+                    $email = mysqli_real_escape_string($conn, $email);
+                    $verification_code = mysqli_real_escape_string($conn, $verification_code);
+
+                    $insert_verifcodes_qry = mysqli_query($conn, "INSERT INTO recovery_code(email,verification_code)
+                                                             VALUES('$email','$verification_code')");
+                    $mail = new PHPMailer(true);
+
+                    $mail->isSMTP();
+                    $mail->Host       = 'smtp.gmail.com';
+                    $mail->SMTPAuth   = true;
+                    $mail->Username   = 'alumni.management07@gmail.com';
+                    $mail->Password   = 'kcio bmde ffvc sfar';
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                    $mail->Port       = 587;
+
+                    $mail->setFrom('alumni.management07@gmail.com', 'Alumni Management');
+                    $mail->addAddress($email);
+
+                    $mail->isHTML(true);
+                    $mail->Subject = 'Verification Code';
+                    $mail->Body    = 'Your verification code is <b>' . $verification_code . '</b>';
+                    $mail->AltBody = 'Your verification code is ' . $verification_code;
+
+                    $mail->send();
+                    $_SESSION['email'] = $email;
+
                     echo "<script>
-                        // Wait for the document to load
-                        document.addEventListener('DOMContentLoaded', function() {
-                            // Use SweetAlert2 for the alert
-                            Swal.fire({
-                                    title: 'Verified your Account First',
-                                    timer: 2000,
-                                    showConfirmButton: true, // Show the confirm button
-                                    confirmButtonColor: '#4CAF50', // Set the button color to green
-                                    confirmButtonText: 'OK' // Change the button text if needed
-                            }).then(function() {
-                                // Redirect after the alert closes
-                                window.location.href = './verificationcode.php';
+                            // Wait for the document to load
+                            document.addEventListener('DOMContentLoaded', function() {
+                                // Use SweetAlert2 for the alert
+                                Swal.fire({
+                                        title: 'Verify Your Account First',
+                                        timer: 5000,
+                                        showConfirmButton: true, // Show the confirm button
+                                        confirmButtonColor: '#4CAF50', // Set the button color to green
+                                        confirmButtonText: 'OK' // Change the button text if needed
+                                }).then(function() {
+                                    // Redirect after the alert closes
+                                    window.location.href = './verification_code.php';
+                                });
                             });
-                        });
-                    </script>";
+                        </script>";
+
+                    // sleep(5); // Delay to ensure JavaScript has time to execute
+
                 }
             }
         }
@@ -308,7 +362,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
             // Use SweetAlert2 for the alert
             Swal.fire({
                 title: 'Incorrect Student ID / Email and Password',
-                timer: 4000,
+                timer: 5000,
                 showConfirmButton: true, // Show the confirm button
                 confirmButtonColor: '#4CAF50', // Set the button color to green
                 confirmButtonText: 'OK' // Change the button text if needed
@@ -413,12 +467,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
             $imageData = file_get_contents($filePath);
             $imageDataEscaped = addslashes($imageData);
 
-            $sql = "INSERT INTO alumni SET student_id='$stud_id', email='$email', password='$password', picture='$imageDataEscaped'";
+            $stmt = $conn->prepare("UPDATE alumni SET status = 'Verified' WHERE student_id = ?");
+            $stmt->bind_param("s", $account);
+            $stmt->execute();
+
+            $register = "INSERT INTO alumni (fname, mname, lname, gender, course, batch_startYear, batch_endYear, contact, address)" .
+                "SELECT fname, mname, lname, gender, course, batch_startYear, batch_endYear, contact, address FROM list_of_graduate WHERE student_id=$stud_id";
+            $conn->query($register);
+
+            $sql = "INSERT INTO alumni SET student_id='$stud_id', email='$email', password='$password', picture='$imageDataEscaped' WHERE student_id=$stud_id";
             $result = $conn->query($sql);
 
-            if ($result) {
-                // $successMessage = "Coordinator Edited Successfully";
-                echo "
+            $sql_delete = "DELETE FROM list_of_graduate WHERE student_id=$stud_id";
+            $conn->query($sql_delete);
+
+
+            // if ($result) {
+            // $successMessage = "Coordinator Edited Successfully";
+            echo "
             <script>
                 // Wait for the document to load
                 document.addEventListener('DOMContentLoaded', function() {
@@ -436,7 +502,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                 });
             </script>
             ";
-            }
+            $stmt->close();
+            // }
         }
     }
 }
@@ -457,6 +524,7 @@ function check_login($conn, $table, $log_email, $pass)
     return false;
 }
 
+// LOGIN CHECK FOR ALUMNI
 function check_alumni($conn, $table, $log_email, $pass)
 {
     $sql = "SELECT * FROM $table WHERE (student_id = ? OR email = ?) AND password = ? LIMIT 1";
@@ -471,6 +539,7 @@ function check_alumni($conn, $table, $log_email, $pass)
     return false;
 }
 
+// ALUMNI ARCHIVE CHECKER
 function check_alumni_archive($conn, $table, $log_email, $pass)
 {
     $sql = "SELECT * FROM $table WHERE (student_id = ? OR email = ?) AND password = ? LIMIT 1";
@@ -546,7 +615,7 @@ function check_alumni_archive($conn, $table, $log_email, $pass)
                     <label></label>
                 </div>
                 <br>
-                <a href="#" class="forgot">Forgot your password?</a>
+                <a href="./forgetpassword.php" class="forgot">Forgot your password?</a>
                 <button>Log In</button>
             </form>
         </div>
