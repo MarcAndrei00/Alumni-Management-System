@@ -66,31 +66,57 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 
         $check_verifcode_qry = mysqli_query($conn, "SELECT verification_code FROM recovery_code WHERE verification_code = '$verif_code'");
 
-        if (mysqli_num_rows($check_verifcode_qry) > 0) {
-          $stmt = $conn->prepare("UPDATE alumni SET status = 'Verified' WHERE alumni_id = ?");
-          $stmt->bind_param("s", $account);
-          $stmt->execute();
+        if ($user_result->num_rows > 0) {
+          $sql = "SELECT * FROM alumni WHERE alumni_id=$account";
+          $result = $conn->query($sql);
+          $row = $result->fetch_assoc();
 
-          $delete_qry = mysqli_query($conn, "DELETE FROM recovery_code WHERE email='$account_email'");
-          echo "<script>
+          if ($row['status'] == "Verified") {
+            // User is a verified alumni
+            header('Location: ../alumniPage/dashboard_user.php');
+            exit();
+          } else {
+            if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['verif_code']) && isset($_POST['submit_code'])) {
+              $verif_code = $_POST['verif_code'];
+
+              $check_verifcode_qry = mysqli_query($conn, "SELECT verification_code FROM recovery_code WHERE verification_code = '$verif_code'");
+
+              if (mysqli_num_rows($check_verifcode_qry) > 0) {
+                $stmt = $conn->prepare("UPDATE alumni SET status = 'Verified' WHERE alumni_id = ?");
+                $stmt->bind_param("s", $account);
+                $stmt->execute();
+
+                $delete_qry = mysqli_query($conn, "DELETE FROM recovery_code WHERE email='$account_email'");
+
+                $redirectUrl = '../alumniPage/dashboard_user.php'; // Change this to the desired URL
+                echo "<script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                          showSuccessAlert('$redirectUrl');
+                        });
+                      </script>";
+                sleep(3);
+              } else {
+                echo "<script>
                   document.addEventListener('DOMContentLoaded', function() {
                     Swal.fire({
-                        icon: 'success',
-                        title: 'Verification code match!',
-                        text: 'Now proceed to Alumni Dashboard.',
-                        customClass: {
-                            popup: 'swal-custom'
-                        }
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            window.location.href = '../alumniPage/dashboard_user.php';
-                            exit();
-                        }
+                      icon: 'error',
+                      iconHtml: '<i class=\"fas fa-exclamation-circle\"></i>', // Custom icon using Font Awesome
+                      title: 'Verification code does not match!',
+                      text: 'Please try again.',
+                      customClass: {
+                        popup: 'swal-custom'
+                      },
+                      showConfirmButton: true,
+                      confirmButtonColor: '#4CAF50',
+                      confirmButtonText: 'OK',
+                      timer: 5000,
                     });
-                });
-              </script>";
-        } else {
-          echo "verification code doesn't match!";
+                  });
+                </script>";
+                sleep(3);
+              }
+            }
+          }
         }
       }
       // BACK BUTTON
@@ -137,7 +163,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
           $mail->AltBody = 'Your verification code is ' . $verification_code;
 
           $mail->send();
-          $_SESSION['alert'] = "Verification cod successfully sent.";
+          $_SESSION['alert'] = "Verification code successfully sent.";
 
           // Check and display alert if set
           if (isset($_SESSION['alert'])) {
@@ -170,25 +196,33 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 
   if (mysqli_num_rows($check_verifcode_qry) > 0) {
     $delete_qry = mysqli_query($conn, "DELETE FROM recovery_code WHERE verification_code = '$verif_code'");
+
+    $redirectUrl = './newpassword.php'; // Change this to the desired URL
     echo "<script>
-                document.addEventListener('DOMContentLoaded', function() {
-                  Swal.fire({
-                      icon: 'success',
-                      title: 'Verification code match!',
-                      text: 'Now proceed to changing your password.',
-                      customClass: {
-                          popup: 'swal-custom'
-                      }
-                  }).then((result) => {
-                      if (result.isConfirmed) {
-                          window.location.href = 'newpassword.php';
-                          exit();
-                      }
-                  });
-              });
-            </script>";
+            document.addEventListener('DOMContentLoaded', function() {
+              changePass('$redirectUrl');
+            });
+          </script>";
+          sleep(3);
   } else {
-    echo "verification code doesn't match!";
+    echo "<script>
+                  document.addEventListener('DOMContentLoaded', function() {
+                    Swal.fire({
+                      icon: 'error',
+                      iconHtml: '<i class=\"fas fa-exclamation-circle\"></i>', // Custom icon using Font Awesome
+                      title: 'Verification code does not match!',
+                      text: 'Please try again.',
+                      customClass: {
+                        popup: 'swal-custom'
+                      },
+                      showConfirmButton: true,
+                      confirmButtonColor: '#4CAF50',
+                      confirmButtonText: 'OK',
+                      timer: 5000,
+                    });
+                  });
+                </script>";
+                sleep(3);
   }
 } // BACK BUTTON
 else if (isset($_POST['back_btn'])) {
@@ -234,7 +268,7 @@ else if (isset($_POST['resendCode'])) {
     $mail->AltBody = 'Your verification code is ' . $verification_code;
 
     $mail->send();
-    $_SESSION['alert'] = "Verification cod successfully sent.";
+    $_SESSION['alert'] = "Verification code successfully sent.";
 
     // Check and display alert if set
     if (isset($_SESSION['alert'])) {
@@ -265,6 +299,8 @@ else if (isset($_POST['resendCode'])) {
   <link rel="shortcut icon" href="../assets/cvsu.png" type="image/svg+xml">
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
   <style>
     body,
     html {
@@ -367,6 +403,81 @@ else if (isset($_POST['resendCode'])) {
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  <script>
+    // FOR NO NIGGATIVE NUMBERS
+    document.addEventListener("DOMContentLoaded", function() {
+      const studentIdInput = document.getElementById("code");
+
+      studentIdInput.addEventListener("input", function(event) {
+        let value = studentIdInput.value;
+        // Replace all non-numeric characters
+        value = value.replace(/[^0-9]/g, '');
+        studentIdInput.value = value;
+      });
+    });
+
+    // CODE MATCH
+    function showSuccessAlert(redirectUrl) {
+      Swal.fire({
+        icon: 'success',
+        iconHtml: '<i class="fas fa-check-circle"></i>', // Custom icon using Font Awesome
+        title: 'Verification code match!',
+        text: 'You will be redirected shortly to Dashboard.',
+        customClass: {
+          popup: 'swal-custom'
+        },
+        showConfirmButton: true,
+        confirmButtonText: 'OK',
+        timer: 5000,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = redirectUrl; // Redirect to the desired page
+        }
+      });
+    }
+
+    // CODE MATCH
+    function changePass(redirectUrl) {
+      Swal.fire({
+        icon: 'success',
+        iconHtml: '<i class="fas fa-check-circle"></i>', // Custom icon using Font Awesome
+        title: 'Verification code match!',
+        text: 'You will be redirected shortly to change password.',
+        customClass: {
+          popup: 'swal-custom'
+        },
+        showConfirmButton: true,
+        confirmButtonText: 'OK',
+        timer: 5000,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = redirectUrl; // Redirect to the desired page
+        }
+      });
+    }
+
+    // FOR VERIFICATION
+    function showWarningAlert(redirectUrl, title, text) {
+      Swal.fire({
+        icon: 'warning',
+        iconHtml: '<i class="fas fa-exclamation-triangle"></i>', // Custom icon using Font Awesome
+        title: title,
+        text: text,
+        customClass: {
+          popup: 'swal-custom'
+        },
+        showConfirmButton: true,
+        confirmButtonColor: '#4CAF50',
+        confirmButtonText: 'OK',
+        timer: 5000,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          window.location.href = redirectUrl; // Redirect to the desired page
+        }
+      });
+    }
+  </script>
 </body>
 
 </html>

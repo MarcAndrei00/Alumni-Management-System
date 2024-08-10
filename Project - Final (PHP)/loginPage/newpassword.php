@@ -140,6 +140,8 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     <link rel="shortcut icon" href="../assets/cvsu.png" type="image/svg+xml">
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+
     <style>
         body,
         html {
@@ -233,6 +235,27 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
                 passwordField.type = 'password';
                 toggleIcon.src = 'eye-close.png'; // Use the image for hiding password
             }
+        }
+
+        // FOR VERIFICATION
+        function showWarningAlert(redirectUrl, title, text) {
+            Swal.fire({
+                icon: 'warning',
+                iconHtml: '<i class="fas fa-exclamation-triangle"></i>', // Custom icon using Font Awesome
+                title: title,
+                text: text,
+                customClass: {
+                    popup: 'swal-custom'
+                },
+                showConfirmButton: true,
+                confirmButtonColor: '#4CAF50',
+                confirmButtonText: 'OK',
+                timer: 5000,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = redirectUrl; // Redirect to the desired page
+                }
+            });
         }
     </script>
 

@@ -73,23 +73,15 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
             // header("Location: ./login.php");
 
             $_SESSION['email'] = $account_email;
+            $redirectUrl = './verification_code.php'; // Change this to the desired URL
+            $title = 'Account Not Verified!'; // Your custom title
+            $text = 'Please verify yout account first. We send verification code to your email.'; // Your custom text
+
             echo "<script>
-                            // Wait for the document to load
-                            document.addEventListener('DOMContentLoaded', function() {
-                                // Use SweetAlert2 for the alert
-                                Swal.fire({
-                                        title: 'Verify Your Account First',
-                                        timer: 5000,
-                                        showConfirmButton: true, // Show the confirm button
-                                        confirmButtonColor: '#4CAF50', // Set the button color to green
-                                        confirmButtonText: 'OK' // Change the button text if needed
-                                }).then(function() {
-                                    // Redirect after the alert closes
-                                    window.location.href = './verification_code.php';
-                                    exit();
-                                });
-                            });
-                        </script>";
+                    document.addEventListener('DOMContentLoaded', function() {
+                        showWarningAlert('$redirectUrl', '$title', '$text');
+                    });
+                </script>";
         }
     } else {
         // Redirect to login if no matching user found
@@ -161,24 +153,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
             $stmt->execute();
             $stmt->close();
 
-            echo "
-            <script>
-                // Wait for the document to load
-                document.addEventListener('DOMContentLoaded', function() {
-                    // Use SweetAlert2 for the alert
-                    Swal.fire({
-                            title: 'Login Successfully',
-                            timer: 5000,
-                            showConfirmButton: true, // Show the confirm button
-                            confirmButtonColor: '#4CAF50', // Set the button color to green
-                            confirmButtonText: 'OK' // Change the button text if needed
-                    }).then(function() {
-                        // Redirect after the alert closes
-                        window.location.href = '../adminPage/dashboard_admin.php';
+            $redirectUrl = '../adminPage/dashboard_admin.php'; // Change this to the desired URL
+            echo "<script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        showSuccessAlert('$redirectUrl');
                     });
-                });
-            </script>
-            ";
+                </script>";
+            sleep(3);
         } else if ($user_type == 'coordinator') {
             // Redirect to COORDINATOR
 
@@ -191,22 +172,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
             $stmt->execute();
             $stmt->close();
 
+            $redirectUrl = '../coordinatorPage/dashboard_coor.php'; // Change this to the desired URL
             echo "<script>
-                // Wait for the document to load
-                document.addEventListener('DOMContentLoaded', function() {
-                    // Use SweetAlert2 for the alert
-                    Swal.fire({
-                            title: 'Login Successfully',
-                            timer: 5000,
-                            showConfirmButton: true, // Show the confirm button
-                            confirmButtonColor: '#4CAF50', // Set the button color to green
-                            confirmButtonText: 'OK' // Change the button text if needed
-                    }).then(function() {
-                        // Redirect after the alert closes
-                         window.location.href = '../coordinatorPage/dashboard_coor.php';
+                    document.addEventListener('DOMContentLoaded', function() {
+                        showSuccessAlert('$redirectUrl');
                     });
-                });
-            </script>";
+                </script>";
+            sleep(3);
         } else if ($user_type == 'alumni_archive') {
             // ARCHIVE
             if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
@@ -246,21 +218,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
 
                     $mail->send();
                     $_SESSION['email'] = $email;
+                    $redirectUrl = './inactiveVerification.php'; // Change this to the desired URL
+                    $title = 'Your Account is Inactive!'; // Your custom title
+                    $text = 'Verified your Account First to continue.'; // Your custom text
 
                     echo "<script>
-                            // Wait for the document to load
                             document.addEventListener('DOMContentLoaded', function() {
-                                // Use SweetAlert2 for the alert
-                                Swal.fire({
-                                        title: 'Your Account is Inactive, Verified your Account First to continue.',
-                                        timer: 5000,
-                                        showConfirmButton: true, // Show the confirm button
-                                        confirmButtonColor: '#4CAF50', // Set the button color to green
-                                        confirmButtonText: 'OK' // Change the button text if needed
-                                }).then(function() {
-                                    // Redirect after the alert closes
-                                    window.location.href = './inactiveVerification.php';
-                                });
+                                showWarningAlert('$redirectUrl', '$title', '$text');
                             });
                         </script>";
                 }
@@ -287,22 +251,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                     $stmt->execute();
                     $stmt->close();
 
+                    $redirectUrl = '../alumniPage/dashboard_user.php'; // Change this to the desired URL
                     echo "<script>
-                        // Wait for the document to load
-                        document.addEventListener('DOMContentLoaded', function() {
-                            // Use SweetAlert2 for the alert
-                            Swal.fire({
-                                    title: 'Login Successfully',
-                                    timer: 5000,
-                                    showConfirmButton: true, // Show the confirm button
-                                    confirmButtonColor: '#4CAF50', // Set the button color to green
-                                    confirmButtonText: 'OK' // Change the button text if needed
-                            }).then(function() {
-                                // Redirect after the alert closes
-                                window.location.href = '../alumniPage/dashboard_user.php';
+                            document.addEventListener('DOMContentLoaded', function() {
+                                showSuccessAlert('$redirectUrl');
                             });
-                        });
-                    </script>";
+                        </script>";
+                    sleep(3);
                 } else {
 
                     $email = $_SESSION['user_email'];
@@ -332,24 +287,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
 
                     $mail->send();
                     $_SESSION['email'] = $email;
+                    $redirectUrl = './verification_code.php'; // Change this to the desired URL
+                    $title = 'Account Not Verified!'; // Your custom title
+                    $text = 'Please verify yout account first. We send verification code to your email.'; // Your custom text
 
                     echo "<script>
-                            // Wait for the document to load
                             document.addEventListener('DOMContentLoaded', function() {
-                                // Use SweetAlert2 for the alert
-                                Swal.fire({
-                                        title: 'Verify Your Account First',
-                                        timer: 5000,
-                                        showConfirmButton: true, // Show the confirm button
-                                        confirmButtonColor: '#4CAF50', // Set the button color to green
-                                        confirmButtonText: 'OK' // Change the button text if needed
-                                }).then(function() {
-                                    // Redirect after the alert closes
-                                    window.location.href = './verification_code.php';
-                                });
+                                showWarningAlert('$redirectUrl', '$title', '$text');
                             });
                         </script>";
-
                     // sleep(5); // Delay to ensure JavaScript has time to execute
 
                 }
@@ -358,18 +304,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
     } else {
         // Login failed
         echo "<script>
-            // Wait for the document to load
-            document.addEventListener('DOMContentLoaded', function() {
-            // Use SweetAlert2 for the alert
-            Swal.fire({
-                title: 'Incorrect Student ID / Email and Password',
-                timer: 5000,
-                showConfirmButton: true, // Show the confirm button
-                confirmButtonColor: '#4CAF50', // Set the button color to green
-                confirmButtonText: 'OK' // Change the button text if needed
-                });
-            });
-            </script>";
+        document.addEventListener('DOMContentLoaded', function() {
+          Swal.fire({
+            icon: 'error',
+            iconHtml: '<i class=\"fas fa-exclamation-circle\"></i>', // Custom icon using Font Awesome
+            title: 'Incorrect Student ID / Email and Password!',
+            text: 'Please try again.',
+            customClass: {
+              popup: 'swal-custom'
+            },
+            showConfirmButton: true,
+            confirmButtonColor: '#4CAF50',
+            confirmButtonText: 'OK',
+            timer: 5000,
+          });
+        });
+      </script>";
+        sleep(3);
     }
 } else if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
     $stud_id = $_POST['student_id'];
@@ -385,43 +336,41 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
 
     // Email and student ID validation
     if (mysqli_num_rows($emailCheck) > 0 || mysqli_num_rows($emailCheck_archive) > 0) {
+
+        $title = 'Email Already Exists!'; // Your custom title
+        $text = 'Please try again.'; // Your custom text
+
         echo "<script>
-            document.addEventListener('DOMContentLoaded', function() {
-                Swal.fire({
-                    title: 'Email Already Exists',
-                    timer: 4000,
-                    showConfirmButton: true,
-                    confirmButtonColor: '#4CAF50',
-                    confirmButtonText: 'OK'
+                document.addEventListener('DOMContentLoaded', function() {
+                    duplicateAccount('$title', '$text');
                 });
-            });
-        </script>";
+            </script>";
+        sleep(3);
     } elseif (mysqli_num_rows($idCheck) > 0 || mysqli_num_rows($idCheck_archive) > 0) {
+
+        $title = 'Student ID Already Exists!'; // Your custom title
+        $text = 'Please try again.'; // Your custom text
+
         echo "<script>
-            document.addEventListener('DOMContentLoaded', function() {
-                Swal.fire({
-                    title: 'Student ID Already Exists',
-                    timer: 4000,
-                    showConfirmButton: true,
-                    confirmButtonColor: '#4CAF50',
-                    confirmButtonText: 'OK'
+                document.addEventListener('DOMContentLoaded', function() {
+                    duplicateAccount('$title', '$text');
                 });
-            });
-        </script>";
+            </script>";
+        sleep(3);
     } else {
         // Check if password and confirm password match
         if ($password !== $confirm_password) {
+
+            $title = 'Password and confirm password do not match!'; // Your custom title
+            $text = 'Please try again.'; // Your custom text
+
             echo "<script>
                 document.addEventListener('DOMContentLoaded', function() {
-                    Swal.fire({
-                        title: 'Password and confirm password do not match!',
-                        timer: 4000,
-                        showConfirmButton: true,
-                        confirmButtonColor: '#4CAF50',
-                        confirmButtonText: 'OK'
-                    });
+                    duplicateAccount('$title', '$text');
                 });
             </script>";
+
+            sleep(3);
         } else {
             // Check if student exists in the list_of_graduate table
             $idCheck_alumni = mysqli_query($conn, "SELECT * FROM list_of_graduate WHERE student_id='$stud_id'");
@@ -494,37 +443,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
 
                     $stmt->close();
 
+                    $redirectUrl = './verification_code.php'; // Change this to the desired URL
                     echo "<script>
-                        document.addEventListener('DOMContentLoaded', function() {
-                            Swal.fire({
-                                title: 'Account Successfully Registered',
-                                text: 'We sent a verification code to your email to verify your account.',
-                                timer: 5000,
-                                showConfirmButton: true,
-                                confirmButtonColor: '#4CAF50',
-                                confirmButtonText: 'OK'
-                            }).then(function() {
-                                window.location.href = './verification_code.php';
+                            document.addEventListener('DOMContentLoaded', function() {
+                                Registration('$redirectUrl');
                             });
-                        });
-                    </script>";
+                        </script>";
                 } else {
                     session_destroy();
                     header('Location: ./login.php');
                     exit();
                 }
             } else {
+
+                $title = 'There is no alumni with student ID '. $stud_id; // Your custom title
+                $text = 'Please try again.'; // Your custom text
+
                 echo "<script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        Swal.fire({
-                            title: 'There is no alumni with student ID $stud_id.',
-                            timer: 4000,
-                            showConfirmButton: true,
-                            confirmButtonColor: '#4CAF50',
-                            confirmButtonText: 'OK'
+                        document.addEventListener('DOMContentLoaded', function() {
+                            duplicateAccount('$title', '$text');
                         });
-                    });
-                </script>";
+                    </script>";
+                sleep(3);
             }
         }
     }
@@ -762,6 +702,84 @@ function check_alumni_archive($conn, $table, $log_email, $pass)
                 passwordField.type = 'password';
                 toggleIcon.src = 'eye-close.png'; // Use the image for hiding password
             }
+        }
+
+        // LOGIN SUCCESSFUL
+        function showSuccessAlert(redirectUrl) {
+            Swal.fire({
+                icon: 'success',
+                iconHtml: '<i class="fas fa-check-circle"></i>', // Custom icon using Font Awesome
+                title: 'Login Successful!',
+                text: 'You will be redirected shortly to Dashboard.',
+                customClass: {
+                    popup: 'swal-custom'
+                },
+                showConfirmButton: true,
+                confirmButtonText: 'OK',
+                timer: 5000,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = redirectUrl; // Redirect to the desired page
+                }
+            });
+        }
+
+        // FOR REGISTRATION
+        function Registration(redirectUrl) {
+            Swal.fire({
+                icon: 'success',
+                iconHtml: '<i class="fas fa-check-circle"></i>', // Custom icon using Font Awesome
+                title: 'Account Successfully Registered',
+                text: 'We sent a verification code to your email to verify your account.',
+                customClass: {
+                    popup: 'swal-custom'
+                },
+                showConfirmButton: true,
+                confirmButtonText: 'OK',
+                timer: 5000,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = redirectUrl; // Redirect to the desired page
+                }
+            });
+        }
+
+        // FOR VERIFICATION
+        function showWarningAlert(redirectUrl, title, text) {
+            Swal.fire({
+                icon: 'warning',
+                iconHtml: '<i class="fas fa-exclamation-triangle"></i>', // Custom icon using Font Awesome
+                title: title,
+                text: text,
+                customClass: {
+                    popup: 'swal-custom'
+                },
+                showConfirmButton: true,
+                confirmButtonColor: '#4CAF50',
+                confirmButtonText: 'OK',
+                timer: 5000,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = redirectUrl; // Redirect to the desired page
+                }
+            });
+        }
+
+        // WARNING FOR DUPE ACCOUNT
+        function duplicateAccount(title, text) {
+            Swal.fire({
+                icon: 'warning',
+                iconHtml: '<i class="fas fa-exclamation-triangle"></i>', // Custom icon using Font Awesome
+                title: title,
+                text: text,
+                customClass: {
+                    popup: 'swal-custom'
+                },
+                showConfirmButton: true,
+                confirmButtonColor: '#4CAF50',
+                confirmButtonText: 'OK',
+                timer: 5000,
+            });
         }
     </script>
 </body>
