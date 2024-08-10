@@ -93,6 +93,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
         }
     } else {
         // Redirect to login if no matching user found
+        session_destroy();
         header('Location: ./login.php');
         exit();
     }
@@ -376,137 +377,161 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
 
-    // email and user existing check
+    // Check if email or student ID exists in both the active and archive tables
     $emailCheck = mysqli_query($conn, "SELECT * FROM alumni WHERE email='$email'");
     $emailCheck_archive = mysqli_query($conn, "SELECT * FROM alumni_archive WHERE email='$email'");
     $idCheck = mysqli_query($conn, "SELECT * FROM alumni WHERE student_id='$stud_id'");
     $idCheck_archive = mysqli_query($conn, "SELECT * FROM alumni_archive WHERE student_id='$stud_id'");
 
-
-    if (mysqli_num_rows($emailCheck) > 0) {
-        // $errorMessage = "Email Already Exists";
+    // Email and student ID validation
+    if (mysqli_num_rows($emailCheck) > 0 || mysqli_num_rows($emailCheck_archive) > 0) {
         echo "<script>
-            // Wait for the document to load
             document.addEventListener('DOMContentLoaded', function() {
-                // Use SweetAlert2 for the alert
                 Swal.fire({
                     title: 'Email Already Exists',
                     timer: 4000,
-                    showConfirmButton: true, // Show the confirm button
-                    confirmButtonColor: '#4CAF50', // Set the button color to green
-                    confirmButtonText: 'OK' // Change the button text if needed
+                    showConfirmButton: true,
+                    confirmButtonColor: '#4CAF50',
+                    confirmButtonText: 'OK'
                 });
             });
         </script>";
-    } else if (mysqli_num_rows($emailCheck_archive) > 0) {
-        // $errorMessage = "Email Already Exists";
+    } elseif (mysqli_num_rows($idCheck) > 0 || mysqli_num_rows($idCheck_archive) > 0) {
         echo "<script>
-            // Wait for the document to load
             document.addEventListener('DOMContentLoaded', function() {
-                // Use SweetAlert2 for the alert
-                Swal.fire({
-                    title: 'Email Already Exists',
-                    timer: 4000,
-                    showConfirmButton: true, // Show the confirm button
-                    confirmButtonColor: '#4CAF50', // Set the button color to green
-                    confirmButtonText: 'OK' // Change the button text if needed
-                });
-            });
-        </script>";
-    } else if (mysqli_num_rows($idCheck) > 0) {
-        // $errorMessage = "Student ID Already Exists";
-        echo "<script>
-            // Wait for the document to load
-            document.addEventListener('DOMContentLoaded', function() {
-                // Use SweetAlert2 for the alert
                 Swal.fire({
                     title: 'Student ID Already Exists',
                     timer: 4000,
-                    showConfirmButton: true, // Show the confirm button
-                    confirmButtonColor: '#4CAF50', // Set the button color to green
-                    confirmButtonText: 'OK' // Change the button text if needed
-                });
-            });
-        </script>";
-    } else if (mysqli_num_rows($idCheck_archive) > 0) {
-        // $errorMessage = "Student ID Already Exists";
-        echo "<script>
-            // Wait for the document to load
-            document.addEventListener('DOMContentLoaded', function() {
-                // Use SweetAlert2 for the alert
-                Swal.fire({
-                    title: 'Student ID Already Exists',
-                    timer: 4000,
-                    showConfirmButton: true, // Show the confirm button
-                    confirmButtonColor: '#4CAF50', // Set the button color to green
-                    confirmButtonText: 'OK' // Change the button text if needed
+                    showConfirmButton: true,
+                    confirmButtonColor: '#4CAF50',
+                    confirmButtonText: 'OK'
                 });
             });
         </script>";
     } else {
-
-        // Check if new password and confirm password match
+        // Check if password and confirm password match
         if ($password !== $confirm_password) {
-            // $errorMessage = "New password and confirm password do not match.";
             echo "<script>
-            // Wait for the document to load
-            document.addEventListener('DOMContentLoaded', function() {
-                // Use SweetAlert2 for the alert
-                Swal.fire({
-                    title: 'Password and confirm password do not match!',
-                    timer: 4000,
-                    showConfirmButton: true, // Show the confirm button
-                    confirmButtonColor: '#4CAF50', // Set the button color to green
-                    confirmButtonText: 'OK' // Change the button text if needed
-                });
-            });
-        </script>";
-        } else {
-
-            $filePath = '../assets/profile_icon.jpg';
-            $imageData = file_get_contents($filePath);
-            $imageDataEscaped = addslashes($imageData);
-
-            $stmt = $conn->prepare("UPDATE alumni SET status = 'Verified' WHERE student_id = ?");
-            $stmt->bind_param("s", $account);
-            $stmt->execute();
-
-            $register = "INSERT INTO alumni (fname, mname, lname, gender, course, batch_startYear, batch_endYear, contact, address)" .
-                "SELECT fname, mname, lname, gender, course, batch_startYear, batch_endYear, contact, address FROM list_of_graduate WHERE student_id=$stud_id";
-            $conn->query($register);
-
-            $sql = "INSERT INTO alumni SET student_id='$stud_id', email='$email', password='$password', picture='$imageDataEscaped' WHERE student_id=$stud_id";
-            $result = $conn->query($sql);
-
-            $sql_delete = "DELETE FROM list_of_graduate WHERE student_id=$stud_id";
-            $conn->query($sql_delete);
-
-
-            // if ($result) {
-            // $successMessage = "Coordinator Edited Successfully";
-            echo "
-            <script>
-                // Wait for the document to load
                 document.addEventListener('DOMContentLoaded', function() {
-                    // Use SweetAlert2 for the alert
                     Swal.fire({
-                        title: 'Account Successfully Registered',
-                        timer: 2000,
-                        showConfirmButton: true, // Show the confirm button
-                        confirmButtonColor: '#4CAF50', // Set the button color to green
-                        confirmButtonText: 'OK' // Change the button text if needed
-                        }).then(function() {
-                        // Redirect after the alert closes
-                        window.location.href = './login.php';
+                        title: 'Password and confirm password do not match!',
+                        timer: 4000,
+                        showConfirmButton: true,
+                        confirmButtonColor: '#4CAF50',
+                        confirmButtonText: 'OK'
                     });
                 });
-            </script>
-            ";
-            $stmt->close();
-            // }
+            </script>";
+        } else {
+            // Check if student exists in the list_of_graduate table
+            $idCheck_alumni = mysqli_query($conn, "SELECT * FROM list_of_graduate WHERE student_id='$stud_id'");
+
+            if (mysqli_num_rows($idCheck_alumni) > 0) {
+                // Transfer data
+                $filePath = '../assets/profile_icon.jpg';
+                $imageData = file_get_contents($filePath);
+                $imageDataEscaped = addslashes($imageData);
+
+                // Update graduate information
+                $sql = "UPDATE list_of_graduate SET email='$email', password='$password', picture='$imageDataEscaped' WHERE student_id='$stud_id'";
+                $result = $conn->query($sql);
+
+                // Insert into alumni table
+                $sql_restore = "INSERT INTO alumni (student_id, fname, mname, lname, gender, course, batch_startYear, batch_endYear, contact, address, email, password, picture, date_created) 
+                                SELECT student_id, fname, mname, lname, gender, course, batch_startYear, batch_endYear, contact, address, '$email', '$password', '$imageDataEscaped', date_created 
+                                FROM list_of_graduate WHERE student_id='$stud_id'";
+                $conn->query($sql_restore);
+
+                $stmt = $conn->prepare("UPDATE alumni SET status = 'Unverified' WHERE student_id = ?");
+                $stmt->bind_param("s", $stud_id);
+                $stmt->execute();
+                $stmt->close();
+
+                // Delete from list_of_graduate table
+                $sql_delete = "DELETE FROM list_of_graduate WHERE student_id='$stud_id'";
+                $conn->query($sql_delete);
+
+                // Check if user is an alumni
+                $stmt = $conn->prepare("SELECT * FROM alumni WHERE student_id = ? AND email = ?");
+                $stmt->bind_param("ss", $stud_id, $email);
+                $stmt->execute();
+                $user_result = $stmt->get_result();
+
+                if ($user_result->num_rows > 0) {
+                    $verification_code = sprintf("%06d", mt_rand(1, 999999));
+
+                    $insert_verifcodes_qry = mysqli_query($conn, "INSERT INTO recovery_code(email, verification_code) VALUES('$email', '$verification_code')");
+
+                    // PHPMailer setup
+                    $mail = new PHPMailer(true);
+
+                    $mail->isSMTP();
+                    $mail->Host       = 'smtp.gmail.com';
+                    $mail->SMTPAuth   = true;
+                    $mail->Username   = 'alumni.management07@gmail.com';
+                    $mail->Password   = 'kcio bmde ffvc sfar';
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                    $mail->Port       = 587;
+
+                    $mail->setFrom('alumni.management07@gmail.com', 'Alumni Management');
+                    $mail->addAddress($email);
+
+                    $mail->isHTML(true);
+                    $mail->Subject = 'Verification Code';
+                    $mail->Body    = 'Your verification code is <b>' . $verification_code . '</b>';
+                    $mail->AltBody = 'Your verification code is ' . $verification_code;
+
+                    $mail->send();
+
+                    $sql_change = "SELECT alumni_id FROM alumni WHERE student_id = $stud_id";
+                    $result = $conn->query($sql_change);
+                    $row = $result->fetch_assoc();
+
+                    // Set session variables
+                    $_SESSION['email'] = $email;
+                    $_SESSION['user_email'] = $email;
+                    $_SESSION['user_id'] = $row['alumni_id'];
+
+                    $stmt->close();
+
+                    echo "<script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            Swal.fire({
+                                title: 'Account Successfully Registered',
+                                text: 'We sent a verification code to your email to verify your account.',
+                                timer: 5000,
+                                showConfirmButton: true,
+                                confirmButtonColor: '#4CAF50',
+                                confirmButtonText: 'OK'
+                            }).then(function() {
+                                window.location.href = './verification_code.php';
+                            });
+                        });
+                    </script>";
+                } else {
+                    session_destroy();
+                    header('Location: ./login.php');
+                    exit();
+                }
+            } else {
+                echo "<script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        Swal.fire({
+                            title: 'There is no alumni with student ID $stud_id.',
+                            timer: 4000,
+                            showConfirmButton: true,
+                            confirmButtonColor: '#4CAF50',
+                            confirmButtonText: 'OK'
+                        });
+                    });
+                </script>";
+            }
         }
     }
 }
+
+
+
 
 // LOGIN CHECK FOR ADMIN AND COORDINATOR
 function check_login($conn, $table, $log_email, $pass)

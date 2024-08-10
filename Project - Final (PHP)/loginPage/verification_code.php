@@ -2,9 +2,15 @@
 session_start();
 $conn = new mysqli("localhost", "root", "", "alumni_management_system");
 
+use PHPMailer\PHPMailer\PHPMailer;
+
+require '../vendor/autoload.php';
+
 $email = $_SESSION['email'];
 if ($email == 0) {
+  session_destroy();
   header('Location: login.php');
+  exit();
 }
 
 if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
@@ -48,6 +54,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     $sql = "SELECT * FROM alumni WHERE alumni_id=$account";
     $result = $conn->query($sql);
     $row = $result->fetch_assoc();
+
 
     if ($row['status'] == "Verified") {
       // User is a verified alumni
@@ -94,8 +101,64 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
         header('Location: ./login.php');
         exit();
       }
+      // RESEND CODE
+      else if (isset($_POST['resendCode'])) {
+        // DELETE OLD VERIF CODE
+        $sql_delete = "DELETE FROM recovery_code WHERE email='$account_email'";
+        $conn->query($sql_delete);
+
+        $email = $_SESSION['email'];
+        $verification_code = sprintf("%06d", mt_rand(1, 999999));
+        $email = mysqli_real_escape_string($conn, $email);
+        $verification_code = mysqli_real_escape_string($conn, $verification_code);
+
+        $check_email_status_qry = mysqli_query($conn, "SELECT status FROM alumni WHERE email = '$email'");
+
+        if (mysqli_num_rows($check_email_status_qry) > 0) {
+          // Email exists and is verified
+          $insert_verifcodes_qry = mysqli_query($conn, "INSERT INTO recovery_code(email,verification_code)
+              VALUES('$email','$verification_code')");
+          $mail = new PHPMailer(true);
+
+          $mail->isSMTP();
+          $mail->Host       = 'smtp.gmail.com';
+          $mail->SMTPAuth   = true;
+          $mail->Username   = 'alumni.management07@gmail.com';
+          $mail->Password   = 'kcio bmde ffvc sfar';
+          $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+          $mail->Port       = 587;
+
+          $mail->setFrom('alumni.management07@gmail.com', 'Alumni Management');
+          $mail->addAddress($email);
+
+          $mail->isHTML(true);
+          $mail->Subject = 'Verification Code';
+          $mail->Body    = 'Your verification code is <b>' . $verification_code . '</b>';
+          $mail->AltBody = 'Your verification code is ' . $verification_code;
+
+          $mail->send();
+          $_SESSION['alert'] = "Verification cod successfully sent.";
+
+          // Check and display alert if set
+          if (isset($_SESSION['alert'])) {
+            echo "<script>
+          document.addEventListener('DOMContentLoaded', function() {
+              Swal.fire({
+                  icon: 'success',
+                  title: '" . addslashes($_SESSION['alert']) . "',
+                  customClass: {
+                      popup: 'swal-custom'
+                  }
+              });
+          });
+        </script>";
+            unset($_SESSION['alert']); // Unset the alert after showing it
+          }
+        }
+      }
     }
   } else {
+    session_destroy();
     header('Location: ../homepage.php');
     exit();
   }
@@ -129,11 +192,66 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
   }
 } // BACK BUTTON
 else if (isset($_POST['back_btn'])) {
-  $sql_delete = "DELETE FROM recovery_code WHERE email='$account_email'";
+  $sql_delete = "DELETE FROM recovery_code WHERE email='$email'";
   $conn->query($sql_delete);
   session_destroy();
   header('Location: ./forgetpassword.php');
   exit();
+}
+// RESEND CODE
+else if (isset($_POST['resendCode'])) {
+  // DELETE OLD VERIF CODE
+  $sql_delete = "DELETE FROM recovery_code WHERE email='$email'";
+  $conn->query($sql_delete);
+
+  $email = $_SESSION['email'];
+  $verification_code = sprintf("%06d", mt_rand(1, 999999));
+  $email = mysqli_real_escape_string($conn, $email);
+  $verification_code = mysqli_real_escape_string($conn, $verification_code);
+
+  $check_email_status_qry = mysqli_query($conn, "SELECT status FROM alumni WHERE email = '$email'");
+
+  if (mysqli_num_rows($check_email_status_qry) > 0) {
+    // Email exists and is verified
+    $insert_verifcodes_qry = mysqli_query($conn, "INSERT INTO recovery_code(email,verification_code)
+              VALUES('$email','$verification_code')");
+    $mail = new PHPMailer(true);
+
+    $mail->isSMTP();
+    $mail->Host       = 'smtp.gmail.com';
+    $mail->SMTPAuth   = true;
+    $mail->Username   = 'alumni.management07@gmail.com';
+    $mail->Password   = 'kcio bmde ffvc sfar';
+    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+    $mail->Port       = 587;
+
+    $mail->setFrom('alumni.management07@gmail.com', 'Alumni Management');
+    $mail->addAddress($email);
+
+    $mail->isHTML(true);
+    $mail->Subject = 'Verification Code';
+    $mail->Body    = 'Your verification code is <b>' . $verification_code . '</b>';
+    $mail->AltBody = 'Your verification code is ' . $verification_code;
+
+    $mail->send();
+    $_SESSION['alert'] = "Verification cod successfully sent.";
+
+    // Check and display alert if set
+    if (isset($_SESSION['alert'])) {
+      echo "<script>
+          document.addEventListener('DOMContentLoaded', function() {
+              Swal.fire({
+                  icon: 'success',
+                  title: '" . addslashes($_SESSION['alert']) . "',
+                  customClass: {
+                      popup: 'swal-custom'
+                  }
+              });
+          });
+        </script>";
+      unset($_SESSION['alert']); // Unset the alert after showing it
+    }
+  }
 }
 
 ?>
@@ -192,10 +310,29 @@ else if (isset($_POST['back_btn'])) {
     }
 
     .back-to-login {
-      display: block;
+      display: inline;
       text-align: center;
       margin-top: 10px;
+      float: none;
+      background: none;
+      border: none;
+      padding: 0;
+      color: #007bff;
+      margin: 0px;
+      cursor: pointer;
+      text-decoration: none;
     }
+
+    .back-to-login:hover {
+      color: #0056b3;
+      text-decoration: underline;
+    }
+
+    .back-to-login:focus {
+      outline: none;
+      /* Remove default focus outline (borders) */
+    }
+
 
     .icon-size {
       width: 48px;
@@ -216,7 +353,9 @@ else if (isset($_POST['back_btn'])) {
           <div class="form-group">
             <input type="number" name="verif_code" class="form-control" id="code" placeholder="Input the Verification Code">
           </div>
-          <a href="#" class="back-to-login">Resend Code</a>
+          <div style="text-align: center;">
+            <button type="submit" name="resendCode" class="back-to-login">Resend Code</button>
+          </div>
           <br>
           <button type="submit" name="submit_code" class="btn btn-primary btn-block" style="width: 48%; float: left;">Submit</button>
           <button type="submit" name="back_btn" class="btn btn-primary btn-block" style="width: 48%; float: right; margin: 0px;">Back</button>

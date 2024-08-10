@@ -114,6 +114,7 @@ else {
       $mail->send();
       header('location: verification_code.php');
       $_SESSION['email'] = $email;
+      
       exit();
     } else {
       // Email does not exist
