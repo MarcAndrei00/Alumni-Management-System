@@ -53,6 +53,10 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     header('Location: ./contact.php');
     exit();
 }
+
+// Read data from table alumni
+$sql = "SELECT * FROM event";
+$result = $conn->query($sql);
 ?>
 
 <!DOCTYPE html>
@@ -192,6 +196,25 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
             width: 0;
             animation: typing 3s steps(30, end) forwards, blink-cursor 0.75s step-end infinite, hide-cursor 0s 3.1s forwards;
 
+        }
+
+        .buttons1 {
+            text-align: right;
+            /* Aligns the buttons to the right */
+        }
+
+        .buttons .btn {
+            display: inline-block;
+            width: 150px;
+            /* Set the width as per your requirement */
+            text-align: center;
+            /* Center the text */
+        }
+
+        .buttons .btn-donate,
+        .buttons .btn-view-details {
+            padding: 10px 20px;
+            /* Ensure consistent padding */
         }
 
         @keyframes typing {
@@ -617,7 +640,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
                 </li>
                 <li class="nav-item active">
                     <a class="nav-link" href="event.php">Event</a>
-                </li>`
+                </li>
                 <li class="nav-item ">
                     <a class="nav-link" href="about.php">About</a>
                 </li>
@@ -647,49 +670,69 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
         <h2><b>UNIVERSITY EVENTS</b></h2>
     </section>
 
-    <section class="mission-section" id="about-section">
-        <div class="container" data-aos="fade-up">
-            <div class="row align-items-center">
-                <div class="col-lg-6 mb-4 mb-lg-0 d-flex justify-content-center" data-aos="fade-right">
-                    <img src="./assets/alum.png" alt="About Us Image" class="img-fluid" style="border-radius: 3%;">
-                </div>
-                <div class="col-lg-6" data-aos="fade-left">
-                    <h2> Alumni Homecoming Celebration</h2>
-                    <p>
-                    "Join us for a night of nostalgia and reconnection at the Alumni Homecoming Celebration. Relive the memories, catch up with old friends, and celebrate the achievements of our distinguished alumni. Let’s make new memories together and honor the past, present, and future of our alma mater."</p>
-                    <!-- Buttons for Donation and View Details -->
-                    <div class="buttons">
-                        <a href="#" class="btn btn-success btn-donate">Donate</a>
-                        <a href="#" class="btn btn-info btn-view-details">View Details</a>
+    <?php
+    // Check if there are results to display
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            // Check if the event_id is odd or even
+            if ($row['event_id'] % 2 == 1) {
+                // Odd event_id: display in mission-section
+    ?>
+                <section class="mission-section" id="about-section">
+                    <div class="container" data-aos="fade-up">
+                        <div class="row align-items-center">
+                            <div class="col-lg-6 mb-4 mb-lg-0 d-flex justify-content-center" data-aos="fade-right">
+                                <img src="data:image/jpeg;base64,<?php echo base64_encode($row['image']); ?>" alt="About Us Image" class="img-fluid" style="border-radius: 3%;">
+                            </div>
+                            <div class="col-lg-6" data-aos="fade-left">
+                                <h2><?php echo $row['title']; ?></h2>
+                                <p><?php echo $row['description']; ?></p>
+                                <p class="card-text"><small class="text-muted"><b>DATE: </b><?php echo $row['date']; ?></small></p>
+                                <p class="card-text"><small class="text-muted"><b>TIME: </b><?php echo $row['start_time']; ?> To <?php echo $row['end_time']; ?></small></p>
+                                <p class="card-text"><small class="text-muted"><b>VENUE: </b><?php echo $row['venue']; ?></small></p>
+                                <p class="card-text"><small class="text-muted"><b>ADDRESS: </b><?php echo $row['address']; ?></small></p>
+                                <!-- Buttons for Donation and View Details -->
+                                <div class="buttons buttons1">
+                                    <a href="#" class="btn btn-success btn-donate">Donate</a>
+                                    <a href="./loginPage/login.php" class="btn btn-info btn-view-details">View Details</a>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="vision-section" id="vision-section">
-        <div class="container" data-aos="fade-up">
-            <div class="row align-items-center justify-content-center">
-                <div class="col-lg-6" data-aos="fade-left">
-                    <h2>Alumni Fundraising Gala</h2>
-                    <p>
-                    "Support the next generation of students by attending the Alumni Fundraising Gala. This elegant evening includes a gourmet dinner, live entertainment, and a silent auction, with all proceeds going towards scholarships and educational programs that benefit our future leaders."</p>
-                    <!-- Buttons for Donation and View Details -->
-                    <div class="buttons">
-                        <a href="#" class="btn btn-success btn-donate">Donate</a>
-                        <a href="#" class="btn btn-info btn-view-details">View Details</a>
+                </section>
+            <?php
+            } else {
+                // Even event_id: display in vision-section
+            ?>
+                <section class="vision-section" id="vision-section">
+                    <div class="container" data-aos="fade-up">
+                        <div class="row align-items-center justify-content-center">
+                            <div class="col-lg-6" data-aos="fade-left">
+                                <h2><?php echo $row['title']; ?></h2>
+                                <p><?php echo $row['description']; ?></p>
+                                <p class="card-text"><small class="text-muted"><b>DATE: </b><?php echo $row['date']; ?></small></p>
+                                <p class="card-text"><small class="text-muted"><b>TIME: </b><?php echo $row['start_time']; ?> To <?php echo $row['end_time']; ?></small></p>
+                                <p class="card-text"><small class="text-muted"><b>VENUE: </b><?php echo $row['venue']; ?></small></p>
+                                <p class="card-text"><small class="text-muted"><b>ADDRESS: </b><?php echo $row['address']; ?></small></p>
+                                <!-- Buttons for Donation and View Details -->
+                                <div class="buttons">
+                                    <a href="#" class="btn btn-success btn-donate">Donate</a>
+                                    <a href="./loginPage/login.php" class="btn btn-info btn-view-details">View Details</a>
+                                </div>
+                            </div>
+                            <div class="col-lg-6 mb-4 mb-lg-0 d-flex justify-content-center" data-aos="fade-right">
+                                <img src="data:image/jpeg;base64,<?php echo base64_encode($row['image']); ?>" alt="About Us Image" class="img-fluid" style="border-radius: 3%;">
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="col-lg-6 mb-4 mb-lg-0 d-flex justify-content-center" data-aos="fade-right">
-                    <img src="./assets/pic4.jpg" alt="About Us Image" class="img-fluid" style="border-radius: 3%;">
-                </div>
-            </div>
-        </div>
-    </section>
-
-
-
-
+                </section>
+    <?php
+            }
+        }
+    } else {
+        echo "<p>No events found.</p>";
+    }
+    ?>
 
     <footer class="footer">
         <div class="container">
@@ -708,10 +751,6 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     <script>
         AOS.init();
     </script>
-
-
-
-
 
 </body>
 
