@@ -428,6 +428,7 @@ else if (isset($_POST['resendCode'])) {
           popup: 'swal-custom'
         },
         showConfirmButton: true,
+        confirmButtonColor: '#4CAF50',
         confirmButtonText: 'OK',
         timer: 5000,
       }).then((result) => {
@@ -448,6 +449,7 @@ else if (isset($_POST['resendCode'])) {
           popup: 'swal-custom'
         },
         showConfirmButton: true,
+        confirmButtonColor: '#4CAF50',
         confirmButtonText: 'OK',
         timer: 5000,
       }).then((result) => {

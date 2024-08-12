@@ -1,6 +1,5 @@
 <?php
 session_start();
-
 $conn = new mysqli("localhost", "root", "", "alumni_management_system");
 
 use PHPMailer\PHPMailer\PHPMailer;
@@ -67,10 +66,6 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
             header('Location: ../alumniPage/dashboard_user.php');
             exit();
         } else {
-
-            // $_SESSION = array();
-            // session_destroy();
-            // header("Location: ./login.php");
 
             $_SESSION['email'] = $account_email;
             $redirectUrl = './verification_code.php'; // Change this to the desired URL
@@ -386,10 +381,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                 $result = $conn->query($sql);
 
                 // Insert into alumni table
-                $sql_restore = "INSERT INTO alumni (student_id, fname, mname, lname, gender, course, batch_startYear, batch_endYear, contact, address, email, password, picture, date_created) 
-                                SELECT student_id, fname, mname, lname, gender, course, batch_startYear, batch_endYear, contact, address, '$email', '$password', '$imageDataEscaped', date_created 
+                $sql_restore = "INSERT INTO alumni (student_id, fname, mname, lname, gender, course, contact, address, email, password, picture, date_created) 
+                                SELECT student_id, fname, mname, lname, gender, course, contact, address, '$email', '$password', '$imageDataEscaped', date_created 
                                 FROM list_of_graduate WHERE student_id='$stud_id'";
                 $conn->query($sql_restore);
+
+                $sql = "SELECT * FROM list_of_graduate WHERE student_id=$stud_id";
+                $result = $conn->query($sql);
+                $row = $result->fetch_assoc();
+
+                $batchYearRange = $row["batch"] ?? ''; // Assuming batch_years are in column 8
+                $startYear = $endYear = ''; // Initialize with empty values
+
+                if (strpos($batchYearRange, '-') !== FALSE) {
+                    list($startYear, $endYear) = explode('-', $batchYearRange);
+                    // Trim spaces
+                    $startYear = trim($startYear);
+                    $endYear = trim($endYear);
+                }
+
+                $stmt = $conn->prepare("UPDATE alumni SET batch_startYear = '$startYear', batch_endYear = '$endYear' WHERE student_id = ?");
+                $stmt->bind_param("s", $stud_id);
+                $stmt->execute();
+                $stmt->close();
 
                 $stmt = $conn->prepare("UPDATE alumni SET status = 'Unverified' WHERE student_id = ?");
                 $stmt->bind_param("s", $stud_id);
@@ -456,7 +470,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                 }
             } else {
 
-                $title = 'There is no alumni with student ID '. $stud_id; // Your custom title
+                $title = 'There is no alumni with student ID ' . $stud_id; // Your custom title
                 $text = 'Please try again.'; // Your custom text
 
                 echo "<script>
@@ -715,6 +729,7 @@ function check_alumni_archive($conn, $table, $log_email, $pass)
                     popup: 'swal-custom'
                 },
                 showConfirmButton: true,
+                confirmButtonColor: '#4CAF50',
                 confirmButtonText: 'OK',
                 timer: 5000,
             }).then((result) => {
@@ -735,6 +750,7 @@ function check_alumni_archive($conn, $table, $log_email, $pass)
                     popup: 'swal-custom'
                 },
                 showConfirmButton: true,
+                confirmButtonColor: '#4CAF50',
                 confirmButtonText: 'OK',
                 timer: 5000,
             }).then((result) => {

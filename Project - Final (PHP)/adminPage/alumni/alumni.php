@@ -74,7 +74,11 @@ if (isset($_GET['query']) && !empty($_GET['query'])) {
             OR address LIKE '%$search_query%'
             OR email LIKE '%$search_query%' 
             OR course LIKE '%$search_query%'
-            OR (gender LIKE '%$search_query%' AND gender != 'fe') ";
+            OR batch_startYear LIKE '%$search_query%'
+            OR batch_endYear LIKE '%$search_query%'
+            OR CONCAT(batch_startYear, '-', batch_endYear) LIKE '%$search_query%'
+            OR (status LIKE '%$search_query%' AND ((status = 'Verified' AND '$search_query' != 'Unverified') OR (status = 'Unverified' AND '$search_query' != 'Verified')))
+            OR (gender LIKE '%$search_query%' AND ((gender = 'male' AND '$search_query' != 'female') OR (gender = 'female' AND '$search_query' != 'male')))";
 }
 
 $sql .= "ORDER BY lname ASC ";
@@ -92,7 +96,11 @@ if (isset($_GET['query']) && !empty($_GET['query'])) {
                               OR address LIKE '%$search_query%'
                               OR email LIKE '%$search_query%' 
                               OR course LIKE '%$search_query%'
-                              OR (gender LIKE '%$search_query%' AND gender != 'fe')";
+                              OR batch_startYear LIKE '%$search_query%'
+                              OR batch_endYear LIKE '%$search_query%'
+                              OR CONCAT(batch_startYear, '-', batch_endYear) LIKE '%$search_query%'
+                              OR (status LIKE '%$search_query%' AND ((status = 'Verified' AND '$search_query' != 'Unverified') OR (status = 'Unverified' AND '$search_query' != 'Verified')))
+                              OR (gender LIKE '%$search_query%' AND ((gender = 'male' AND '$search_query' != 'female') OR (gender = 'female' AND '$search_query' != 'male')))";
 }
 $total_records_result = mysqli_query($conn, $total_records_query);
 $total_records_row = mysqli_fetch_array($total_records_result);
@@ -118,7 +126,7 @@ if (isset($_GET['ide'])) {
         });
     </script>
     ";
-    }
+}
 ?>
 
 
@@ -336,7 +344,7 @@ if (isset($_GET['ide'])) {
                                     <form class="d-flex" role="search">
                                         <div class="container-fluid" id="search">
                                             <input class="form-control me-2" type="search" name="query" placeholder="Search Records..." aria-label="Search" value="<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>">
-                                            <button class="btn btn-outline-success" type="submit" style="padding-left: 30px; padding-right: 39px;">Search</button>
+                                            <button class="btn btn-outline-success" type="submit" style="padding-left: 30px; padding-right: 30px;">Search</button>
                                         </div>
                                     </form>
 
@@ -347,6 +355,7 @@ if (isset($_GET['ide'])) {
                                     <a style="text-decoration: none;" href='./add_alumni.php'>
                                         <button id="add-new-btn">Add New +</button>
                                     </a>
+                                    <a class='btn btn-secondary border border-dark' href='./list_of_graduate.php' style="margin-left: 1%; padding-left: 4.1px; padding-right: 5.4px; white-space: nowrap;">Unregister Acccount</a>
                                 </div>
                             </div>
                         </div>
@@ -364,6 +373,8 @@ if (isset($_GET['ide'])) {
                                     <th scope="col" class="inline">CONTACT</th>
                                     <th scope="col" class="inline">ADDRESS</th>
                                     <th scope="col" class="inline">EMAIL</th>
+                                    <th scope="col" class="inline">LAST LOGIN</th>
+                                    <th scope="col" class="inline">STATUS</th>
                                     <th scope="col" class="inline">DATE CREATION</th>
                                     <th scope="col" class="inline">ACTION</th>
                                 </tr>
@@ -372,11 +383,11 @@ if (isset($_GET['ide'])) {
                                 <?php
                                 if ($result->num_rows > 0) {
                                     while ($row = $result->fetch_assoc()) {
-                                        if(!empty($row["mname"])){
-                                        $fullname = $row["lname"] . ", " . $row["fname"] . ", " . $row["mname"] . ".";
-                                    }else {
-                                        $fullname = $row["lname"] . ", " . $row["fname"];
-                                    }
+                                        if (!empty($row["mname"])) {
+                                            $fullname = $row["lname"] . ", " . $row["fname"] . ", " . $row["mname"] . ".";
+                                        } else {
+                                            $fullname = $row["lname"] . ", " . $row["fname"];
+                                        }
                                         $batch = $row["batch_startYear"] . " - " . $row["batch_endYear"];
                                 ?>
                                         <tr>
@@ -388,6 +399,10 @@ if (isset($_GET['ide'])) {
                                             <td class="inline"><?php echo $row['contact'] ?></td>
                                             <td class="inline"><?php echo $row['address'] ?></td>
                                             <td class="inline"><?php echo $row['email'] ?></td>
+                                            <td class="inline"><?php echo $row['last_login'] ?></td>
+                                            <td class="inline" style="color: <?php echo ($row['status'] == 'Verified') ? 'green' : 'red'; ?>">
+                                                <?php echo $row['status']; ?>
+                                            </td>
                                             <td class="inline"><?php echo $row['date_created'] ?></td>
                                             <?php
                                             echo "
@@ -409,12 +424,10 @@ if (isset($_GET['ide'])) {
 
                     </div>
 
-                    <div>
-                        <!-- Pagination links -->
-                        <div class="pagination" id="content" style="float:right; margin-right:1.5%">
-                            <!-- next and previous -->
-                            <?php
-                            if ($current_page > 1) : ?>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding-right: 1.5%; padding-left: 1.5%;">
+                        <p style="margin: 0;">Page <?= $current_page ?> out of <?= $total_pages ?></p>
+                        <div class="pagination" id="content">
+                            <?php if ($current_page > 1) : ?>
                                 <a href="?page=<?= ($current_page - 1); ?>&query=<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>" class="prev" style="border-radius:4px;background-color:#368DB8;color:white;margin-bottom:13px;">&laquo; Previous</a>
                             <?php endif; ?>
 
@@ -422,7 +435,6 @@ if (isset($_GET['ide'])) {
                                 <a href="?page=<?= ($current_page + 1); ?>&query=<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>" class="next" style="border-radius:4px;background-color:#368DB8;color:white;margin-bottom:13px;">Next &raquo;</a>
                             <?php endif; ?>
                         </div>
-                        <p style="margin-left:2%;margin-top:2.3%;">Page <?= $current_page ?> out of <?= $total_pages ?></p>
                     </div>
                 </div>
             </div>

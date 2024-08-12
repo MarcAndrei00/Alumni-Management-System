@@ -374,7 +374,6 @@ if (isset($_GET['ide'])) {
                                             <?php
                                             echo "
                                                 <td class='inline act'>
-                                                    <a class='btn btn-warning btn-sm' href='./update_coor.php?id=$row[coor_id]' style='font-size: 11.8px;'>Update</a>
                                                     <a class='btn btn-danger btn-sm archive' href='./del_coor.php?id=$row[coor_id]' style='font-size: 11.8px;'>Archive</a>
                                                 </td>
                                             "; ?>

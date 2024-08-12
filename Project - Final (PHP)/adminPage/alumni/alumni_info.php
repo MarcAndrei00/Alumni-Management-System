@@ -160,6 +160,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .btn-size {
+            display: inline-block;
+            width: 100px;
+            /* Adjust the width as needed */
+            text-align: center;
+        }
+    </style>
 </head>
 
 <body>
@@ -264,12 +272,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                     <!-- PROFILE -->
                     <div class="container text-center" id="start">
                         <div class="row align-items-end">
-                            <div class="col">
-                                <?php echo "
-                                    <a class='btn btn-warning' href='./update_profile.php?id=$row[alumni_id]'> Change Picture </a>
-                                    ";
-                                ?>
-                            </div>
+                            <div class="col"></div>
                             <div class="col">
                                 <!-- Preview image -->
                                 <div class="form-control" style="width:225px;height:215px; border-radius: 100%;">
@@ -387,14 +390,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                         </div>
                     </div>
                     <div class="container">
+                        <div class="row align-items-end">
+                            <div class="col">
+                                <label class="col-sm-3 col-form-label" style="font-size: 20px;" for="name">Status:</label>
+                            </div>
+                            <div class="col">
+                                <input class="form-control" type="email" id="email" name="email" style="color: <?php echo ($row['status'] == 'Verified') ? 'green' : 'red'; ?>" disabled value="<?php echo $row['status']; ?>">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="container">
+                        <div class="row align-items-end">
+                            <div class="col">
+                                <label class="col-sm-3 col-form-label" style="font-size: 20px;" for="name">Last Login:</label>
+                            </div>
+                            <div class="col">
+                                <input class="form-control" type="email" id="email" name="email" disabled value="<?php echo $row['last_login']; ?>">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="container">
                         <div class="row" style="margin-top:20px;">
                             <div class="col" id="buttons">
                                 <div class="button">
 
                                     <?php
                                     echo "
-                                        <a class='btn btn-danger' href='./del_alumni.php?id=$row[alumni_id]'>Archive</a>
-                                        <a class='btn btn-danger' href='./alumni.php'>Cancel</a>
+                                        <a class='btn btn-danger btn-size' href='./del_alumni.php?id=$row[alumni_id]'>Archive</a>
+                                        <a class='btn btn-warning btn-size' href='./alumni.php'>Back</a>
                                     "; ?>
                                 </div>
                             </div>

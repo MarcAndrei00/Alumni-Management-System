@@ -275,6 +275,7 @@ else {
           popup: 'swal-custom'
         },
         showConfirmButton: true,
+        confirmButtonColor: '#4CAF50',
         confirmButtonText: 'OK',
         timer: 5000,
       }).then((result) => {
