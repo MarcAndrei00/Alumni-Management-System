@@ -49,11 +49,15 @@ if (isset($_POST["Import"])) {
         if (($file = fopen($csvFile, "r")) !== FALSE) {
 
             $insertCount = 0; // Counter for inserted records
+            $row = 1; // Start counting rows
 
             while (($emapData = fgetcsv($file, 10000, ",")) !== FALSE) {
 
-                // Skip header row or any empty row
-                if (empty(array_filter($emapData))) continue;
+                // Skip header row and any empty row
+                if ($row == 1 || empty(array_filter($emapData))) {
+                    $row++;
+                    continue;
+                }
 
                 // Check if student_id already exists
                 $checkQuery = "SELECT * FROM list_of_graduate WHERE student_id = '$emapData[1]'";
@@ -61,10 +65,11 @@ if (isset($_POST["Import"])) {
 
                 if (mysqli_num_rows($checkResult) > 0) {
                     // Skip inserting if student_id exists
+                    $row++;
                     continue;
                 }
 
-                // Insert data into subject table
+                // Insert data into list_of_graduate table
                 $sql = "INSERT INTO list_of_graduate (`student_id`, `lname`, `fname`, `mname`, `gender`, `course`, `batch`, `contact`, `address`, `email`) 
                                     VALUES ('$emapData[1]', '$emapData[2]', '$emapData[3]', '$emapData[4]', '$emapData[5]', '$emapData[6]', '$emapData[7]', '$emapData[8]', '$emapData[9]', '$emapData[10]')";
                 $result = mysqli_query($conn, $sql);
@@ -77,6 +82,7 @@ if (isset($_POST["Import"])) {
                 }
 
                 $insertCount++; // Increment the counter if insertion is successful
+                $row++;
             }
             fclose($file);
 
