@@ -49,13 +49,17 @@ if (isset($_POST["Import"])) {
         if (($file = fopen($csvFile, "r")) !== FALSE) {
 
             $insertCount = 0; // Counter for inserted records
-            $row = 1; // Start counting rows
+            $startImporting = false; // Flag to start importing data
 
             while (($emapData = fgetcsv($file, 10000, ",")) !== FALSE) {
 
-                // Skip header row and any empty row
-                if ($row == 1 || empty(array_filter($emapData))) {
-                    $row++;
+                // Check if the first column has the value "1" to start importing
+                if (trim($emapData[0]) == "1") {
+                    $startImporting = true;
+                }
+
+                // Skip rows until we find the row with "No. 1"
+                if (!$startImporting) {
                     continue;
                 }
 
@@ -65,7 +69,6 @@ if (isset($_POST["Import"])) {
 
                 if (mysqli_num_rows($checkResult) > 0) {
                     // Skip inserting if student_id exists
-                    $row++;
                     continue;
                 }
 
@@ -82,7 +85,6 @@ if (isset($_POST["Import"])) {
                 }
 
                 $insertCount++; // Increment the counter if insertion is successful
-                $row++;
             }
             fclose($file);
 
