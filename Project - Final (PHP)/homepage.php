@@ -1,11 +1,6 @@
 <?php
 session_start();
-
-$servername = "localhost";
-$db_username = "root";
-$db_password = "";
-$db_name = "alumni_management_system";
-$conn = new mysqli($servername, $db_username, $db_password, $db_name);
+$conn = new mysqli("localhost", "root", "", "alumni_management_system");
 
 if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     $account = $_SESSION['user_id'];
@@ -19,7 +14,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 
     if ($user_result->num_rows > 0) {
         // User is an admin
-        header('Location: ./adminPage/dashboard_admin.php');
+        header('Location: ../adminPage/dashboard_admin.php');
         exit();
     }
     $stmt->close();
@@ -32,8 +27,22 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 
     if ($user_result->num_rows > 0) {
         // User is a coordinator
-        header('Location: ./coordinatorPage/dashboard_coor.php');
+        header('Location: ../coordinatorPage/dashboard_coor.php');
         exit();
+    }
+    $stmt->close();
+
+
+    // Check if user is a alumni_archive
+    $stmt = $conn->prepare("SELECT * FROM alumni_archive WHERE alumni_id = ? AND email = ?");
+    $stmt->bind_param("ss", $account, $account_email);
+    $stmt->execute();
+    $user_result = $stmt->get_result();
+
+    if ($user_result->num_rows > 0) {
+        $_SESSION = array();
+        session_destroy();
+        header("Location: ./login.php");
     }
     $stmt->close();
 
@@ -44,14 +53,33 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     $user_result = $stmt->get_result();
 
     if ($user_result->num_rows > 0) {
-        // User is an alumni
-        header('Location: ./alumniPage/dashboard_user.php');
+        $sql = "SELECT * FROM alumni WHERE alumni_id=$account";
+        $result = $conn->query($sql);
+        $row = $result->fetch_assoc();
+
+        if ($row['status'] == "Verified") {
+            // User is a verified alumni
+            header('Location: ../alumniPage/dashboard_user.php');
+            exit();
+        } else {
+
+            $_SESSION['email'] = $account_email;
+            $redirectUrl = './verification_code.php'; // Change this to the desired URL
+            $title = 'Account Not Verified!'; // Your custom title
+            $text = 'Please verify yout account first. We send verification code to your email.'; // Your custom text
+
+            echo "<script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        showWarningAlert('$redirectUrl', '$title', '$text');
+                    });
+                </script>";
+        }
+    } else {
+        // Redirect to login if no matching user found
+        session_destroy();
+        header('Location: ./login.php');
         exit();
     }
-    $stmt->close();
-
-    header('Location: ./contact.php');
-    exit();
 }
 ?>
 
