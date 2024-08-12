@@ -79,14 +79,15 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
         }
 
         body {
-            background-color: #e9f5e9;
+            background-color: #0F5123;
             margin: 0;
             padding: 0;
             scroll-behavior: smooth;
+            overflow-x: hidden;
         }
 
         .navbar {
-            background: linear-gradient(90deg, rgba(42, 145, 52, 1) 0%, rgba(42, 145, 52, 1) 100%);
+            background: linear-gradient(90deg, rgb(7 108 17) 0%, rgba(42, 145, 52, 1) 100%);
             color: white;
             
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -313,7 +314,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
         .hello-heroes-section {
             text-align: center;
             padding: 40px 20px;
-            background-color: #2a912e;
+            background-color: #062315;
             color: white;
             font-weight: 700;
         }
@@ -343,7 +344,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 
         .mission-section {
             padding: 100px 40px;
-            background-color: #2a912e;
+            background-color: #0F5132;
             margin: 0;
         }
 
@@ -387,14 +388,8 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
             line-height: 1.6;
             color: #555;
             text-align: justify;
-        }
+            font-style: 'poppins';
 
-        .hello-heroes-section {
-            text-align: center;
-            padding: 40px 20px;
-            background-color: #2a912e;
-            color: white;
-            font-weight: 700;
         }
 
         .hello-heroes-section h2 {
@@ -402,7 +397,6 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
             margin: 0;
             animation: bounceIn 1s ease-out;
         }
-
         @keyframes bounceIn {
             0% {
                 transform: scale(0);
@@ -422,7 +416,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 
         .vision-section {
             padding: 100px 40px;
-            background-color: #2a912e;
+            background-color: #0F5123;
             margin: 0;
         }
 
@@ -468,14 +462,6 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
             text-align: justify;
         }
 
-        .hello-heroes-section {
-            text-align: center;
-            padding: 40px 20px;
-            background-color: #2a912e;
-            color: white;
-            font-weight: 700;
-        }
-
         .hello-heroes-section h2 {
             font-size: 4rem;
             margin: 0;
@@ -501,7 +487,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 
         .hymn-section {
             padding: 100px 40px;
-            background-color: #2a912e;
+            background-color: #0F5132;
             margin: 0;
         }
 

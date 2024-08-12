@@ -37,20 +37,6 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     }
     $stmt->close();
 
-
-    // Check if user is a alumni_archive
-    $stmt = $conn->prepare("SELECT * FROM alumni_archive WHERE alumni_id = ? AND email = ?");
-    $stmt->bind_param("ss", $account, $account_email);
-    $stmt->execute();
-    $user_result = $stmt->get_result();
-
-    if ($user_result->num_rows > 0) {
-        $_SESSION = array();
-        session_destroy();
-        header("Location: ./loginPage/login.php");
-    }
-    $stmt->close();
-
     // Check if user is an alumni
     $stmt = $conn->prepare("SELECT * FROM alumni WHERE alumni_id = ? AND email = ?");
     $stmt->bind_param("ss", $account, $account_email);
@@ -58,44 +44,14 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     $user_result = $stmt->get_result();
 
     if ($user_result->num_rows > 0) {
-        $sql = "SELECT * FROM alumni WHERE alumni_id=$account";
-        $result = $conn->query($sql);
-        $row = $result->fetch_assoc();
-
-        if ($row['status'] == "Verified") {
-            // User is a verified alumni
-            header('Location: ./alumniPage/dashboard_user.php');
-            exit();
-        } else {
-
-            // $_SESSION = array();
-            // session_destroy();
-            // header("Location: ./login.php");
-
-            $_SESSION['email'] = $account_email;
-            echo "<script>
-                            // Wait for the document to load
-                            document.addEventListener('DOMContentLoaded', function() {
-                                // Use SweetAlert2 for the alert
-                                Swal.fire({
-                                        title: 'Verify Your Account First',
-                                        timer: 5000,
-                                        showConfirmButton: true, // Show the confirm button
-                                        confirmButtonColor: '#4CAF50', // Set the button color to green
-                                        confirmButtonText: 'OK' // Change the button text if needed
-                                }).then(function() {
-                                    // Redirect after the alert closes
-                                    window.location.href = './loginPage/verification_code.php';
-                                    exit();
-                                });
-                            });
-                        </script>";
-        }
-    } else {
-    // Redirect to login if no matching user found
-    header('Location: ./homepage.php');
-    exit();
+        // User is an alumni
+        header('Location: ./alumniPage/dashboard_user.php');
+        exit();
     }
+    $stmt->close();
+
+    header('Location: ./contact.php');
+    exit();
 }
 ?>
 
@@ -127,11 +83,11 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
             background-color: #e9f5e9;
             margin: 0;
             padding: 0;
-            
+            overflow-x: hidden;
         }
 
         .navbar {
-            background: linear-gradient(90deg, rgba(42, 145, 52, 1) 0%, rgba(42, 145, 52, 1) 100%);
+            background:  linear-gradient(90deg, rgb(7 108 17) 0%, rgba(42, 145, 52, 1) 100%);
             color: white;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
@@ -298,7 +254,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
         .hello-heroes-section {
             text-align: center;
             padding: 40px 20px;
-            background-color: #2a912e;
+            background-color: #062315;
             color: white;
             /* Updated font */
             font-weight: 700;
@@ -330,7 +286,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 
         .about-section {
             padding: 100px 40px;
-            background-color: #2a912e;
+            background-color: #062315;
             margin: 0;
         }
 
@@ -511,11 +467,24 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     <section class="about-section">
         <div class="container" data-aos="fade-up">
             <div class="row align-items-center">
-                <div class="col-lg-6 mb-4 mb-lg-0" data-aos="fade-right">
-                    <img src="assets/cvsu.png" alt="About Us Image" class="img-fluid">
+                <div class="col-lg-6 mb-4 mb-lg-0 d-flex justify-content-center"  data-aos="fade-right">
+                    <img src="assets/cvsu.png"  alt="About Us Image" class="img-fluid">
                 </div>
                 <div class="col-lg-6" data-aos="fade-left">
-                    <h2>ABOUT US</h2>
+                    <h2>OVERVIEW</h2>
+                    <p>"Welcome to our Alumni Management System, your dedicated platform for staying connected, advancing your career, and giving back to the community. Our system empowers alumni students to effortlessly manage their academic and professional records, aiding in the creation of polished resumes that highlight their achievements. Through curated job opportunities, career resources, and networking events, we strive to support alumni in securing fulfilling employment opportunities. Moreover, we foster a spirit of community engagement by facilitating mentorship programs, volunteer opportunities, and initiatives that contribute to the growth and prosperity of our collective alumni network. Join us in harnessing the power of connectivity and collaboration as we embark on this journey together."</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <section class="about-section">
+        <div class="container" data-aos="fade-up">
+            <div class="row align-items-center">
+                <div class="col-lg-6 mb-4 mb-lg-0 d-flex justify-content-center"  data-aos="fade-right">
+                </div>
+                <div class="col-lg-6" data-aos="fade-left">
+                    <h2>QUALITY POLICY</h2>
                     <p>"Welcome to our Alumni Management System, your dedicated platform for staying connected, advancing your career, and giving back to the community. Our system empowers alumni students to effortlessly manage their academic and professional records, aiding in the creation of polished resumes that highlight their achievements. Through curated job opportunities, career resources, and networking events, we strive to support alumni in securing fulfilling employment opportunities. Moreover, we foster a spirit of community engagement by facilitating mentorship programs, volunteer opportunities, and initiatives that contribute to the growth and prosperity of our collective alumni network. Join us in harnessing the power of connectivity and collaboration as we embark on this journey together."</p>
                 </div>
             </div>
