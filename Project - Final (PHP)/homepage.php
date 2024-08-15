@@ -57,7 +57,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
             $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
             $title = 'Account Not Verified!';
             $text = 'Verified your Account First to continue.';
-            $redirectUrl = './verification_code.php';
+            $redirectUrl = './loginPage/verification_code.php';
 
             echo "<script>
                     document.addEventListener('DOMContentLoaded', function() {
@@ -86,6 +86,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Playfair+Display:wght@700&family=Dancing+Script:wght@400&family=Cinzel:wght@700&family=Oswald:wght@700&family=Raleway:wght@600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
@@ -524,6 +525,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         AOS.init();
         // FOR MESSAGEBOX
@@ -544,7 +546,25 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
                 window.location.href = redirectUrl; // Redirect to the desired page
             });
         }
+
+        // WARNING FOR DUPE ACCOUNT
+        function warningError(title, text, icon, iconHtml) {
+            Swal.fire({
+                icon: icon,
+                iconHtml: iconHtml, // Custom icon using Font Awesome
+                title: title,
+                text: text,
+                customClass: {
+                    popup: 'swal-custom'
+                },
+                showConfirmButton: true,
+                confirmButtonColor: '#4CAF50',
+                confirmButtonText: 'OK',
+                timer: 5000,
+            });
+        }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
 </body>
 
 </html>

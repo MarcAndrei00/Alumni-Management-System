@@ -9,7 +9,6 @@ require '../vendor/autoload.php';
 // SESSION
 $email = $_SESSION['email'];
 if ($email == 0) {
-  session_destroy();
   header('Location: ./login.php');
   exit();
 }

@@ -1,12 +1,8 @@
 <?php
 session_start();
+$conn = new mysqli("localhost", "root", "", "alumni_management_system");
 
-$servername = "localhost";
-$db_username = "root";
-$db_password = "";
-$db_name = "alumni_management_system";
-$conn = new mysqli($servername, $db_username, $db_password, $db_name);
-
+// SESSION
 if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     $account = $_SESSION['user_id'];
     $account_email = $_SESSION['user_email'];
@@ -44,14 +40,37 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     $user_result = $stmt->get_result();
 
     if ($user_result->num_rows > 0) {
-        // User is an alumni
-        header('Location: ./alumniPage/dashboard_user.php');
+        $sql = "SELECT * FROM alumni WHERE alumni_id=$account";
+        $result = $conn->query($sql);
+        $row = $result->fetch_assoc();
+
+        if ($row['status'] == "Verified") {
+            // User is a verified alumni
+            header('Location: ./alumniPage/dashboard_user.php');
+            exit();
+        } else {
+
+            $_SESSION['email'] = $account_email;
+
+            // WARNING NOT VERIFIED
+            $icon = 'warning';
+            $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
+            $title = 'Account Not Verified!';
+            $text = 'Verified your Account First to continue.';
+            $redirectUrl = './loginPage/verification_code.php';
+
+            echo "<script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
+                    });
+                </script>";
+        }
+    } else {
+        // Redirect to login if no matching user found
+        session_destroy();
+        header('Location: ./about.php');
         exit();
     }
-    $stmt->close();
-
-    header('Location: ./contact.php');
-    exit();
 }
 ?>
 
@@ -66,6 +85,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Playfair+Display:wght@700&family=Dancing+Script:wght@400&family=Cinzel:wght@700&family=Oswald:wght@700&family=Raleway:wght@600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
@@ -89,7 +109,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
         .navbar {
             background: linear-gradient(90deg, rgb(7 108 17) 0%, rgba(42, 145, 52, 1) 100%);
             color: white;
-            
+
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
 
@@ -191,7 +211,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
             overflow: hidden;
             width: 0;
             animation: typing 3s steps(30, end) forwards, blink-cursor 0.75s step-end infinite, hide-cursor 0s 3.1s forwards;
-            
+
         }
 
         @keyframes typing {
@@ -397,6 +417,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
             margin: 0;
             animation: bounceIn 1s ease-out;
         }
+
         @keyframes bounceIn {
             0% {
                 transform: scale(0);
@@ -687,7 +708,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
         <img src="assets/Imus-Campus-scaled.jpg" alt="Graduation Image" style="height: 550px;">
         <div class="overlay">
             <h1><b>WELCOME ALUMNI</b></h1>
-            
+
         </div>
     </section>
 
@@ -776,14 +797,45 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         AOS.init();
+        // FOR MESSAGEBOX
+        function alertMessage(redirectUrl, title, text, icon, iconHtml) {
+            Swal.fire({
+                icon: icon,
+                iconHtml: iconHtml, // Custom icon using Font Awesome
+                title: title,
+                text: text,
+                customClass: {
+                    popup: 'swal-custom'
+                },
+                showConfirmButton: true,
+                confirmButtonColor: '#4CAF50',
+                confirmButtonText: 'OK',
+                timer: 5000
+            }).then(() => {
+                window.location.href = redirectUrl; // Redirect to the desired page
+            });
+        }
+
+        // WARNING FOR DUPE ACCOUNT
+        function warningError(title, text, icon, iconHtml) {
+            Swal.fire({
+                icon: icon,
+                iconHtml: iconHtml, // Custom icon using Font Awesome
+                title: title,
+                text: text,
+                customClass: {
+                    popup: 'swal-custom'
+                },
+                showConfirmButton: true,
+                confirmButtonColor: '#4CAF50',
+                confirmButtonText: 'OK',
+                timer: 5000,
+            });
+        }
     </script>
-
-
-
-
-
 </body>
 
 </html>
