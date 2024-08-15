@@ -2,10 +2,11 @@
 session_start();
 $conn = new mysqli("localhost", "root", "", "alumni_management_system");
 
+// PHPMAILER
 use PHPMailer\PHPMailer\PHPMailer;
-
 require '../vendor/autoload.php';
 
+// SESSION
 if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     $account = $_SESSION['user_id'];
     $account_email = $_SESSION['user_email'];
@@ -36,20 +37,6 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     }
     $stmt->close();
 
-
-    // Check if user is a alumni_archive
-    $stmt = $conn->prepare("SELECT * FROM alumni_archive WHERE alumni_id = ? AND email = ?");
-    $stmt->bind_param("ss", $account, $account_email);
-    $stmt->execute();
-    $user_result = $stmt->get_result();
-
-    if ($user_result->num_rows > 0) {
-        $_SESSION = array();
-        session_destroy();
-        header("Location: ./login.php");
-    }
-    $stmt->close();
-
     // Check if user is an alumni
     $stmt = $conn->prepare("SELECT * FROM alumni WHERE alumni_id = ? AND email = ?");
     $stmt->bind_param("ss", $account, $account_email);
@@ -68,13 +55,17 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
         } else {
 
             $_SESSION['email'] = $account_email;
-            $redirectUrl = './verification_code.php'; // Change this to the desired URL
-            $title = 'Account Not Verified!'; // Your custom title
-            $text = 'Please verify yout account first. We send verification code to your email.'; // Your custom text
+
+            // WARNING NOT VERIFIED
+            $icon = 'warning';
+            $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
+            $title = 'Account Not Verified!';
+            $text = 'Verified your Account First to continue.';
+            $redirectUrl = './verification_code.php';
 
             echo "<script>
                     document.addEventListener('DOMContentLoaded', function() {
-                        showWarningAlert('$redirectUrl', '$title', '$text');
+                        alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
                     });
                 </script>";
         }
@@ -94,6 +85,7 @@ $pass = "";
 $password = "";
 $confirm_password = "";
 
+// LOGIN
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset($_POST['log_password'])) {
     $log_email = strtolower($_POST['log_email']);
     $pass = $_POST['log_password'];
@@ -148,10 +140,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
             $stmt->execute();
             $stmt->close();
 
-            $redirectUrl = '../adminPage/dashboard_admin.php'; // Change this to the desired URL
+            // SUCCESS LOGIN ADMIN
+            $icon = 'success';
+            $iconHtml = '<i class="fas fa-check-circle"></i>';
+            $title = 'Login Successful!';
+            $text = 'You will be redirected shortly to the Dashboard.';
+            $redirectUrl = '../adminPage/dashboard_admin.php';
+
             echo "<script>
                     document.addEventListener('DOMContentLoaded', function() {
-                        showSuccessAlert('$redirectUrl');
+                        alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
                     });
                 </script>";
             sleep(3);
@@ -167,10 +165,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
             $stmt->execute();
             $stmt->close();
 
-            $redirectUrl = '../coordinatorPage/dashboard_coor.php'; // Change this to the desired URL
+            // SUCCESS LOGIN COORDINATOR
+            $icon = 'success';
+            $iconHtml = '<i class="fas fa-check-circle"></i>';
+            $title = 'Login Successful!';
+            $text = 'You will be redirected shortly to the Dashboard.';
+            $redirectUrl = '../coordinatorPage/dashboard_coor.php';
+
             echo "<script>
                     document.addEventListener('DOMContentLoaded', function() {
-                        showSuccessAlert('$redirectUrl');
+                        alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
                     });
                 </script>";
             sleep(3);
@@ -213,13 +217,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
 
                     $mail->send();
                     $_SESSION['email'] = $email;
-                    $redirectUrl = './inactiveVerification.php'; // Change this to the desired URL
-                    $title = 'Your Account is Inactive!'; // Your custom title
-                    $text = 'Verified your Account First to continue.'; // Your custom text
+
+                    // WARNING INACTIVE
+                    $icon = 'warning';
+                    $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
+                    $title = 'Your Account is Inactive!';
+                    $text = 'We send a verification code to your email to active your account.';
+                    $redirectUrl = './inactiveVerification.php';
 
                     echo "<script>
                             document.addEventListener('DOMContentLoaded', function() {
-                                showWarningAlert('$redirectUrl', '$title', '$text');
+                                alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
                             });
                         </script>";
                 }
@@ -246,10 +254,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                     $stmt->execute();
                     $stmt->close();
 
-                    $redirectUrl = '../alumniPage/dashboard_user.php'; // Change this to the desired URL
+                    // SUCCESS LOGIN ALUMNI
+                    $icon = 'success';
+                    $iconHtml = '<i class="fas fa-check-circle"></i>';
+                    $title = 'Login Successful!';
+                    $text = 'You will be redirected shortly to the Dashboard.';
+                    $redirectUrl = '../alumniPage/dashboard_user.php';
+
                     echo "<script>
                             document.addEventListener('DOMContentLoaded', function() {
-                                showSuccessAlert('$redirectUrl');
+                                alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
                             });
                         </script>";
                     sleep(3);
@@ -282,41 +296,37 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
 
                     $mail->send();
                     $_SESSION['email'] = $email;
-                    $redirectUrl = './verification_code.php'; // Change this to the desired URL
-                    $title = 'Account Not Verified!'; // Your custom title
-                    $text = 'Please verify yout account first. We send verification code to your email.'; // Your custom text
+
+                    // WARNING NOT VERIFIED
+                    $icon = 'warning';
+                    $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
+                    $title = 'Account Not Verified!';
+                    $text = 'Verified your Account First to continue.';
+                    $redirectUrl = './verification_code.php';
 
                     echo "<script>
                             document.addEventListener('DOMContentLoaded', function() {
-                                showWarningAlert('$redirectUrl', '$title', '$text');
+                                alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
                             });
                         </script>";
-                    // sleep(5); // Delay to ensure JavaScript has time to execute
-
                 }
             }
         }
     } else {
-        // Login failed
+        // ERROR LOGIN FAILED
+        $icon = 'error';
+        $iconHtml = '<i class=\"fas fa-exclamation-circle\"></i>';
+        $title = 'Incorrect Student ID / Email and Password!';
+        $text = 'Please try again.';
+
         echo "<script>
-        document.addEventListener('DOMContentLoaded', function() {
-          Swal.fire({
-            icon: 'error',
-            iconHtml: '<i class=\"fas fa-exclamation-circle\"></i>', // Custom icon using Font Awesome
-            title: 'Incorrect Student ID / Email and Password!',
-            text: 'Please try again.',
-            customClass: {
-              popup: 'swal-custom'
-            },
-            showConfirmButton: true,
-            confirmButtonColor: '#4CAF50',
-            confirmButtonText: 'OK',
-            timer: 5000,
-          });
-        });
-      </script>";
+              document.addEventListener('DOMContentLoaded', function() {
+                  warningError('$title', '$text', '$icon', '$iconHtml');
+              });
+          </script>";
         sleep(3);
     }
+    // SIGNUP 
 } else if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
     $stud_id = $_POST['student_id'];
     $email = strtolower($_POST['email']);
@@ -332,39 +342,47 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
     // Email and student ID validation
     if (mysqli_num_rows($emailCheck) > 0 || mysqli_num_rows($emailCheck_archive) > 0) {
 
-        $title = 'Email Already Exists!'; // Your custom title
-        $text = 'Please try again.'; // Your custom text
+        // WARNING EXISTING ACCOUNT
+        $icon = 'warning';
+        $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
+        $title = 'Email Already Exists!';
+        $text = 'Please try again.';
 
         echo "<script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    duplicateAccount('$title', '$text');
-                });
-            </script>";
+              document.addEventListener('DOMContentLoaded', function() {
+                  warningError('$title', '$text', '$icon', '$iconHtml');
+              });
+          </script>";
         sleep(3);
     } elseif (mysqli_num_rows($idCheck) > 0 || mysqli_num_rows($idCheck_archive) > 0) {
 
-        $title = 'Student ID Already Exists!'; // Your custom title
-        $text = 'Please try again.'; // Your custom text
+        // WARNING EXISTING ACCOUNT
+        $icon = 'warning';
+        $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
+        $title = 'Student ID Already Exists!';
+        $text = 'Please try again.';
 
         echo "<script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    duplicateAccount('$title', '$text');
-                });
-            </script>";
+              document.addEventListener('DOMContentLoaded', function() {
+                  warningError('$title', '$text', '$icon', '$iconHtml');
+              });
+          </script>";
         sleep(3);
     } else {
         // Check if password and confirm password match
         if ($password !== $confirm_password) {
 
-            $title = 'Password and confirm password do not match!'; // Your custom title
-            $text = 'Please try again.'; // Your custom text
+            // WARNING NOT MATCH PASSWORD
+            $icon = 'warning';
+            $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
+            $title = 'Password do not match!';
+            $text = 'Please try again.';
 
             echo "<script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    duplicateAccount('$title', '$text');
-                });
-            </script>";
-
+                    document.addEventListener('DOMContentLoaded', function() {
+                        warningError('$title', '$text', '$icon', '$iconHtml');
+                    });
+                </script>";
             sleep(3);
         } else {
             // Check if student exists in the list_of_graduate table
@@ -457,10 +475,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
 
                     $stmt->close();
 
-                    $redirectUrl = './verification_code.php'; // Change this to the desired URL
+                    // WARNING NOT VERIFIED
+                    $icon = 'success';
+                    $iconHtml = '<i class="fas fa-check-circle"></i>';
+                    $title = 'Account successfully register.';
+                    $text = 'We send a verification code to your email to verify your account.';
+                    $redirectUrl = './verification_code.php';
+
                     echo "<script>
                             document.addEventListener('DOMContentLoaded', function() {
-                                Registration('$redirectUrl');
+                                alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
                             });
                         </script>";
                 } else {
@@ -470,12 +494,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                 }
             } else {
 
-                $title = 'There is no alumni with student ID ' . $stud_id; // Your custom title
-                $text = 'Please try again.'; // Your custom text
+                // WARNING NO ALUMNI
+                $icon = 'warning';
+                $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
+                $title = 'There is no alumni with student ID ' . $stud_id;
+                $text = 'Please try again.';
 
                 echo "<script>
                         document.addEventListener('DOMContentLoaded', function() {
-                            duplicateAccount('$title', '$text');
+                            warningError('$title', '$text', '$icon', '$iconHtml');
                         });
                     </script>";
                 sleep(3);
@@ -483,9 +510,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
         }
     }
 }
-
-
-
 
 // LOGIN CHECK FOR ADMIN AND COORDINATOR
 function check_login($conn, $table, $log_email, $pass)
@@ -654,6 +678,7 @@ function check_alumni_archive($conn, $table, $log_email, $pass)
             });
         });
 
+        // FOR BATCH
         document.addEventListener('DOMContentLoaded', function() {
             const startYearSelect = document.getElementById('startYear');
             const endYearSelect = document.getElementById('endYear');
@@ -705,6 +730,7 @@ function check_alumni_archive($conn, $table, $log_email, $pass)
             });
         });
 
+        // PASS VISIBILITY
         function togglePasswordVisibility(passwordId, toggleId) {
             var passwordField = document.getElementById(passwordId);
             var toggleIcon = document.getElementById(toggleId);
@@ -718,53 +744,11 @@ function check_alumni_archive($conn, $table, $log_email, $pass)
             }
         }
 
-        // LOGIN SUCCESSFUL
-        function showSuccessAlert(redirectUrl) {
+        // FOR MESSAGEBOX
+        function alertMessage(redirectUrl, title, text, icon, iconHtml) {
             Swal.fire({
-                icon: 'success',
-                iconHtml: '<i class="fas fa-check-circle"></i>', // Custom icon using Font Awesome
-                title: 'Login Successful!',
-                text: 'You will be redirected shortly to Dashboard.',
-                customClass: {
-                    popup: 'swal-custom'
-                },
-                showConfirmButton: true,
-                confirmButtonColor: '#4CAF50',
-                confirmButtonText: 'OK',
-                timer: 5000,
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = redirectUrl; // Redirect to the desired page
-                }
-            });
-        }
-
-        // FOR REGISTRATION
-        function Registration(redirectUrl) {
-            Swal.fire({
-                icon: 'success',
-                iconHtml: '<i class="fas fa-check-circle"></i>', // Custom icon using Font Awesome
-                title: 'Account Successfully Registered',
-                text: 'We sent a verification code to your email to verify your account.',
-                customClass: {
-                    popup: 'swal-custom'
-                },
-                showConfirmButton: true,
-                confirmButtonColor: '#4CAF50',
-                confirmButtonText: 'OK',
-                timer: 5000,
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = redirectUrl; // Redirect to the desired page
-                }
-            });
-        }
-
-        // FOR VERIFICATION
-        function showWarningAlert(redirectUrl, title, text) {
-            Swal.fire({
-                icon: 'warning',
-                iconHtml: '<i class="fas fa-exclamation-triangle"></i>', // Custom icon using Font Awesome
+                icon: icon,
+                iconHtml: iconHtml, // Custom icon using Font Awesome
                 title: title,
                 text: text,
                 customClass: {
@@ -773,19 +757,17 @@ function check_alumni_archive($conn, $table, $log_email, $pass)
                 showConfirmButton: true,
                 confirmButtonColor: '#4CAF50',
                 confirmButtonText: 'OK',
-                timer: 5000,
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = redirectUrl; // Redirect to the desired page
-                }
+                timer: 5000
+            }).then(() => {
+                window.location.href = redirectUrl; // Redirect to the desired page
             });
         }
 
         // WARNING FOR DUPE ACCOUNT
-        function duplicateAccount(title, text) {
+        function warningError(title, text, icon, iconHtml) {
             Swal.fire({
-                icon: 'warning',
-                iconHtml: '<i class="fas fa-exclamation-triangle"></i>', // Custom icon using Font Awesome
+                icon: icon,
+                iconHtml: iconHtml, // Custom icon using Font Awesome
                 title: title,
                 text: text,
                 customClass: {
@@ -799,5 +781,4 @@ function check_alumni_archive($conn, $table, $log_email, $pass)
         }
     </script>
 </body>
-
 </html>

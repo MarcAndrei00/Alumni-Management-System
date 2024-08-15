@@ -6,11 +6,11 @@ use PHPMailer\PHPMailer\PHPMailer;
 
 require '../vendor/autoload.php';
 
-
+// SESSION
 $email = $_SESSION['email'];
 if ($email == 0) {
   session_destroy();
-  header('Location: homepage.php');
+  header('Location: ./login.php');
   exit();
 }
 
@@ -61,16 +61,19 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
       header('Location: ../alumniPage/dashboard_user.php');
       exit();
     } else {
-      $redirectUrl = './verification_code.php'; // Change this to the desired URL
-      $title = 'Account Not Verified!'; // Your custom title
-      $text = 'Please verify yout account first. <br>We send verification code to your email.'; // Your custom text
+      // WARNING NOT VERIFIED
+      $icon = 'warning';
+      $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
+      $title = 'Account Not Verified!';
+      $text = 'Verified your Account First to continue.';
+      $redirectUrl = './verification_code.php';
 
       echo "<script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        showWarningAlert('$redirectUrl', '$title', '$text');
-                    });
-                </script>";
-                sleep(3);
+              document.addEventListener('DOMContentLoaded', function() {
+                  alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
+              });
+          </script>";
+      sleep(3);
     }
   }
   $stmt->close();
@@ -104,66 +107,51 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
         $sql_delete = "DELETE FROM recovery_code WHERE email='$account_email'";
         $conn->query($sql_delete);
 
-        $_SESSION = array();
-        session_destroy();
+        // $_SESSION = array();
+        // session_destroy();
 
-        // echo "<script>
-        //               document.addEventListener('DOMContentLoaded', function() {
-        //                 Swal.fire({
-        //                     icon: 'success',
-        //                     title: 'Verification code match!',
-        //                     text: 'Activation of account Successfully',
-        //                     customClass: {
-        //                         popup: 'swal-custom'
-        //                     }
-        //                 }).then((result) => {
-        //                     if (result.isConfirmed) {
-        //                         window.location.href = 'login.php';
-        //                         exit();
-        //                     }
-        //                 });
-        //             });
-        //           </script>";
+        // Check if user is an alumni
+        $stmt = $conn->prepare("SELECT * FROM alumni WHERE alumni_id = ? AND email = ?");
+        $stmt->bind_param("ss", $account, $account_email);
+        $stmt->execute();
+        $user_result = $stmt->get_result();
 
-        $redirectUrl = './login.php'; // Change this to the desired URL
-        echo "<script>
-                document.addEventListener('DOMContentLoaded', function() {
-                  showSuccessAlert('$redirectUrl');
-                });
-            </script>";
-            sleep(3);
-      } else {
-        // echo "<script>
-        //         document.addEventListener('DOMContentLoaded', function() {
-        //           Swal.fire({
-        //           icon: 'error',
-        //           title: 'Verification code does not match!',
-        //           text: 'Please try again.',
-        //           customClass: {
-        //           popup: 'swal-custom'
-        //         }
-        //       });
-        //     });
-        //   </script>";
+        // TO VERIFIED ACCOUNT 
+        if ($user_result->num_rows > 0) {
+
+          // SUCCESS VERIF 
+          $icon = 'success';
+          $iconHtml = '<i class="fas fa-check-circle"></i>';
+          $title = 'Verification code match!';
+          $text = 'You will be redirected shortly to Dashboard';
+          $redirectUrl = '../alumniPage/dashboard_user.php';
 
           echo "<script>
-                  document.addEventListener('DOMContentLoaded', function() {
-                    Swal.fire({
-                      icon: 'error',
-                      iconHtml: '<i class=\"fas fa-exclamation-circle\"></i>', // Custom icon using Font Awesome
-                      title: 'Verification code does not match!',
-                      text: 'Please try again.',
-                      customClass: {
-                        popup: 'swal-custom'
-                      },
-                      showConfirmButton: true,
-                      confirmButtonColor: '#4CAF50',
-                      confirmButtonText: 'OK',
-                      timer: 5000,
-                    });
-                  });
-                </script>";
-                sleep(3);
+              document.addEventListener('DOMContentLoaded', function() {
+                alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
+              });
+            </script>";
+          sleep(3);
+        } else {
+          // Redirect to login if no matching user found
+          session_destroy();
+          header('Location: ../homepage.php');
+          exit();
+        }
+      } else {
+
+        // ERROR VERIF NOT MATCH
+        $icon = 'error';
+        $iconHtml = '<i class=\"fas fa-exclamation-circle\"></i>';
+        $title = 'Verification code does not match!';
+        $text = 'Please try again.';
+
+        echo "<script>
+            document.addEventListener('DOMContentLoaded', function() {
+              warningError('$title', '$text', '$icon', '$iconHtml');
+            });
+          </script>";
+        sleep(3);
       }
     } // BACK BUTTON
     else if (isset($_POST['back_btn'])) {
@@ -194,51 +182,42 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
       // Send verification code via email
       $mail = new PHPMailer(true);
 
-      try {
-        $mail->isSMTP();
-        $mail->Host       = 'smtp.gmail.com';
-        $mail->SMTPAuth   = true;
-        $mail->Username   = 'alumni.management07@gmail.com';
-        $mail->Password   = 'kcio bmde ffvc sfar';  // Ensure this is securely stored and not hardcoded
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-        $mail->Port       = 587;
+      $mail->isSMTP();
+      $mail->Host       = 'smtp.gmail.com';
+      $mail->SMTPAuth   = true;
+      $mail->Username   = 'alumni.management07@gmail.com';
+      $mail->Password   = 'kcio bmde ffvc sfar';  // Ensure this is securely stored and not hardcoded
+      $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+      $mail->Port       = 587;
 
-        $mail->setFrom('alumni.management07@gmail.com', 'Alumni Management');
-        $mail->addAddress($account_email);
+      $mail->setFrom('alumni.management07@gmail.com', 'Alumni Management');
+      $mail->addAddress($account_email);
 
-        $mail->isHTML(true);
-        $mail->Subject = 'Verification Code';
-        $mail->Body    = 'Your verification code is <b>' . $verification_code . '</b>';
-        $mail->AltBody = 'Your verification code is ' . $verification_code;
+      $mail->isHTML(true);
+      $mail->Subject = 'Verification Code';
+      $mail->Body    = 'Your verification code is <b>' . $verification_code . '</b>';
+      $mail->AltBody = 'Your verification code is ' . $verification_code;
 
-        $mail->send();
+      $mail->send();
 
-        // Set alert message to notify the user that the code has been sent
-        $_SESSION['alert'] = "Verification code successfully sent.";
-      } catch (Exception $e) {
-        echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
-      }
+      // SUCCESS RESEND
+      $icon = 'success';
+      $iconHtml = '<i class="fas fa-check-circle"></i>';
+      $title = 'Verification code successfully send.';
+      $text = 'Please check your mail.';
 
-      // Check and display alert if set
-      if (isset($_SESSION['alert'])) {
-        echo "<script>
-              document.addEventListener('DOMContentLoaded', function() {
-                  Swal.fire({
-                      icon: 'success',
-                      title: '" . addslashes($_SESSION['alert']) . "',
-                      customClass: {
-                          popup: 'swal-custom'
-                      }
-                  });
-              });
-          </script>";
-        unset($_SESSION['alert']); // Unset the alert after showing it
-      }
+      echo "<script>
+            document.addEventListener('DOMContentLoaded', function() {
+                warningError('$title', '$text', '$icon', '$iconHtml');
+            });
+        </script>";
     }
+  } else {
+    // Redirect to login if no matching user found
+    session_destroy();
+    header('Location: ../homepage.php');
+    exit();
   }
-  // header('Location: ../homepage.php');
-  // exit();
-
 }
 
 ?>
@@ -338,7 +317,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
         <div class="text-center mb-4">
           <img src="cvsu.png" alt="Logo" class="icon-size">
         </div>
-        <h5 class="text-center mb-4">We've sent the verification code to your email &nbsp;"<?php echo $_SESSION['email'] ?>"</h5>
+        <h5 class="text-center mb-4">We've send the verification code to your email &nbsp;"<?php echo $_SESSION['email'] ?>"</h5>
         <form method="POST">
           <div class="form-group">
             <input type="number" name="verif_code" class="form-control" id="code" placeholder="Input the Verification Code">
@@ -370,32 +349,30 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
       });
     });
 
-    // CODE MATCH
-    function showSuccessAlert(redirectUrl) {
+    // FOR MESSAGEBOX
+    function alertMessage(redirectUrl, title, text, icon, iconHtml) {
       Swal.fire({
-        icon: 'success',
-        iconHtml: '<i class="fas fa-check-circle"></i>', // Custom icon using Font Awesome
-        title: 'Verification code match!',
-        text: 'Activation of account Successfully. You will be redirected shortly to Dashboard.',
+        icon: icon,
+        iconHtml: iconHtml, // Custom icon using Font Awesome
+        title: title,
+        text: text,
         customClass: {
           popup: 'swal-custom'
         },
         showConfirmButton: true,
         confirmButtonColor: '#4CAF50',
         confirmButtonText: 'OK',
-        timer: 5000,
-      }).then((result) => {
-        if (result.isConfirmed) {
-          window.location.href = redirectUrl; // Redirect to the desired page
-        }
+        timer: 5000
+      }).then(() => {
+        window.location.href = redirectUrl; // Redirect to the desired page
       });
     }
 
-    // FOR VERIFICATION
-    function showWarningAlert(redirectUrl, title, text) {
+    // WARNING FOR DUPE ACCOUNT
+    function warningError(title, text, icon, iconHtml) {
       Swal.fire({
-        icon: 'warning',
-        iconHtml: '<i class="fas fa-exclamation-triangle"></i>', // Custom icon using Font Awesome
+        icon: icon,
+        iconHtml: iconHtml, // Custom icon using Font Awesome
         title: title,
         text: text,
         customClass: {
@@ -405,10 +382,6 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
         confirmButtonColor: '#4CAF50',
         confirmButtonText: 'OK',
         timer: 5000,
-      }).then((result) => {
-        if (result.isConfirmed) {
-          window.location.href = redirectUrl; // Redirect to the desired page
-        }
       });
     }
   </script>

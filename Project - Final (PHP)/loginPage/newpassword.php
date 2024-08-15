@@ -53,28 +53,25 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
             exit();
         } else {
             $_SESSION['email'] = $account_email;
+            // WARNING NOT VERIFIED
+            $icon = 'warning';
+            $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
+            $title = 'Account Not Verified!';
+            $text = 'Verified your Account First to continue.';
+            $redirectUrl = './verification_code.php';
+
             echo "<script>
-                            // Wait for the document to load
-                            document.addEventListener('DOMContentLoaded', function() {
-                                // Use SweetAlert2 for the alert
-                                Swal.fire({
-                                        title: 'Verify Your Account First',
-                                        timer: 5000,
-                                        showConfirmButton: true, // Show the confirm button
-                                        confirmButtonColor: '#4CAF50', // Set the button color to green
-                                        confirmButtonText: 'OK' // Change the button text if needed
-                                }).then(function() {
-                                    // Redirect after the alert closes
-                                    window.location.href = './verification_code.php';
-                                });
-                            });
-                        </script>";
+                    document.addEventListener('DOMContentLoaded', function() {
+                        alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
+                    });
+                </script>";
         }
     }
     $stmt->close();
 } else {
     $email = isset($_SESSION['email']) ? $_SESSION['email'] : '';
     if (empty($email)) {
+        session_destroy();
         header('Location: login.php');
         exit();
     }
@@ -87,43 +84,35 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
         if ($new_pass === $confirm_pass) {
             // Update password
             $match_pass_qry = mysqli_query($conn, "UPDATE alumni SET password = '$confirm_pass' WHERE email = '$email'");
-            $_SESSION['alert'] = [
-                'type' => 'success',
-                'title' => 'Password has been changed!',
-                'text' => 'Now you can login with your new password.'
-            ];
-            header('Location: ' . $_SERVER['PHP_SELF']);
-            exit();
-        } else {
-            $_SESSION['alert'] = [
-                'type' => 'error',
-                'title' => 'Password does not match!'
-            ];
-            header('Location: ' . $_SERVER['PHP_SELF']);
-            exit();
-        }
-    }
 
-    // Check and display alert if set
-    if (isset($_SESSION['alert'])) {
-        $alert = $_SESSION['alert'];
-        echo "<script>
-        document.addEventListener('DOMContentLoaded', function() {
-            Swal.fire({
-                icon: '" . $alert['type'] . "',
-                title: '" . addslashes($alert['title']) . "',
-                text: '" . (isset($alert['text']) ? addslashes($alert['text']) : '') . "',
-                customClass: {
-                    popup: 'swal-custom'
-                }
-            }).then((result) => {
-                if (result.isConfirmed && '" . $alert['type'] . "' === 'success') {
-                    window.location.href = 'login.php';
-                }
-            });
-        });
-      </script>";
-        unset($_SESSION['alert']); // Unset the alert after showing it
+            // SUCCESS CHANGE PASS
+            $icon = 'success';
+            $iconHtml = '<i class="fas fa-check-circle"></i>';
+            $title = 'Password has been changed!';
+            $text = 'Now you can login with your new password.';
+            $redirectUrl = './login.php';
+
+            echo "<script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
+                    });
+                </script>";
+            sleep(3);
+        } else {
+
+            // ERROR NOT EXIST
+            $icon = 'error';
+            $iconHtml = '<i class=\"fas fa-exclamation-circle\"></i>';
+            $title = 'Password does not match!';
+            $text = 'Please try again.';
+
+            echo "<script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        warningError('$title', '$text', '$icon', '$iconHtml');
+                    });
+                </script>";
+            sleep(3);
+        }
     }
 }
 // Redirect if email is not set
@@ -237,11 +226,30 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
             }
         }
 
-        // FOR VERIFICATION
-        function showWarningAlert(redirectUrl, title, text) {
+        // FOR MESSAGEBOX
+        function alertMessage(redirectUrl, title, text, icon, iconHtml) {
             Swal.fire({
-                icon: 'warning',
-                iconHtml: '<i class="fas fa-exclamation-triangle"></i>', // Custom icon using Font Awesome
+                icon: icon,
+                iconHtml: iconHtml, // Custom icon using Font Awesome
+                title: title,
+                text: text,
+                customClass: {
+                    popup: 'swal-custom'
+                },
+                showConfirmButton: true,
+                confirmButtonColor: '#4CAF50',
+                confirmButtonText: 'OK',
+                timer: 5000
+            }).then(() => {
+                window.location.href = redirectUrl; // Redirect to the desired page
+            });
+        }
+
+        // WARNING FOR DUPE ACCOUNT
+        function warningError(title, text, icon, iconHtml) {
+            Swal.fire({
+                icon: icon,
+                iconHtml: iconHtml, // Custom icon using Font Awesome
                 title: title,
                 text: text,
                 customClass: {
@@ -251,10 +259,6 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
                 confirmButtonColor: '#4CAF50',
                 confirmButtonText: 'OK',
                 timer: 5000,
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = redirectUrl; // Redirect to the desired page
-                }
             });
         }
     </script>

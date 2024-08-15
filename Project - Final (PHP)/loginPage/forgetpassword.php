@@ -56,17 +56,21 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 
       $_SESSION['email'] = $account_email;
 
-      $redirectUrl = './verification_code.php'; // Change this to the desired URL
-      $title = 'Account Not Verified!'; // Your custom title
-      $text = 'Please verify yout account first. We send verification code to your email.'; // Your custom text
+      // WARNING NOT VERIFIED
+      $icon = 'warning';
+      $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
+      $title = 'Account Not Verified!';
+      $text = 'Verified your Account First to continue.';
+      $redirectUrl = './verification_code.php';
 
       echo "<script>
               document.addEventListener('DOMContentLoaded', function() {
-                showWarningAlert('$redirectUrl', '$title', '$text');
+                  alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
               });
           </script>";
     }
   } else {
+    session_destroy();
     header('Location: ./login.php');
     exit();
   }
@@ -108,41 +112,33 @@ else {
       $mail->send();
       $_SESSION['email'] = $email;
 
-      $redirectUrl = './verification_code.php'; // Change this to the desired URL
-      $title = "Verification code successfully send";
-      $text = "You will be redirected shortly to verify the email.";
+      // WARNING NOT VERIFIED
+      $icon = 'success';
+      $iconHtml = '<i class="fas fa-check-circle"></i>';
+      $title = 'Verification code successfully send';
+      $text = 'You will be redirected shortly to verify the email.';
+      $redirectUrl = './verification_code.php';
+
       echo "<script>
               document.addEventListener('DOMContentLoaded', function() {
-                  showWarningAlert('$redirectUrl', '$title', '$text');
+                  alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
               });
-            </script>";
-    } else {
-      // Email does not exist
-      $_SESSION['alert'] = "The email you input doesn't exist! Please create an account first";
-      sleep(3);
-      header('Location: ' . $_SERVER['PHP_SELF']);
-      exit();
-    }
-  }
-
-  // Check and display alert if set
-  if (isset($_SESSION['alert'])) {
-    echo "<script>
-            document.addEventListener('DOMContentLoaded', function() {
-                Swal.fire({
-                    icon: 'error',
-                    title: '" . addslashes($_SESSION['alert']) . "',
-                    customClass: {
-                        popup: 'swal-custom'
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed && '" . addslashes($_SESSION['alert']) . "' === 'Account is not Verified! Please verify your account first') {
-                        window.location.href = 'verification_code.php';
-                    }
-                });
-            });
           </script>";
-    unset($_SESSION['alert']); // Unset the alert after showing it
+    } else {
+
+      // ERROR NOT EXIST
+      $icon = 'error';
+      $iconHtml = '<i class=\"fas fa-exclamation-circle\"></i>';
+      $title = 'The email you input does not exist!';
+      $text = 'Please create an account first or try again.';
+
+      echo "<script>
+            document.addEventListener('DOMContentLoaded', function() {
+                warningError('$title', '$text', '$icon', '$iconHtml');
+            });
+        </script>";
+        sleep(3);
+    }
   }
 }
 ?>
@@ -243,34 +239,33 @@ else {
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   <script>
-    // FOR VERIFICATION
-    function showWarningAlert(redirectUrl, title, text) {
-    Swal.fire({
-        icon: 'warning',
-        iconHtml: '<i class=\"fas fa-exclamation-triangle\"></i>', // Custom icon using Font Awesome
+    
+    // FOR MESSAGEBOX
+    function alertMessage(redirectUrl, title, text, icon, iconHtml) {
+      Swal.fire({
+        icon: icon,
+        iconHtml: iconHtml, // Custom icon using Font Awesome
         title: title,
         text: text,
         customClass: {
-            popup: 'swal-custom'
+          popup: 'swal-custom'
         },
         showConfirmButton: true,
         confirmButtonColor: '#4CAF50',
         confirmButtonText: 'OK',
-        timer: 5000,
-    }).then((result) => {
-        if (result.isConfirmed) {
-            window.location.href = redirectUrl; // Redirect to the desired page
-        }
-    });
-}
+        timer: 5000
+      }).then(() => {
+        window.location.href = redirectUrl; // Redirect to the desired page
+      });
+    }
 
-    // FOR REGISTRATION
-    function Registration(redirectUrl) {
+    // WARNING FOR DUPE ACCOUNT
+    function warningError(title, text, icon, iconHtml) {
       Swal.fire({
-        icon: 'success',
-        iconHtml: '<i class="fas fa-check-circle"></i>', // Custom icon using Font Awesome
-        title: 'Verification code successfully send',
-        text: 'You will be redirected shortly to verify the email.',
+        icon: icon,
+        iconHtml: iconHtml, // Custom icon using Font Awesome
+        title: title,
+        text: text,
         customClass: {
           popup: 'swal-custom'
         },
@@ -278,10 +273,6 @@ else {
         confirmButtonColor: '#4CAF50',
         confirmButtonText: 'OK',
         timer: 5000,
-      }).then((result) => {
-        if (result.isConfirmed) {
-          window.location.href = redirectUrl; // Redirect to the desired page
-        }
       });
     }
   </script>

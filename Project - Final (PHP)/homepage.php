@@ -2,6 +2,7 @@
 session_start();
 $conn = new mysqli("localhost", "root", "", "alumni_management_system");
 
+// SESSION
 if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     $account = $_SESSION['user_id'];
     $account_email = $_SESSION['user_email'];
@@ -14,7 +15,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 
     if ($user_result->num_rows > 0) {
         // User is an admin
-        header('Location: ../adminPage/dashboard_admin.php');
+        header('Location: ./adminPage/dashboard_admin.php');
         exit();
     }
     $stmt->close();
@@ -27,22 +28,8 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 
     if ($user_result->num_rows > 0) {
         // User is a coordinator
-        header('Location: ../coordinatorPage/dashboard_coor.php');
+        header('Location: ./coordinatorPage/dashboard_coor.php');
         exit();
-    }
-    $stmt->close();
-
-
-    // Check if user is a alumni_archive
-    $stmt = $conn->prepare("SELECT * FROM alumni_archive WHERE alumni_id = ? AND email = ?");
-    $stmt->bind_param("ss", $account, $account_email);
-    $stmt->execute();
-    $user_result = $stmt->get_result();
-
-    if ($user_result->num_rows > 0) {
-        $_SESSION = array();
-        session_destroy();
-        header("Location: ./login.php");
     }
     $stmt->close();
 
@@ -59,25 +46,29 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 
         if ($row['status'] == "Verified") {
             // User is a verified alumni
-            header('Location: ../alumniPage/dashboard_user.php');
+            header('Location: ./alumniPage/dashboard_user.php');
             exit();
         } else {
 
             $_SESSION['email'] = $account_email;
-            $redirectUrl = './verification_code.php'; // Change this to the desired URL
-            $title = 'Account Not Verified!'; // Your custom title
-            $text = 'Please verify yout account first. We send verification code to your email.'; // Your custom text
+
+            // WARNING NOT VERIFIED
+            $icon = 'warning';
+            $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
+            $title = 'Account Not Verified!';
+            $text = 'Verified your Account First to continue.';
+            $redirectUrl = './verification_code.php';
 
             echo "<script>
                     document.addEventListener('DOMContentLoaded', function() {
-                        showWarningAlert('$redirectUrl', '$title', '$text');
+                        alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
                     });
                 </script>";
         }
     } else {
         // Redirect to login if no matching user found
         session_destroy();
-        header('Location: ./login.php');
+        header('Location: ./homepage.php');
         exit();
     }
 }
@@ -115,7 +106,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
         }
 
         .navbar {
-            background:  linear-gradient(90deg, rgb(7 108 17) 0%, rgba(42, 145, 52, 1) 100%);
+            background: linear-gradient(90deg, rgb(7 108 17) 0%, rgba(42, 145, 52, 1) 100%);
             color: white;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
@@ -449,7 +440,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark">
         <a class="navbar-brand" href="homepage.php">
-            <img src="assets/cvsu.png" alt="Cavite State University - Imus Campus" >
+            <img src="assets/cvsu.png" alt="Cavite State University - Imus Campus">
         </a>
         <a class="navbar-brand" href="homepage.php">CAVITE STATE UNIVERSITY - IMUS CAMPUS</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
@@ -481,7 +472,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     </nav>
 
     <section class="hero-section">
-        <img src="assets/Imus-Campus-scaled.jpg" alt="Graduation Image" >
+        <img src="assets/Imus-Campus-scaled.jpg" alt="Graduation Image">
         <div class="overlay">
             <h1>WELCOME ALUMNI</h1>
             <h2>TO CAVITE STATE UNIVERSITY - IMUS CAMPUS</h2>
@@ -495,8 +486,8 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     <section class="about-section">
         <div class="container" data-aos="fade-up">
             <div class="row align-items-center">
-                <div class="col-lg-6 mb-4 mb-lg-0 d-flex justify-content-center"  data-aos="fade-right">
-                    <img src="assets/cvsu.png"  alt="About Us Image" class="img-fluid">
+                <div class="col-lg-6 mb-4 mb-lg-0 d-flex justify-content-center" data-aos="fade-right">
+                    <img src="assets/cvsu.png" alt="About Us Image" class="img-fluid">
                 </div>
                 <div class="col-lg-6" data-aos="fade-left">
                     <h2>OVERVIEW</h2>
@@ -505,11 +496,11 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
             </div>
         </div>
     </section>
-    
+
     <section class="about-section">
         <div class="container" data-aos="fade-up">
             <div class="row align-items-center">
-                <div class="col-lg-6 mb-4 mb-lg-0 d-flex justify-content-center"  data-aos="fade-right">
+                <div class="col-lg-6 mb-4 mb-lg-0 d-flex justify-content-center" data-aos="fade-right">
                 </div>
                 <div class="col-lg-6" data-aos="fade-left">
                     <h2>QUALITY POLICY</h2>
@@ -535,6 +526,24 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
     <script>
         AOS.init();
+        // FOR MESSAGEBOX
+        function alertMessage(redirectUrl, title, text, icon, iconHtml) {
+            Swal.fire({
+                icon: icon,
+                iconHtml: iconHtml, // Custom icon using Font Awesome
+                title: title,
+                text: text,
+                customClass: {
+                    popup: 'swal-custom'
+                },
+                showConfirmButton: true,
+                confirmButtonColor: '#4CAF50',
+                confirmButtonText: 'OK',
+                timer: 5000
+            }).then(() => {
+                window.location.href = redirectUrl; // Redirect to the desired page
+            });
+        }
     </script>
 </body>
 
