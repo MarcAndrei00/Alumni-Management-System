@@ -1,9 +1,11 @@
 <?php
 session_start();
+date_default_timezone_set('Asia/Manila'); // Replace with your desired timezone
 $conn = new mysqli("localhost", "root", "", "alumni_management_system");
 
 // PHPMAILER
 use PHPMailer\PHPMailer\PHPMailer;
+
 require '../vendor/autoload.php';
 
 // SESSION
@@ -75,7 +77,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
         header('Location: ./login.php');
         exit();
     }
-} 
+}
 
 
 
@@ -135,11 +137,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
             $user_id = $_SESSION['user_id'];
 
             // Update the last_login time
-            $sql2 = "UPDATE admin SET last_login = NOW() WHERE admin_id = ?";
-            $stmt = $conn->prepare($sql2);
-            $stmt->bind_param("i", $user_id);
-            $stmt->execute();
-            $stmt->close();
+            $current_time = date("Y-m-d H:i:s"); // Format: 2024-08-15 14:35:00
+            $sql = "UPDATE admin SET last_login = '$current_time' WHERE admin_id = $user_id";
+            $conn->query($sql);
 
             // SUCCESS LOGIN ADMIN
             $icon = 'success';
@@ -160,11 +160,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
             $user_id = $_SESSION['user_id'];
 
             // Update the last_login time
-            $sql2 = "UPDATE coordinator SET last_login = NOW() WHERE coor_id = ?";
-            $stmt = $conn->prepare($sql2);
-            $stmt->bind_param("i", $user_id);
-            $stmt->execute();
-            $stmt->close();
+            $current_time = date("Y-m-d H:i:s"); // Format: 2024-08-15 14:35:00
+            $sql = "UPDATE coordinator SET last_login = '$current_time' WHERE coor_id = $user_id";
+            $conn->query($sql);
 
             // SUCCESS LOGIN COORDINATOR
             $icon = 'success';
@@ -249,11 +247,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                     $user_id = $_SESSION['user_id'];
 
                     // Update the last_login time
-                    $sql2 = "UPDATE alumni SET last_login = NOW() WHERE alumni_id = ?";
-                    $stmt = $conn->prepare($sql2);
-                    $stmt->bind_param("i", $user_id);
-                    $stmt->execute();
-                    $stmt->close();
+                    $current_time = date("Y-m-d H:i:s"); // Format: 2024-08-15 14:35:00
+                    $sql = "UPDATE alumni SET last_login = '$current_time' WHERE alumni_id = $user_id";
+                    $conn->query($sql);
+
 
                     // SUCCESS LOGIN ALUMNI
                     $icon = 'success';
@@ -386,118 +383,138 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                 </script>";
             sleep(3);
         } else {
-            // Check if student exists in the list_of_graduate table
             $idCheck_alumni = mysqli_query($conn, "SELECT * FROM list_of_graduate WHERE student_id='$stud_id'");
 
             if (mysqli_num_rows($idCheck_alumni) > 0) {
-                // Transfer data
-                $filePath = '../assets/profile_icon.jpg';
-                $imageData = file_get_contents($filePath);
-                $imageDataEscaped = addslashes($imageData);
-
-                // Update graduate information
-                $sql = "UPDATE list_of_graduate SET email='$email', password='$password', picture='$imageDataEscaped' WHERE student_id='$stud_id'";
-                $result = $conn->query($sql);
-
-                // Insert into alumni table
-                $sql_restore = "INSERT INTO alumni (student_id, fname, mname, lname, gender, course, contact, address, email, password, picture, date_created) 
-                                SELECT student_id, fname, mname, lname, gender, course, contact, address, '$email', '$password', '$imageDataEscaped', date_created 
-                                FROM list_of_graduate WHERE student_id='$stud_id'";
-                $conn->query($sql_restore);
-
-                $sql = "SELECT * FROM list_of_graduate WHERE student_id=$stud_id";
-                $result = $conn->query($sql);
-                $row = $result->fetch_assoc();
-
-                $batchYearRange = $row["batch"] ?? ''; // Assuming batch_years are in column 8
-                $startYear = $endYear = ''; // Initialize with empty values
-
-                if (strpos($batchYearRange, '-') !== FALSE) {
-                    list($startYear, $endYear) = explode('-', $batchYearRange);
-                    // Trim spaces
-                    $startYear = trim($startYear);
-                    $endYear = trim($endYear);
-                }
-
-                $stmt = $conn->prepare("UPDATE alumni SET batch_startYear = '$startYear', batch_endYear = '$endYear' WHERE student_id = ?");
-                $stmt->bind_param("s", $stud_id);
-                $stmt->execute();
-                $stmt->close();
-
-                $stmt = $conn->prepare("UPDATE alumni SET status = 'Unverified' WHERE student_id = ?");
-                $stmt->bind_param("s", $stud_id);
-                $stmt->execute();
-                $stmt->close();
-
-                // Delete from list_of_graduate table
-                $sql_delete = "DELETE FROM list_of_graduate WHERE student_id='$stud_id'";
-                $conn->query($sql_delete);
-
-                // Check if user is an alumni
-                $stmt = $conn->prepare("SELECT * FROM alumni WHERE student_id = ? AND email = ?");
+                // Check if student exists in the list_of_graduate table
+                $stmt = $conn->prepare("SELECT * FROM list_of_graduate WHERE student_id = ? AND email = ?");
                 $stmt->bind_param("ss", $stud_id, $email);
                 $stmt->execute();
                 $user_result = $stmt->get_result();
 
                 if ($user_result->num_rows > 0) {
-                    $verification_code = sprintf("%06d", mt_rand(1, 999999));
+                    $stmt->close();
+                    // Transfer data
+                    $filePath = '../assets/profile_icon.jpg';
+                    $imageData = file_get_contents($filePath);
+                    $imageDataEscaped = addslashes($imageData);
 
-                    $insert_verifcodes_qry = mysqli_query($conn, "INSERT INTO recovery_code(email, verification_code) VALUES('$email', '$verification_code')");
+                    // Update graduate information
+                    $sql = "UPDATE list_of_graduate SET email='$email', password='$password', picture='$imageDataEscaped' WHERE student_id='$stud_id'";
+                    $result = $conn->query($sql);
 
-                    // PHPMailer setup
-                    $mail = new PHPMailer(true);
+                    // Insert into alumni table
+                    $sql_restore = "INSERT INTO alumni (student_id, fname, mname, lname, gender, course, contact, address, email, password, picture, date_created) 
+                                SELECT student_id, fname, mname, lname, gender, course, contact, address, '$email', '$password', '$imageDataEscaped', date_created 
+                                FROM list_of_graduate WHERE student_id='$stud_id'";
+                    $conn->query($sql_restore);
 
-                    $mail->isSMTP();
-                    $mail->Host       = 'smtp.gmail.com';
-                    $mail->SMTPAuth   = true;
-                    $mail->Username   = 'alumni.management07@gmail.com';
-                    $mail->Password   = 'kcio bmde ffvc sfar';
-                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
-                    $mail->Port       = 587;
-
-                    $mail->setFrom('alumni.management07@gmail.com', 'Alumni Management');
-                    $mail->addAddress($email);
-
-                    $mail->isHTML(true);
-                    $mail->Subject = 'Verification Code';
-                    $mail->Body    = 'Your verification code is <b>' . $verification_code . '</b>';
-                    $mail->AltBody = 'Your verification code is ' . $verification_code;
-
-                    $mail->send();
-
-                    $sql_change = "SELECT alumni_id FROM alumni WHERE student_id = $stud_id";
-                    $result = $conn->query($sql_change);
+                    $sql = "SELECT * FROM list_of_graduate WHERE student_id=$stud_id";
+                    $result = $conn->query($sql);
                     $row = $result->fetch_assoc();
 
-                    // Set session variables
-                    $_SESSION['email'] = $email;
-                    $_SESSION['user_email'] = $email;
-                    $_SESSION['user_id'] = $row['alumni_id'];
+                    $batchYearRange = $row["batch"] ?? ''; // Assuming batch_years are in column 8
+                    $startYear = $endYear = ''; // Initialize with empty values
 
+                    if (strpos($batchYearRange, '-') !== FALSE) {
+                        list($startYear, $endYear) = explode('-', $batchYearRange);
+                        // Trim spaces
+                        $startYear = trim($startYear);
+                        $endYear = trim($endYear);
+                    }
+
+                    $stmt = $conn->prepare("UPDATE alumni SET batch_startYear = '$startYear', batch_endYear = '$endYear' WHERE student_id = ?");
+                    $stmt->bind_param("s", $stud_id);
+                    $stmt->execute();
                     $stmt->close();
 
-                    // WARNING NOT VERIFIED
-                    $icon = 'success';
-                    $iconHtml = '<i class="fas fa-check-circle"></i>';
-                    $title = 'Account successfully register.';
-                    $text = 'We send a verification code to your email to verify your account.';
-                    $redirectUrl = './verification_code.php';
+                    $stmt = $conn->prepare("UPDATE alumni SET status = 'Unverified' WHERE student_id = ?");
+                    $stmt->bind_param("s", $stud_id);
+                    $stmt->execute();
+                    $stmt->close();
 
-                    echo "<script>
-                            document.addEventListener('DOMContentLoaded', function() {
-                                alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
-                            });
-                        </script>";
+                    // Delete from list_of_graduate table
+                    $sql_delete = "DELETE FROM list_of_graduate WHERE student_id='$stud_id'";
+                    $conn->query($sql_delete);
+
+                    // Check if user is an alumni
+                    $stmt = $conn->prepare("SELECT * FROM alumni WHERE student_id = ? AND email = ?");
+                    $stmt->bind_param("ss", $stud_id, $email);
+                    $stmt->execute();
+                    $user_result = $stmt->get_result();
+
+                    if ($user_result->num_rows > 0) {
+                        $verification_code = sprintf("%06d", mt_rand(1, 999999));
+
+                        $insert_verifcodes_qry = mysqli_query($conn, "INSERT INTO recovery_code(email, verification_code) VALUES('$email', '$verification_code')");
+
+                        // PHPMailer setup
+                        $mail = new PHPMailer(true);
+
+                        $mail->isSMTP();
+                        $mail->Host       = 'smtp.gmail.com';
+                        $mail->SMTPAuth   = true;
+                        $mail->Username   = 'alumni.management07@gmail.com';
+                        $mail->Password   = 'kcio bmde ffvc sfar';
+                        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                        $mail->Port       = 587;
+
+                        $mail->setFrom('alumni.management07@gmail.com', 'Alumni Management');
+                        $mail->addAddress($email);
+
+                        $mail->isHTML(true);
+                        $mail->Subject = 'Verification Code';
+                        $mail->Body    = 'Your verification code is <b>' . $verification_code . '</b>';
+                        $mail->AltBody = 'Your verification code is ' . $verification_code;
+
+                        $mail->send();
+
+                        $sql_change = "SELECT alumni_id FROM alumni WHERE student_id = $stud_id";
+                        $result = $conn->query($sql_change);
+                        $row = $result->fetch_assoc();
+
+                        // Set session variables
+                        $_SESSION['email'] = $email;
+                        $_SESSION['user_email'] = $email;
+                        $_SESSION['user_id'] = $row['alumni_id'];
+
+                        $stmt->close();
+
+                        // WARNING NOT VERIFIED
+                        $icon = 'success';
+                        $iconHtml = '<i class="fas fa-check-circle"></i>';
+                        $title = 'Account successfully register.';
+                        $text = 'We send a verification code to your email to verify your account.';
+                        $redirectUrl = './verification_code.php';
+
+                        echo "<script>
+                                document.addEventListener('DOMContentLoaded', function() {
+                                    alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
+                                });
+                            </script>";
+                    } else {
+                        session_destroy();
+                        header('Location: ./login.php');
+                        exit();
+                    }
                 } else {
-                    session_destroy();
-                    header('Location: ./login.php');
-                    exit();
+                    // WARNING NOT MATCH PASSWORD
+                    $icon = 'warning';
+                    $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
+                    $title = 'Your cvsu email and student id do not match!';
+                    $text = 'Please try again.';
+                    echo "<script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            warningError('$title', '$text', '$icon', '$iconHtml');
+                        });
+                    </script>";
+                    sleep(3);
                 }
             } else {
 
                 // WARNING NO ALUMNI
-                $icon = 'warning';
-                $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
+                $icon = 'error';
+                $iconHtml = '<i class=\"fas fa-exclamation-circle\"></i>';
                 $title = 'There is no alumni with student ID ' . $stud_id;
                 $text = 'Please try again.';
 
@@ -782,4 +799,5 @@ function check_alumni_archive($conn, $table, $log_email, $pass)
         }
     </script>
 </body>
+
 </html>

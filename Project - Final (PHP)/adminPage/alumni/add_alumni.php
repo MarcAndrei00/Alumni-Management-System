@@ -1,12 +1,13 @@
 <?php
 session_start();
+$conn = new mysqli("localhost", "root", "", "alumni_management_system");
 
-$servername = "localhost";
-$db_username = "root";
-$db_password = "";
-$db_name = "alumni_management_system";
-$conn = new mysqli($servername, $db_username, $db_password, $db_name);
+// PHPMAILER
+use PHPMailer\PHPMailer\PHPMailer;
 
+require '../../vendor/autoload.php';
+
+// SESSION
 if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     $account = $_SESSION['user_id'];
     $account_email = $_SESSION['user_email'];
@@ -36,6 +37,18 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     }
     $stmt->close();
 
+    // Check if user is a alumni_archive
+    $stmt = $conn->prepare("SELECT * FROM alumni_archive WHERE alumni_id = ? AND email = ?");
+    $stmt->bind_param("ss", $account, $account_email);
+    $stmt->execute();
+    $user_result = $stmt->get_result();
+
+    if ($user_result->num_rows > 0) {
+        session_destroy();
+        header("Location: ../../homepage.php");
+    }
+    $stmt->close();
+
     // Check if user is an alumni
     $stmt = $conn->prepare("SELECT * FROM alumni WHERE alumni_id = ? AND email = ?");
     $stmt->bind_param("ss", $account, $account_email);
@@ -43,15 +56,39 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     $user_result = $stmt->get_result();
 
     if ($user_result->num_rows > 0) {
-        // User is an alumni
-        header('Location: ../../alumniPage/dashboard_user.php');
-        exit();
+        $sql = "SELECT * FROM alumni WHERE alumni_id=$account";
+        $result = $conn->query($sql);
+        $row = $result->fetch_assoc();
+
+        if ($row['status'] == "Verified") {
+            // User is a verified alumni
+            header('Location: ../../alumniPage/dashboard_user.php');
+            exit();
+        } else {
+
+            $_SESSION['email'] = $account_email;
+
+            // WARNING NOT VERIFIED
+            $icon = 'warning';
+            $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
+            $title = 'Account Not Verified!';
+            $text = 'Verified your Account First to continue.';
+            $redirectUrl = '../../loginPage/verification_code.php';
+
+            echo "<script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
+                    });
+                </script>";
+        }
     }
-    $stmt->close();
 } else {
+    // Redirect to login if no matching user found
+    session_destroy();
     header('Location: ../../homepage.php');
     exit();
 }
+
 
 $stud_id = "";
 $fname = "";
@@ -82,71 +119,224 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $temp_password = $_POST['temp_pass'];
 
 
-    // email and user existing check
-    $alumni_idCheck = mysqli_query($conn, "SELECT * FROM list_of_graduate WHERE student_id='$stud_id'");
+    // // email and user existing check
+    // $alumni_idCheck = mysqli_query($conn, "SELECT * FROM list_of_graduate WHERE student_id='$stud_id'");
 
-    if (mysqli_num_rows($alumni_idCheck) > 0) {
+    // if (mysqli_num_rows($alumni_idCheck) > 0) {
 
-        // email and user existing check
-        $emailCheck = mysqli_query($conn, "SELECT * FROM alumni WHERE email='$email'");
-        $emailCheck_archive = mysqli_query($conn, "SELECT * FROM alumni_archive WHERE email='$email'");
-        $idCheck = mysqli_query($conn, "SELECT * FROM alumni WHERE student_id='$stud_id'");
-        $idCheck_archive = mysqli_query($conn, "SELECT * FROM alumni_archive WHERE student_id='$stud_id'");
+    // Check if email or student ID exists in both the active and archive tables
+    $emailCheck = mysqli_query($conn, "SELECT * FROM alumni WHERE email='$email'");
+    $emailCheck_archive = mysqli_query($conn, "SELECT * FROM alumni_archive WHERE email='$email'");
+    $idCheck = mysqli_query($conn, "SELECT * FROM alumni WHERE student_id='$stud_id'");
+    $idCheck_archive = mysqli_query($conn, "SELECT * FROM alumni_archive WHERE student_id='$stud_id'");
 
-        if (mysqli_num_rows($emailCheck) > 0) {
-            $errorMessage = "Email Already Exists";
-        } else if (mysqli_num_rows($emailCheck_archive) > 0) {
-            $errorMessage = "Email Already Exists";
-        } else if (mysqli_num_rows($idCheck) > 0) {
-            $errorMessage = "Student ID Already Exists";
-        } else if (mysqli_num_rows($idCheck_archive) > 0) {
-            $errorMessage = "Student ID Already Exists";
-        } else {
-            $filePath = '../../assets/profile_icon.jpg';
+    // Email and student ID validation
+    if (mysqli_num_rows($emailCheck) > 0 || mysqli_num_rows($emailCheck_archive) > 0) {
+
+        // WARNING EXISTING ACCOUNT
+        $icon = 'warning';
+        $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
+        $title = 'Email Already Exists!';
+        $text = 'Please try again.';
+
+        echo "<script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        warningError('$title', '$text', '$icon', '$iconHtml');
+                    });
+                </script>";
+        sleep(3);
+    } elseif (mysqli_num_rows($idCheck) > 0 || mysqli_num_rows($idCheck_archive) > 0) {
+
+        // WARNING EXISTING ACCOUNT
+        $icon = 'warning';
+        $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
+        $title = 'Student ID Already Exists!';
+        $text = 'Please try again.';
+
+        echo "<script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        warningError('$title', '$text', '$icon', '$iconHtml');
+                    });
+                </script>";
+        sleep(3);
+    } else {
+        $filePath = '../../assets/profile_icon.jpg';
+        $imageData = file_get_contents($filePath);
+        $imageDataEscaped = addslashes($imageData);
+
+
+// new update
+// +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+
+        // Check if student exists in the list_of_graduate table
+        $idCheck_alumni = mysqli_query($conn, "SELECT * FROM list_of_graduate WHERE student_id='$stud_id'");
+
+        if (mysqli_num_rows($idCheck_alumni) > 0) {
+            // Transfer data
+            $filePath = '../assets/profile_icon.jpg';
             $imageData = file_get_contents($filePath);
             $imageDataEscaped = addslashes($imageData);
 
-            $sql = "INSERT INTO alumni SET student_id='$stud_id', fname='$fname', mname='$mname', lname='$lname', gender='$gender', course='$course', batch_startYear='$fromYear', batch_endYear='$toYear', contact='$contact', address='$address', email='$email', password='$temp_password', picture='$imageDataEscaped'";
+            // Update graduate information
+            $sql = "UPDATE list_of_graduate SET email='$email', password='$password', picture='$imageDataEscaped' WHERE student_id='$stud_id'";
             $result = $conn->query($sql);
 
-            //delete data in table list_of_graduate
-            $sql_delete = "DELETE FROM list_of_graduate WHERE student_id=$stud_id";
+            // Insert into alumni table
+            $sql_restore = "INSERT INTO alumni (student_id, fname, mname, lname, gender, course, contact, address, email, password, picture, date_created) 
+                            SELECT student_id, fname, mname, lname, gender, course, contact, address, '$email', '$password', '$imageDataEscaped', date_created 
+                            FROM list_of_graduate WHERE student_id='$stud_id'";
+            $conn->query($sql_restore);
+
+            $sql = "SELECT * FROM list_of_graduate WHERE student_id=$stud_id";
+            $result = $conn->query($sql);
+            $row = $result->fetch_assoc();
+
+            $batchYearRange = $row["batch"] ?? ''; // Assuming batch_years are in column 8
+            $startYear = $endYear = ''; // Initialize with empty values
+
+            if (strpos($batchYearRange, '-') !== FALSE) {
+                list($startYear, $endYear) = explode('-', $batchYearRange);
+                // Trim spaces
+                $startYear = trim($startYear);
+                $endYear = trim($endYear);
+            }
+
+            $stmt = $conn->prepare("UPDATE alumni SET batch_startYear = '$startYear', batch_endYear = '$endYear' WHERE student_id = ?");
+            $stmt->bind_param("s", $stud_id);
+            $stmt->execute();
+            $stmt->close();
+
+            $stmt = $conn->prepare("UPDATE alumni SET status = 'Unverified' WHERE student_id = ?");
+            $stmt->bind_param("s", $stud_id);
+            $stmt->execute();
+            $stmt->close();
+
+            // Delete from list_of_graduate table
+            $sql_delete = "DELETE FROM list_of_graduate WHERE student_id='$stud_id'";
             $conn->query($sql_delete);
 
-            echo "
-            <script>
-                // Wait for the document to load
-                document.addEventListener('DOMContentLoaded', function() {
-                    // Use SweetAlert2 for the alert
-                    Swal.fire({
-                            title: 'Alumni Added Successfully',
-                            timer: 2000,
-                            showConfirmButton: true, // Show the confirm button
-                            confirmButtonColor: '#4CAF50', // Set the button color to green
-                            confirmButtonText: 'OK' // Change the button text if needed
-                    }).then(function() {
-                        // Redirect after the alert closes
-                        window.location.href = './alumni.php';
+            // Check if user is an alumni
+            $stmt = $conn->prepare("SELECT * FROM alumni WHERE student_id = ? AND email = ?");
+            $stmt->bind_param("ss", $stud_id, $email);
+            $stmt->execute();
+            $user_result = $stmt->get_result();
+
+            if ($user_result->num_rows > 0) {
+                $verification_code = sprintf("%06d", mt_rand(1, 999999));
+
+                $insert_verifcodes_qry = mysqli_query($conn, "INSERT INTO recovery_code(email, verification_code) VALUES('$email', '$verification_code')");
+
+                // PHPMailer setup
+                $mail = new PHPMailer(true);
+
+                $mail->isSMTP();
+                $mail->Host       = 'smtp.gmail.com';
+                $mail->SMTPAuth   = true;
+                $mail->Username   = 'alumni.management07@gmail.com';
+                $mail->Password   = 'kcio bmde ffvc sfar';
+                $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                $mail->Port       = 587;
+
+                $mail->setFrom('alumni.management07@gmail.com', 'Alumni Management');
+                $mail->addAddress($email);
+
+                $mail->isHTML(true);
+                $mail->Subject = 'Verification Code';
+                $mail->Body    = 'Your verification code is <b>' . $verification_code . '</b>';
+                $mail->AltBody = 'Your verification code is ' . $verification_code;
+
+                $mail->send();
+
+                $sql_change = "SELECT alumni_id FROM alumni WHERE student_id = $stud_id";
+                $result = $conn->query($sql_change);
+                $row = $result->fetch_assoc();
+
+                // Set session variables
+                $_SESSION['email'] = $email;
+                $_SESSION['user_email'] = $email;
+                $_SESSION['user_id'] = $row['alumni_id'];
+
+                $stmt->close();
+
+                // WARNING NOT VERIFIED
+                $icon = 'success';
+                $iconHtml = '<i class="fas fa-check-circle"></i>';
+                $title = 'Account successfully register.';
+                $text = 'We send a verification code to your email to verify your account.';
+                $redirectUrl = './verification_code.php';
+
+                echo "<script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
+                        });
+                    </script>";
+            } else {
+                session_destroy();
+                header('Location: ./login.php');
+                exit();
+            }
+        } else {
+
+            // WARNING NO ALUMNI
+            $icon = 'error';
+            $iconHtml = '<i class=\"fas fa-exclamation-circle\"></i>';
+            $title = 'There is no alumni with student ID ' . $stud_id;
+            $text = 'Please try again.';
+
+            echo "<script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        warningError('$title', '$text', '$icon', '$iconHtml');
                     });
-                });
-            </script>
-            ";
+                </script>";
+            sleep(3);
         }
-    } else {
+
+
+// ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+
+
+
+
+
+
+        $sql = "INSERT INTO alumni SET student_id='$stud_id', fname='$fname', mname='$mname', lname='$lname', gender='$gender', course='$course', batch_startYear='$fromYear', batch_endYear='$toYear', contact='$contact', address='$address', email='$email', password='$temp_password', picture='$imageDataEscaped'";
+        $result = $conn->query($sql);
+
+        //delete data in table list_of_graduate
+        $sql_delete = "DELETE FROM list_of_graduate WHERE student_id=$stud_id";
+        $conn->query($sql_delete);
+
+        // SUCCESS LOGIN ADMIN
+        $icon = 'success';
+        $iconHtml = '<i class="fas fa-check-circle"></i>';
+        $title = 'Alumni Added Successfully';
+        $text = 'You will be redirected shortly to the Alumni List.';
+        $redirectUrl = './alumni.php';
+
         echo "<script>
-            // Wait for the document to load
-            document.addEventListener('DOMContentLoaded', function() {
-                // Use SweetAlert2 for the alert
-                Swal.fire({
-                    title: 'No Alumni Student with student Id of $stud_id; ',
-                    timer: 4000,
-                    showConfirmButton: true, // Show the confirm button
-                    confirmButtonColor: '#4CAF50', // Set the button color to green
-                    confirmButtonText: 'OK' // Change the button text if needed
-                });
-            });
-        </script>";
+                    document.addEventListener('DOMContentLoaded', function() {
+                        alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
+                    });
+                </script>";
+        sleep(3);
     }
+    // } else {
+    //     // WARNING NO ALUMNI
+    //     $icon = 'error';
+    //     $iconHtml = '<i class=\"fas fa-exclamation-circle\"></i>';
+    //     $title = 'There is no alumni with student ID ' . $stud_id;
+    //     $text = 'Please try again.';
+
+    //     echo "<script>
+    //              document.addEventListener('DOMContentLoaded', function() {
+    //                  warningError('$title', '$text', '$icon', '$iconHtml');
+    //              });
+    //          </script>";
+    //     sleep(3);
+    // }
 }
 ?>
 
@@ -164,7 +354,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <link rel="stylesheet" href="	https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
@@ -263,20 +454,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <div class="container-title">
                     <span>Add New Account</span>
                 </div>
-
-                <?php
-                if (!empty($errorMessage)) {
-                    echo "<script>";
-                    echo "Swal.fire({";
-                    echo "  icon: 'error',";
-                    echo "  title: 'Oops...',";
-                    echo "  text: '$errorMessage',";
-                    echo "  timer: 2000,";
-                    echo "})";
-                    echo "</script>";
-                }
-                ?>
-
                 <div class="container" id="content">
                     <form action="" method="POST">
                         <div class="container">
@@ -499,6 +676,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 }
             }
         });
+
+        // FOR MESSAGEBOX
+        function alertMessage(redirectUrl, title, text, icon, iconHtml) {
+            Swal.fire({
+                icon: icon,
+                iconHtml: iconHtml, // Custom icon using Font Awesome
+                title: title,
+                text: text,
+                customClass: {
+                    popup: 'swal-custom'
+                },
+                showConfirmButton: true,
+                confirmButtonColor: '#4CAF50',
+                confirmButtonText: 'OK',
+                timer: 5000
+            }).then(() => {
+                window.location.href = redirectUrl; // Redirect to the desired page
+            });
+        }
+
+        // WARNING FOR DUPE ACCOUNT
+        function warningError(title, text, icon, iconHtml) {
+            Swal.fire({
+                icon: icon,
+                iconHtml: iconHtml, // Custom icon using Font Awesome
+                title: title,
+                text: text,
+                customClass: {
+                    popup: 'swal-custom'
+                },
+                showConfirmButton: true,
+                confirmButtonColor: '#4CAF50',
+                confirmButtonText: 'OK',
+                timer: 5000,
+            });
+        }
     </script>
 </body>
 

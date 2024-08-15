@@ -106,9 +106,6 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
         $sql_delete = "DELETE FROM recovery_code WHERE email='$account_email'";
         $conn->query($sql_delete);
 
-        // $_SESSION = array();
-        // session_destroy();
-
         // Check if user is an alumni
         $stmt = $conn->prepare("SELECT * FROM alumni WHERE alumni_id = ? AND email = ?");
         $stmt->bind_param("ss", $account, $account_email);
@@ -117,6 +114,11 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 
         // TO VERIFIED ACCOUNT 
         if ($user_result->num_rows > 0) {
+
+          // Update the last_login time
+          $current_time = date("Y-m-d H:i:s"); // Format: 2024-08-15 14:35:00
+          $sql = "UPDATE alumni SET last_login = '$current_time' WHERE alumni_id = $account";
+          $conn->query($sql);
 
           // SUCCESS VERIF 
           $icon = 'success';

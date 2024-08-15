@@ -107,6 +107,16 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
             overflow-x: hidden;
         }
 
+        .iframe-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .iframe-container iframe {
+            max-width: 100%;
+        }
+
         .navbar {
             background: linear-gradient(90deg, rgb(7 108 17) 0%, rgba(42, 145, 52, 1) 100%);
             color: white;
@@ -624,20 +634,16 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     <section class="mission-section" id="about-section">
         <div class="container" data-aos="fade-up">
             <div class="row align-items-center">
-                <div class="col-lg-6 mb-4 mb-lg-0" data-aos="fade-right">
-                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d61826.49974971021!2d120.93253400352037!3d14.418155634799145!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397d25e0e88d16b%3A0xc2f8607cd4512597!2sCavite%20State%20University%20-%20Imus%20Campus!5e0!3m2!1sfil!2sph!4v1722941794812!5m2!1sfil!2sph" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
-                    </iframe>
+                <div class="col-lg-6 mb-4 mb-lg-0 iframe-container" data-aos="fade-right">
+                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d61826.49974971021!2d120.93253400352037!3d14.418155634799145!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3397d25e0e88d16b%3A0xc2f8607cd4512597!2sCavite%20State%20University%20-%20Imus%20Campus!5e0!3m2!1sfil!2sph!4v1722941794812!5m2!1sfil!2sph" width="700" height="500" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                 </div>
                 <div class="col-lg-6" data-aos="fade-left">
                     <h2>Need Some Help?</h2><br>
-                    <br>
                     <p>If you have any questions or need assistance, we're here to help! Please reach out to us through any
-                        of the following methods, and we'll get back to you as soon as possible:
-                        <br>
-                        <br>
-                        <br>
-                        <b>Office Hours:</b> Monday to Thursday, 9 AM - 5 PM<br>
-                    </p>
+                        of the following methods, and we'll get back to you as soon as possible:</p>
+                    <br>
+                    <br>
+                    <b>Office Hours:</b> Monday to Thursday, 9 AM - 5 PM<br>
                 </div>
             </div>
         </div>
