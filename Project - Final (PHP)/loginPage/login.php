@@ -588,7 +588,7 @@ function check_alumni_archive($conn, $table, $log_email, $pass)
     <!-- FOR SIGN UP -->
     <div class="container" id="container">
         <div class="form-container sign-up-container">
-            <form action="#" method="POST" id="signup" onsubmit="disableButton(this)">
+            <form action="#" method="POST" id="signup">
                 <h1>Sign Up</h1>
 
                 <div class="infield">
