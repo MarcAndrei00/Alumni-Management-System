@@ -12,6 +12,28 @@ if ($email == 0) {
   exit();
 }
 
+if (isset($_SESSION['alert'])) {
+  $alertMessage = $_SESSION['alert'];
+} else {
+  $alertMessage = 'Verified';
+}
+
+if ($alertMessage == 'Unverified') {
+  // ERROR VERIF NOT MATCH
+  $icon = 'warning';
+  $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
+  $title = 'Account Not Verified!';
+  $text = 'Verified your Account First to continue.';
+
+  echo "<script>
+          document.addEventListener('DOMContentLoaded', function() {
+            warningError('$title', '$text', '$icon', '$iconHtml');
+          });
+        </script>";
+      $alertMessage = 'Verified';
+}
+
+
 if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
   $account = $_SESSION['user_id'];
   $account_email = $_SESSION['user_email'];
@@ -87,6 +109,11 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 
                 $delete_qry = mysqli_query($conn, "DELETE FROM recovery_code WHERE email='$account_email'");
 
+                // Update the last_login time
+                $current_time = date("Y-m-d H:i:s"); // Format: 2024-08-15 14:35:00
+                $sql = "UPDATE alumni SET last_login = '$current_time' WHERE alumni_id = $account";
+                $conn->query($sql);
+
                 // SUCCESS VERIFICATION MATCH
                 $icon = 'success';
                 $iconHtml = '<i class="fas fa-check-circle"></i>';
@@ -99,7 +126,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
                           alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
                         });
                       </script>";
-                sleep(3);
+                sleep(2);
               } else {
                 // SUCCESS RESEND
                 $icon = 'error';
@@ -112,7 +139,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
                           warningError('$title', '$text', '$icon', '$iconHtml');
                         });
                       </script>";
-                sleep(3);
+                sleep(2);
               }
             }
           }
@@ -203,7 +230,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
               alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
             });
           </script>";
-    sleep(3);
+    sleep(2);
   } else {
 
     // ERROR VERIF NOT MATCH
@@ -217,7 +244,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
               warningError('$title', '$text', '$icon', '$iconHtml');
             });
           </script>";
-    sleep(3);
+    sleep(2);
   }
 } // BACK BUTTON
 else if (isset($_POST['back_btn'])) {

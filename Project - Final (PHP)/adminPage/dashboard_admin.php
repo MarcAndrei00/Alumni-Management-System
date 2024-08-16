@@ -60,21 +60,12 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
             header('Location: ../alumniPage/dashboard_user.php');
             exit();
         } else {
-
+            
             $_SESSION['email'] = $account_email;
-
-            // WARNING NOT VERIFIED
-            $icon = 'warning';
-            $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
-            $title = 'Account Not Verified!';
-            $text = 'Verified your Account First to continue.';
-            $redirectUrl = '../loginPage/verification_code.php';
-
-            echo "<script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
-                    });
-                </script>";
+            $_SESSION['alert'] = 'Unverified';
+            sleep(2);
+            header('Location: ../loginPage/verification_code.php');
+            exit();
         }
     }
 } else {

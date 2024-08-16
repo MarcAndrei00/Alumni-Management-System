@@ -57,19 +57,10 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
         } else {
 
             $_SESSION['email'] = $account_email;
-
-            // WARNING NOT VERIFIED
-            $icon = 'warning';
-            $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
-            $title = 'Account Not Verified!';
-            $text = 'Verified your Account First to continue.';
-            $redirectUrl = './verification_code.php';
-
-            echo "<script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
-                    });
-                </script>";
+            $_SESSION['alert'] = 'Unverified';
+            sleep(2);
+            header('Location: ../loginPage/verification_code.php');
+            exit();
         }
     } else {
         // Redirect to login if no matching user found
@@ -153,7 +144,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                         alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
                     });
                 </script>";
-            sleep(3);
+            sleep(2);
         } else if ($user_type == 'coordinator') {
             // Redirect to COORDINATOR
 
@@ -176,7 +167,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                         alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
                     });
                 </script>";
-            sleep(3);
+            sleep(2);
         } else if ($user_type == 'alumni_archive') {
             // ARCHIVE
             if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
@@ -264,7 +255,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                                 alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
                             });
                         </script>";
-                    sleep(3);
+                    sleep(2);
                 } else {
 
                     $email = $_SESSION['user_email'];
@@ -322,7 +313,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                   warningError('$title', '$text', '$icon', '$iconHtml');
               });
           </script>";
-        sleep(3);
+        sleep(2);
     }
     // SIGNUP 
 } else if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
@@ -351,7 +342,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                   warningError('$title', '$text', '$icon', '$iconHtml');
               });
           </script>";
-        sleep(3);
+        sleep(2);
     } elseif (mysqli_num_rows($idCheck) > 0 || mysqli_num_rows($idCheck_archive) > 0) {
 
         // WARNING EXISTING ACCOUNT
@@ -365,7 +356,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                   warningError('$title', '$text', '$icon', '$iconHtml');
               });
           </script>";
-        sleep(3);
+        sleep(2);
     } else {
         // Check if password and confirm password match
         if ($password !== $confirm_password) {
@@ -381,7 +372,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                         warningError('$title', '$text', '$icon', '$iconHtml');
                     });
                 </script>";
-            sleep(3);
+            sleep(2);
         } else {
             $idCheck_alumni = mysqli_query($conn, "SELECT * FROM list_of_graduate WHERE student_id='$stud_id'");
 
@@ -508,7 +499,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                             warningError('$title', '$text', '$icon', '$iconHtml');
                         });
                     </script>";
-                    sleep(3);
+                    sleep(2);
                 }
             } else {
 
@@ -523,7 +514,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                             warningError('$title', '$text', '$icon', '$iconHtml');
                         });
                     </script>";
-                sleep(3);
+                sleep(2);
             }
         }
     }
@@ -597,7 +588,7 @@ function check_alumni_archive($conn, $table, $log_email, $pass)
     <!-- FOR SIGN UP -->
     <div class="container" id="container">
         <div class="form-container sign-up-container">
-            <form action="#" method="POST">
+            <form action="#" method="POST" id="signup" onsubmit="disableButton(this)">
                 <h1>Sign Up</h1>
 
                 <div class="infield">
@@ -624,7 +615,7 @@ function check_alumni_archive($conn, $table, $log_email, $pass)
 
         <!-- FOR LOG IN -->
         <div class="form-container log-in-container">
-            <form action="#" method="POST">
+            <form action="#" method="POST" id="login" onsubmit="disableButton(this)">
                 <h1>Log in</h1>
                 <div class="infield">
                     <input type="text" placeholder="Student ID / Email" name="log_email" required />
@@ -637,7 +628,7 @@ function check_alumni_archive($conn, $table, $log_email, $pass)
                 </div>
                 <br>
                 <a href="./forgetpassword.php" class="forgot">Forgot your password?</a>
-                <button>Log In</button>
+                <button type="submit">Log In</button>
             </form>
         </div>
         <div class="overlay-container" id="overlayCon">
@@ -796,6 +787,12 @@ function check_alumni_archive($conn, $table, $log_email, $pass)
                 confirmButtonText: 'OK',
                 timer: 5000,
             });
+        }
+
+        // PREVENT MULTIPLE FORM SUBMITTIONS
+        function disableButton(form) {
+            const submitButton = form.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
         }
     </script>
 </body>

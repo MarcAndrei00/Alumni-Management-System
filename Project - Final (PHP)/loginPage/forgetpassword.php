@@ -44,6 +44,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
   $row = $user_result->fetch_assoc();
 
   if ($user_result->num_rows > 0) {
+    
     $sql = "SELECT * FROM alumni WHERE alumni_id=$account";
     $result = $conn->query($sql);
     $row = $result->fetch_assoc();
@@ -53,28 +54,19 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
       header('Location: ../alumniPage/dashboard_user.php');
       exit();
     } else {
-
+      $stmt->close();
       $_SESSION['email'] = $account_email;
-
-      // WARNING NOT VERIFIED
-      $icon = 'warning';
-      $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
-      $title = 'Account Not Verified!';
-      $text = 'Verified your Account First to continue.';
-      $redirectUrl = './verification_code.php';
-
-      echo "<script>
-              document.addEventListener('DOMContentLoaded', function() {
-                  alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
-              });
-          </script>";
+      $_SESSION['alert'] = 'Unverified';
+      sleep(2);
+      header('Location: ./verification_code.php');
+      exit();
     }
   } else {
     session_destroy();
     header('Location: ./login.php');
     exit();
   }
-  $stmt->close();
+  
 }
 // NO ACCOUNT IN SESSION
 else {
@@ -137,7 +129,7 @@ else {
                 warningError('$title', '$text', '$icon', '$iconHtml');
             });
         </script>";
-        sleep(3);
+      sleep(2);
     }
   }
 }
@@ -239,7 +231,6 @@ else {
   <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   <script>
-    
     // FOR MESSAGEBOX
     function alertMessage(redirectUrl, title, text, icon, iconHtml) {
       Swal.fire({

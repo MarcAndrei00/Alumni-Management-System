@@ -183,7 +183,7 @@ echo "<script>
             alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
         });
     </script>";
-sleep(3);
+sleep(2);
 
 
 // WARNING INACTIVE
@@ -225,7 +225,7 @@ echo "<script>
           warningError('$title', '$text', '$icon', '$iconHtml');
       });
   </script>";
-sleep(3);
+sleep(2);
 
 
 // WARNING EXISTING ACCOUNT - NO REDIRECT
@@ -239,7 +239,7 @@ echo "<script>
           warningError('$title', '$text', '$icon', '$iconHtml');
       });
   </script>";
-sleep(3);
+sleep(2);
 
 
 // WARNING EXISTING ACCOUNT - NO REDIRECT
@@ -253,7 +253,7 @@ echo "<script>
           warningError('$title', '$text', '$icon', '$iconHtml');
       });
   </script>";
-sleep(3);
+sleep(2);
 
 
 // WARNING NOT MATCH PASSWORD
@@ -267,7 +267,7 @@ echo "<script>
             warningError('$title', '$text', '$icon', '$iconHtml');
         });
     </script>";
-sleep(3);
+sleep(2);
 
 
 // WARNING NOT VERIFIED
@@ -295,7 +295,7 @@ echo "<script>
                 warningError('$title', '$text', '$icon', '$iconHtml');
             });
         </script>";
-sleep(3);
+sleep(2);
 
 ?>
 

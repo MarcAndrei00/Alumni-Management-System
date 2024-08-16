@@ -1,30 +1,78 @@
 <?php
 session_start();
+$conn = new mysqli("localhost", "root", "", "alumni_management_system");
 
-$serername = "localhost";
-$db_username = "root";
-$db_password = "";
-$db_name = "alumni_management_system";
-$conn = mysqli_connect($serername, $db_username, $db_password, $db_name);
-
-// USER ACCOUNT DATA
-if (isset($_SESSION['user_id'])) {
+// SESSION
+if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     $account = $_SESSION['user_id'];
+    $account_email = $_SESSION['user_email'];
 
-    $stmt = $conn->prepare("SELECT * FROM coordinator WHERE coor_id = ?");
-    $stmt->bind_param("s", $account); // "s" indicates the type is string
+    // Check if user is an admin
+    $stmt = $conn->prepare("SELECT * FROM admin WHERE admin_id = ? AND email = ?");
+    $stmt->bind_param("ss", $account, $account_email);
     $stmt->execute();
     $user_result = $stmt->get_result();
 
     if ($user_result->num_rows > 0) {
-        $user = $user_result->fetch_assoc();
-    } else {
-        // No user found with the given coor_id
+        // User is an admin
+        header('Location: ../../adminPage/dashboard_admin.php');
+        exit();
     }
-
     $stmt->close();
+
+    // Check if user is a coordinator
+    $stmt = $conn->prepare("SELECT * FROM coordinator WHERE coor_id = ? AND email = ?");
+    $stmt->bind_param("ss", $account, $account_email);
+    $stmt->execute();
+    $user_result = $stmt->get_result();
+
+    if ($user_result->num_rows > 0) {
+        // User is a coordinator
+        $user = $user_result->fetch_assoc();
+    }
+    $stmt->close();
+
+    // Check if user is a alumni_archive
+    $stmt = $conn->prepare("SELECT * FROM alumni_archive WHERE alumni_id = ? AND email = ?");
+    $stmt->bind_param("ss", $account, $account_email);
+    $stmt->execute();
+    $user_result = $stmt->get_result();
+
+    if ($user_result->num_rows > 0) {
+        session_destroy();
+        header("Location: ../../homepage.php");
+    }
+    $stmt->close();
+
+    // Check if user is an alumni
+    $stmt = $conn->prepare("SELECT * FROM alumni WHERE alumni_id = ? AND email = ?");
+    $stmt->bind_param("ss", $account, $account_email);
+    $stmt->execute();
+    $user_result = $stmt->get_result();
+
+    if ($user_result->num_rows > 0) {
+        $sql = "SELECT * FROM alumni WHERE alumni_id=$account";
+        $result = $conn->query($sql);
+        $row = $result->fetch_assoc();
+
+        if ($row['status'] == "Verified") {
+            // User is a verified alumni
+            header('Location: ../../alumniPage/dashboard_user.php');
+            exit();
+        } else {
+
+            $_SESSION['email'] = $account_email;
+            $_SESSION['alert'] = 'Unverified';
+            sleep(2);
+            header('Location: ../../loginPage/verification_code.php');
+            exit();
+        }
+    }
 } else {
-    echo "User not logged in.";
+    // Redirect to login if no matching user found
+    session_destroy();
+    header('Location: ../../homepage.php');
+    exit();
 }
 
 

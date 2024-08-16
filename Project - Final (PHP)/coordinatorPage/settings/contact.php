@@ -1,12 +1,8 @@
 <?php
 session_start();
+$conn = new mysqli("localhost", "root", "", "alumni_management_system");
 
-$servername = "localhost";
-$db_username = "root";
-$db_password = "";
-$db_name = "alumni_management_system";
-$conn = new mysqli($servername, $db_username, $db_password, $db_name);
-
+// SESSION
 if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     $account = $_SESSION['user_id'];
     $account_email = $_SESSION['user_email'];
@@ -36,6 +32,18 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     }
     $stmt->close();
 
+    // Check if user is a alumni_archive
+    $stmt = $conn->prepare("SELECT * FROM alumni_archive WHERE alumni_id = ? AND email = ?");
+    $stmt->bind_param("ss", $account, $account_email);
+    $stmt->execute();
+    $user_result = $stmt->get_result();
+
+    if ($user_result->num_rows > 0) {
+        session_destroy();
+        header("Location: ../../homepage.php");
+    }
+    $stmt->close();
+
     // Check if user is an alumni
     $stmt = $conn->prepare("SELECT * FROM alumni WHERE alumni_id = ? AND email = ?");
     $stmt->bind_param("ss", $account, $account_email);
@@ -43,17 +51,31 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     $user_result = $stmt->get_result();
 
     if ($user_result->num_rows > 0) {
-        // User is an alumni
-        header('Location: ../../alumniPage/dashboard_user.php');
-        exit();
+        $sql = "SELECT * FROM alumni WHERE alumni_id=$account";
+        $result = $conn->query($sql);
+        $row = $result->fetch_assoc();
+
+        if ($row['status'] == "Verified") {
+            // User is a verified alumni
+            header('Location: ../../alumniPage/dashboard_user.php');
+            exit();
+        } else {
+
+            $_SESSION['email'] = $account_email;
+            $_SESSION['alert'] = 'Unverified';
+            sleep(2);
+            header('Location: ../../loginPage/verification_code.php');
+            exit();
+        }
     }
-    $stmt->close();
-    
 } else {
+    // Redirect to login if no matching user found
+    session_destroy();
     header('Location: ../../homepage.php');
     exit();
 }
-$title = "";
+
+
 $address = "";
 $contact = "";
 $email = "";

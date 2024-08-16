@@ -60,19 +60,11 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
       header('Location: ../alumniPage/dashboard_user.php');
       exit();
     } else {
-      // WARNING NOT VERIFIED
-      $icon = 'warning';
-      $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
-      $title = 'Account Not Verified!';
-      $text = 'Verified your Account First to continue.';
-      $redirectUrl = './verification_code.php';
-
-      echo "<script>
-              document.addEventListener('DOMContentLoaded', function() {
-                  alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
-              });
-          </script>";
-      sleep(3);
+      $_SESSION['email'] = $account_email;
+      $_SESSION['alert'] = 'Unverified';
+      sleep(2);
+      header('Location: ./verification_code.php');
+      exit();
     }
   }
   $stmt->close();
@@ -132,7 +124,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
                 alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
               });
             </script>";
-          sleep(3);
+          sleep(2);
         } else {
           // Redirect to login if no matching user found
           session_destroy();
@@ -152,7 +144,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
               warningError('$title', '$text', '$icon', '$iconHtml');
             });
           </script>";
-        sleep(3);
+        sleep(2);
       }
     } // BACK BUTTON
     else if (isset($_POST['back_btn'])) {
