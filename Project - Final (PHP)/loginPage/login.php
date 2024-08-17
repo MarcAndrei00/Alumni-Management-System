@@ -322,6 +322,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
 
+    $hashedpassword = password_hash($password, PASSWORD_BCRYPT); // Hashing the password
+    $hashedpassword = password_hash($confirm_password, PASSWORD_BCRYPT); // Hashing the password
+
     // Check if email or student ID exists in both the active and archive tables
     $emailCheck = mysqli_query($conn, "SELECT * FROM alumni WHERE email='$email'");
     $emailCheck_archive = mysqli_query($conn, "SELECT * FROM alumni_archive WHERE email='$email'");
@@ -360,7 +363,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
     } else {
         // Check if password and confirm password match
         if ($password !== $confirm_password) {
-
+            
             // WARNING NOT MATCH PASSWORD
             $icon = 'warning';
             $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
@@ -391,13 +394,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
                     $imageDataEscaped = addslashes($imageData);
 
                     // Update graduate information
-                    $sql = "UPDATE list_of_graduate SET email='$email', password='$password', picture='$imageDataEscaped' WHERE student_id='$stud_id'";
+                    $sql = "UPDATE list_of_graduate SET email='$email', password='$hashedpassword', picture='$imageDataEscaped' WHERE student_id='$stud_id'";
                     $result = $conn->query($sql);
 
                     // Insert into alumni table
                     $sql_restore = "INSERT INTO alumni (student_id, fname, mname, lname, gender, course, contact, address, email, password, picture, date_created) 
-                                SELECT student_id, fname, mname, lname, gender, course, contact, address, '$email', '$password', '$imageDataEscaped', date_created 
-                                FROM list_of_graduate WHERE student_id='$stud_id'";
+                        SELECT student_id, fname, mname, lname, gender, course, contact, address, '$email', '$hashedpassword', '$imageDataEscaped', date_created 
+                        FROM list_of_graduate WHERE student_id='$stud_id'";
                     $conn->query($sql_restore);
 
                     $sql = "SELECT * FROM list_of_graduate WHERE student_id=$stud_id";
@@ -523,14 +526,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
 // LOGIN CHECK FOR ADMIN AND COORDINATOR
 function check_login($conn, $table, $log_email, $pass)
 {
-    $sql = "SELECT * FROM $table WHERE email = ? AND password = ? LIMIT 1";
+    $sql = "SELECT * FROM $table WHERE email = ? LIMIT 1";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("ss", $log_email, $pass);
+    $stmt->bind_param("s", $log_email);
     $stmt->execute();
     $result = $stmt->get_result();
 
     if ($result->num_rows > 0) {
-        return $result->fetch_assoc();
+        $user = $result->fetch_assoc(); {
+            return $user;
+        }
     }
 
     return false;
@@ -539,14 +544,17 @@ function check_login($conn, $table, $log_email, $pass)
 // LOGIN CHECK FOR ALUMNI
 function check_alumni($conn, $table, $log_email, $pass)
 {
-    $sql = "SELECT * FROM $table WHERE (student_id = ? OR email = ?) AND password = ? LIMIT 1";
+    $sql = "SELECT * FROM $table WHERE (student_id = ? OR email = ?) LIMIT 1";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sss", $log_email, $log_email, $pass);
+    $stmt->bind_param("ss", $log_email, $log_email);
     $stmt->execute();
     $result = $stmt->get_result();
 
     if ($result->num_rows > 0) {
-        return $result->fetch_assoc();
+        $user = $result->fetch_assoc();
+        if (password_verify($pass, $user['password'])) {
+            return $user;
+        }
     }
     return false;
 }
@@ -554,14 +562,17 @@ function check_alumni($conn, $table, $log_email, $pass)
 // ALUMNI ARCHIVE CHECKER
 function check_alumni_archive($conn, $table, $log_email, $pass)
 {
-    $sql = "SELECT * FROM $table WHERE (student_id = ? OR email = ?) AND password = ? LIMIT 1";
+    $sql = "SELECT * FROM $table WHERE (student_id = ? OR email = ?) LIMIT 1";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sss", $log_email, $log_email, $pass);
+    $stmt->bind_param("ss", $log_email, $log_email);
     $stmt->execute();
     $result = $stmt->get_result();
 
     if ($result->num_rows > 0) {
-        return $result->fetch_assoc();
+        $user = $result->fetch_assoc();
+        if (password_verify($pass, $user['password'])) {
+            return $user;
+        }
     }
     return false;
 }
@@ -596,7 +607,7 @@ $errors = array();
     <div class="container" id="container">
         <div class="form-container sign-up-container">
             <form action="#" method="POST" id="signup">
-                <h1>Sign Up</h1>    
+                <h1>Sign Up</h1>
                 <div class="alert alert-danger text-center error-list" id="real-time-errors"></div>
                 <div class="infield">
                     <input type="text" id="student_id" placeholder="Student ID" name="student_id" value="<?php echo htmlspecialchars($stud_id); ?>" required />
@@ -608,14 +619,14 @@ $errors = array();
                 </div>
                 <div class="infield" style="position: relative;">
                     <input type="password" placeholder="Password" id="password" name="password" onkeyup="validatePassword()" value="<?php echo htmlspecialchars($password); ?>" min="0" required />
-                    <img id="togglePassword" src="eye-close.png" alt="Show/Hide Password"  onclick="togglePasswordVisibility('password', 'togglePassword')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;" />
+                    <img id="togglePassword" src="eye-close.png" alt="Show/Hide Password" onclick="togglePasswordVisibility('password', 'togglePassword')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;" />
                     <label></label>
                 </div>
                 <div class="infield" style="position: relative;">
                     <input type="password" placeholder="Confirm Password" id="confirm_password" onkeyup="validatePassword()" name="confirm_password" value="<?php echo htmlspecialchars($confirm_password); ?>" required />
-                    <img id="toggleConfirmPassword" src="eye-close.png" alt="Show/Hide Password"  onclick="togglePasswordVisibility('confirm_password', 'toggleConfirmPassword')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;" />
+                    <img id="toggleConfirmPassword" src="eye-close.png" alt="Show/Hide Password" onclick="togglePasswordVisibility('confirm_password', 'toggleConfirmPassword')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;" />
                     <label></label>
-                </div>  
+                </div>
                 <button type="submit" name="submit">Sign Up</button>
             </form>
         </div>
@@ -819,20 +830,15 @@ $errors = array();
             } else {
                 if (password.length < 8) {
                     errorMessages.push("Password must be at least 8 characters long.");
-                }
-                else if (!/[A-Z]/.test(password)) {
+                } else if (!/[A-Z]/.test(password)) {
                     errorMessages.push("Password must contain at least one uppercase letter.");
-                }
-                else if (!/[a-z]/.test(password)) {
+                } else if (!/[a-z]/.test(password)) {
                     errorMessages.push("Password must contain at least one lowercase letter.");
-                }
-                else if (!/\d/.test(password)) {
+                } else if (!/\d/.test(password)) {
                     errorMessages.push("Password must contain at least one digit.");
-                }
-                else if (!/[^a-zA-Z\d]/.test(password)) {
+                } else if (!/[^a-zA-Z\d]/.test(password)) {
                     errorMessages.push("Password must contain at least one special character.");
-                }
-                else if (confirmPassword && password !== confirmPassword) {
+                } else if (confirmPassword && password !== confirmPassword) {
                     errorMessages.push("Passwords do not match.");
                 }
             }
