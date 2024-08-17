@@ -71,7 +71,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 
     // Handle form submission
     if (isset($_POST['submit'])) {
-        $new_pass = $_POST['new_password'];
+        $new_pass = $_POST['password'];
         $confirm_pass = $_POST['confirm_password'];
 
         if ($new_pass === $confirm_pass) {
@@ -88,20 +88,6 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
             echo "<script>
                     document.addEventListener('DOMContentLoaded', function() {
                         alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
-                    });
-                </script>";
-            sleep(2);
-        } else {
-
-            // ERROR NOT EXIST
-            $icon = 'error';
-            $iconHtml = '<i class=\"fas fa-exclamation-circle\"></i>';
-            $title = 'Password does not match!';
-            $text = 'Please try again.';
-
-            echo "<script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        warningError('$title', '$text', '$icon', '$iconHtml');
                     });
                 </script>";
             sleep(2);
@@ -177,6 +163,25 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
             width: 48px;
             height: 48px;
         }
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border: 1px solid #f5c6cb;
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+
+        .error-message {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        #real-time-errors {
+            display: none; /* Hidden by default */
+        }
     </style>
 </head>
 
@@ -187,14 +192,15 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
                 <div class="text-center mb-4">
                     <img src="cvsu.png" alt="Warning Icon" class="icon-size">
                 </div>
+                <div class="alert alert-danger text-center error-list" id="real-time-errors"></div>
                 <h5 class="text-center mb-4">New Password</h5>
                 <form method="POST">
                     <div class="form-group" style="position: relative;">
-                        <input type="password" name="new_password" class="form-control" id="password" placeholder="Create new password" required>
+                        <input type="password" name="password" class="form-control" id="password" onkeyup="validatePassword()" placeholder="Create new password" required>
                         <img id="togglePassword" src="eye-close.png" alt="Show/Hide Password" onclick="togglePasswordVisibility('password', 'togglePassword')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;" />
                     </div>
                     <div class="form-group" style="position: relative;">
-                        <input type="password" name="confirm_password" class="form-control" id="confirm_password" placeholder="Confirm your password" required>
+                        <input type="password" name="confirm_password" class="form-control" id="confirm_password" onkeyup="validatePassword()" placeholder="Confirm your password" required>
                         <img id="toggleConfirmPassword" src="eye-close.png" alt="Show/Hide Password" onclick="togglePasswordVisibility('confirm_password', 'toggleConfirmPassword')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;" />
                     </div>
                     <button type="submit" name="submit" class="btn btn-primary btn-block">Change</button>
@@ -253,6 +259,57 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
                 confirmButtonText: 'OK',
                 timer: 5000,
             });
+        }
+        function validatePassword() {
+            var password = document.getElementById("password").value;
+            var confirmPassword = document.getElementById("confirm_password").value;
+            var errorMessages = [];
+            var errorContainer = document.getElementById("real-time-errors");
+
+            // Clear previous error messages
+            errorContainer.innerHTML = "";
+
+            // Validation rules
+
+            if (password === '') {
+                errorContainer.style.display = 'none';
+                return;
+            } else {
+                if (password.length < 8) {
+                    errorMessages.push("Password must be at least 8 characters long.");
+                }
+                else if (!/[A-Z]/.test(password)) {
+                    errorMessages.push("Password must contain at least one uppercase letter.");
+                }
+                else if (!/[a-z]/.test(password)) {
+                    errorMessages.push("Password must contain at least one lowercase letter.");
+                }
+                else if (!/\d/.test(password)) {
+                    errorMessages.push("Password must contain at least one digit.");
+                }
+                else if (!/[^a-zA-Z\d]/.test(password)) {
+                    errorMessages.push("Password must contain at least one special character.");
+                }
+                else if (confirmPassword && password !== confirmPassword) {
+                    errorMessages.push("Passwords do not match.");
+                }
+            }
+
+            // Display error messages
+            if (errorMessages.length > 0) {
+                errorMessages.forEach(function(error) {
+                    var p = document.createElement("p");
+                    p.innerText = error;
+                    p.className = "error-message";
+                    errorContainer.appendChild(p);
+                });
+
+                // Ensure the error container is visible
+                errorContainer.style.display = 'block';
+            } else {
+                // Hide the error container if there are no errors
+                errorContainer.style.display = 'none';
+            }
         }
     </script>
 

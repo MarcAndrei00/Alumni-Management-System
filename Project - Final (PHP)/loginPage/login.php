@@ -565,6 +565,13 @@ function check_alumni_archive($conn, $table, $log_email, $pass)
     }
     return false;
 }
+
+// SIGNUP STRONG PASSWORD
+
+$errors = array();
+
+
+
 ?>
 
 <!DOCTYPE html>
@@ -589,8 +596,8 @@ function check_alumni_archive($conn, $table, $log_email, $pass)
     <div class="container" id="container">
         <div class="form-container sign-up-container">
             <form action="#" method="POST" id="signup">
-                <h1>Sign Up</h1>
-
+                <h1>Sign Up</h1>    
+                <div class="alert alert-danger text-center error-list" id="real-time-errors"></div>
                 <div class="infield">
                     <input type="text" id="student_id" placeholder="Student ID" name="student_id" value="<?php echo htmlspecialchars($stud_id); ?>" required />
                     <label></label>
@@ -600,15 +607,15 @@ function check_alumni_archive($conn, $table, $log_email, $pass)
                     <label></label>
                 </div>
                 <div class="infield" style="position: relative;">
-                    <input type="password" placeholder="Password" id="password" name="password" value="<?php echo htmlspecialchars($password); ?>" min="0" required />
-                    <img id="togglePassword" src="eye-close.png" alt="Show/Hide Password" onclick="togglePasswordVisibility('password', 'togglePassword')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;" />
+                    <input type="password" placeholder="Password" id="password" name="password" onkeyup="validatePassword()" value="<?php echo htmlspecialchars($password); ?>" min="0" required />
+                    <img id="togglePassword" src="eye-close.png" alt="Show/Hide Password"  onclick="togglePasswordVisibility('password', 'togglePassword')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;" />
                     <label></label>
                 </div>
                 <div class="infield" style="position: relative;">
-                    <input type="password" placeholder="Confirm Password" id="confirm_password" name="confirm_password" value="<?php echo htmlspecialchars($confirm_password); ?>" required />
-                    <img id="toggleConfirmPassword" src="eye-close.png" alt="Show/Hide Password" onclick="togglePasswordVisibility('confirm_password', 'toggleConfirmPassword')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;" />
+                    <input type="password" placeholder="Confirm Password" id="confirm_password" onkeyup="validatePassword()" name="confirm_password" value="<?php echo htmlspecialchars($confirm_password); ?>" required />
+                    <img id="toggleConfirmPassword" src="eye-close.png" alt="Show/Hide Password"  onclick="togglePasswordVisibility('confirm_password', 'toggleConfirmPassword')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;" />
                     <label></label>
-                </div>
+                </div>  
                 <button type="submit" name="submit">Sign Up</button>
             </form>
         </div>
@@ -793,6 +800,58 @@ function check_alumni_archive($conn, $table, $log_email, $pass)
         function disableButton(form) {
             const submitButton = form.querySelector('button[type="submit"]');
             submitButton.disabled = true;
+        }
+
+        function validatePassword() {
+            var password = document.getElementById("password").value;
+            var confirmPassword = document.getElementById("confirm_password").value;
+            var errorMessages = [];
+            var errorContainer = document.getElementById("real-time-errors");
+
+            // Clear previous error messages
+            errorContainer.innerHTML = "";
+
+            // Validation rules
+
+            if (password === '') {
+                errorContainer.style.display = 'none';
+                return;
+            } else {
+                if (password.length < 8) {
+                    errorMessages.push("Password must be at least 8 characters long.");
+                }
+                else if (!/[A-Z]/.test(password)) {
+                    errorMessages.push("Password must contain at least one uppercase letter.");
+                }
+                else if (!/[a-z]/.test(password)) {
+                    errorMessages.push("Password must contain at least one lowercase letter.");
+                }
+                else if (!/\d/.test(password)) {
+                    errorMessages.push("Password must contain at least one digit.");
+                }
+                else if (!/[^a-zA-Z\d]/.test(password)) {
+                    errorMessages.push("Password must contain at least one special character.");
+                }
+                else if (confirmPassword && password !== confirmPassword) {
+                    errorMessages.push("Passwords do not match.");
+                }
+            }
+
+            // Display error messages
+            if (errorMessages.length > 0) {
+                errorMessages.forEach(function(error) {
+                    var p = document.createElement("p");
+                    p.innerText = error;
+                    p.className = "error-message";
+                    errorContainer.appendChild(p);
+                });
+
+                // Ensure the error container is visible
+                errorContainer.style.display = 'block';
+            } else {
+                // Hide the error container if there are no errors
+                errorContainer.style.display = 'none';
+            }
         }
     </script>
 </body>

@@ -7,6 +7,10 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     $account = $_SESSION['user_id'];
     $account_email = $_SESSION['user_email'];
 
+    $user_pass = mysqli_query($conn,"SELECT password FROM alumni WHERE alumni_id = '$account'");
+    $current_pass = mysqli_fetch_assoc($user_pass);
+    $_SESSION['current_pass'] = $current_pass['password'];
+
     // Check if user is an admin
     $stmt = $conn->prepare("SELECT * FROM admin WHERE admin_id = ? AND email = ?");
     $stmt->bind_param("ss", $account, $account_email);
@@ -241,19 +245,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <span>
                                 <h3>CHANGE PASSWORD</h3>
                             </span>
+                            <div class="alert alert-danger text-center error-list" id="real-time-errors"></div>
                             <br>
                             <form method="POST" onsubmit="return submitForm(this);">
-                                <div class="mb-3">
+                                <div class="mb-3" class="infield" style="position: relative;">
                                     <label for="formGroupExampleInput" class="form-label">Enter Current Password</label>
-                                    <input type="text" name="currentPass" class="form-control" id="formGroupExampleInput" required>
+                                    <input type="hidden" id="current_passwordd" value="<?php echo $_SESSION['current_pass'] ?>">
+                                    <input type="password" name="currentPass" class="form-control" id="formGroupExampleInput" onkeyup="validatePassword()" required>
+                                    <img id="togglePassword" src="eye-close.png" alt="Show/Hide Password"  onclick="togglePasswordVisibility('formGroupExampleInput', 'togglePassword')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 75%; transform: translateY(-50%); cursor: pointer;" />
                                 </div>
-                                <div class="mb-3">
+                                <div class="mb-3" class="infield" style="position: relative;">
                                     <label for="formGroupExampleInput2" class="form-label">Change Password</label>
-                                    <input type="password" name="newPass" class="form-control" id="formGroupExampleInput2" required>
+                                    <input type="password" name="newPass" class="form-control" id="formGroupExampleInput2" onkeyup="validatePassword()" required>
+                                    <img id="togglePasswordd" src="eye-close.png" alt="Show/Hide Password"  onclick="togglePasswordVisibility('formGroupExampleInput2', 'togglePasswordd')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 75%; transform: translateY(-50%); cursor: pointer;" />
                                 </div>
-                                <div class="mb-3">
+                                <div class="mb-3" class="infield" style="position: relative;">
                                     <label for="formGroupExampleInput2" class="form-label">Confirm Password</label>
-                                    <input type="password" name="confirmPass" class="form-control" id="formGroupExampleInput2" required>
+                                    <input type="password" name="confirmPass" class="form-control" id="formGroupExampleInput3"onkeyup="validatePassword()" required>
+                                    <img id="toggleConfirmPassword" src="eye-close.png" alt="Show/Hide Password"  onclick="togglePasswordVisibility('formGroupExampleInput3', 'toggleConfirmPassword')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 75%; transform: translateY(-50%); cursor: pointer;" />
                                 </div>
                                 <div class="row">
                                     <div class="container-fluid">
@@ -295,6 +304,75 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     }
                 });
             return false; // Prevent default form submission
+        }
+        function togglePasswordVisibility(passwordId, toggleId) {
+            var passwordField = document.getElementById(passwordId);
+            var toggleIcon = document.getElementById(toggleId);
+
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                toggleIcon.src = 'eye-open.png'; // Use the image for showing password
+            } else {
+                passwordField.type = 'password';
+                toggleIcon.src = 'eye-close.png'; // Use the image for hiding password
+            }
+        }
+        function validatePassword() {
+            var current_password = document.getElementById("current_passwordd").value;
+            var entered_password = document.getElementById("formGroupExampleInput").value;
+            var new_password = document.getElementById("formGroupExampleInput2").value;
+            var confirm_password = document.getElementById("formGroupExampleInput3").value;
+            var errorMessages = [];
+            var errorContainer = document.getElementById("real-time-errors");
+
+            // Clear previous error messages
+            errorContainer.innerHTML = "";
+
+            // Validation for current password
+            if (entered_password !== '') {
+                if (current_password !== entered_password) {
+                    errorMessages.push("Your current password doesn't match.");
+                }
+            }else if (new_password !== '') {
+                if (new_password.length < 8) {
+                    errorMessages.push("Password must be at least 8 characters long.");
+                }
+                else if (!/[A-Z]/.test(new_password)) {
+                    errorMessages.push("Password must contain at least one uppercase letter.");
+                }
+                else if (!/[a-z]/.test(new_password)) {
+                    errorMessages.push("Password must contain at least one lowercase letter.");
+                }
+                else if (!/\d/.test(new_password)) {
+                    errorMessages.push("Password must contain at least one digit.");
+                }
+                else if (!/[^a-zA-Z\d]/.test(new_password)) {
+                    errorMessages.push("Password must contain at least one special character.");
+                }
+                else if (confirm_password && new_password !== confirm_password) {
+                    errorMessages.push("Passwords do not match.");
+                }
+            }
+             else {
+                errorContainer.style.display = 'none';
+                return;
+            }
+
+            // Display error messages
+            if (errorMessages.length > 0) {
+                errorMessages.forEach(function(error) {
+                    var p = document.createElement("p");
+                    p.innerText = error;
+                    p.className = "error-message";
+                    errorContainer.appendChild(p);
+                });
+
+                // Ensure the error container is visible
+                errorContainer.style.display = 'block';
+            } else {
+                // Hide the error container if there are no errors
+                errorContainer.style.display = 'none';
+            }
         }
     </script>
 </body>

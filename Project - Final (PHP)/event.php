@@ -1,7 +1,10 @@
 <?php
+require_once('vendor/autoload.php');
+
 session_start();
 $conn = new mysqli("localhost", "root", "", "alumni_management_system");
 
+$client = new \GuzzleHttp\Client(); 
 // SESSION
 if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     $account = $_SESSION['user_id'];
@@ -64,6 +67,48 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     }
 }
 
+if(isset($_POST['submit_btn'])){
+    $payment = $_POST['donation_amount'];
+
+    // Multiply the payment by 100 to convert it to cents
+    $paymentInCents = $payment * 100;
+
+    $_SESSION['paymentInCents'] = $paymentInCents;
+
+    // Define the request body with the required description
+    $requestBody = [
+        'data' => [
+            'attributes' => [
+                'amount' => $paymentInCents,
+                'description' => 'Payment for your donation',  // Add a description here
+                'redirect' => [
+                    'success' => 'http://6320-2001-4450-4fab-3b00-e9fc-5a3b-d425-9f0a.ngrok-free.app/event.php',  // Redirect on successful payment
+                    'failed' => 'http://6320-2001-4450-4fab-3b00-e9fc-5a3b-d425-9f0a.ngrok-free.app/event.php'  // Redirect on failed payment
+                ]
+            ]
+        ]
+    ];
+
+    // Send the request to the PayMongo API
+    $response = $client->request('POST', 'https://api.paymongo.com/v1/links', [
+        'body' => json_encode($requestBody),  // Convert the request body to JSON
+        'headers' => [
+            'accept' => 'application/json',
+            'authorization' => 'Basic c2tfdGVzdF9QSEUyUTNlQ3luc1lOcWNhYW03ejRFenk6',
+            'content-type' => 'application/json',
+        ],
+    ]);
+
+    // Decode the JSON response
+    $responseData = json_decode($response->getBody(), true);
+    
+    // Extract the checkout URL
+    $checkoutUrl = $responseData['data']['attributes']['checkout_url'];
+    
+    // Redirect the user to the checkout URL
+    header('Location: ' . $checkoutUrl);
+    exit(); // Terminate the script to ensure the redirect happens
+}
 // Read data from table alumni
 $sql = "SELECT * FROM event";
 $result = $conn->query($sql);
@@ -704,9 +749,9 @@ $result = $conn->query($sql);
                                 <p class="card-text"><small class="text-muted"><b>ADDRESS: </b><?php echo $row['address']; ?></small></p>
                                 <!-- Buttons for Donation and View Details -->
                                 <div class="buttons buttons1">
-                                    <a href="#" class="btn btn-success btn-donate">Donate</a>
+                                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#donateModal">
                                     <a href="./loginPage/login.php" class="btn btn-info btn-view-details">View Details</a>
-                                </div>
+                                </div>  
                             </div>
                         </div>
                     </div>
@@ -727,7 +772,7 @@ $result = $conn->query($sql);
                                 <p class="card-text"><small class="text-muted"><b>ADDRESS: </b><?php echo $row['address']; ?></small></p>
                                 <!-- Buttons for Donation and View Details -->
                                 <div class="buttons">
-                                    <a href="#" class="btn btn-success btn-donate">Donate</a>
+                                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#donateModal">
                                     <a href="./loginPage/login.php" class="btn btn-info btn-view-details">View Details</a>
                                 </div>
                             </div>
@@ -744,6 +789,43 @@ $result = $conn->query($sql);
         echo "<p>No events found.</p>";
     }
     ?>
+    
+    <div class="modal fade" id="donateModal" tabindex="-1" aria-labelledby="donateModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="donateModalLabel">Donate</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST">
+                        <div class="form-group">
+                            <label for="donorName">Name</label>
+                            <input type="text" name="name" class="form-control" id="donorName" placeholder="Enter your name">
+                        </div>
+                        <div class="form-group">
+                            <label for="donorEmail">Email</label>
+                            <input type="email" name="email" class="form-control" id="donorEmail" placeholder="Enter your email">
+                        </div>
+                        <div class="form-group">
+                            <label for="donorEmail">Contact Number</label>
+                            <input type="number" name="contact_number" class="form-control" id="donorNumber" placeholder="Enter your email">
+                        </div>
+                        <div class="form-group">
+                            <label for="donationAmount">Donation Amount</label>
+                            <input type="number" name="donation_amount" class="form-control" id="donationAmount" placeholder="Enter amount">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <button type="submit" name="submit_btn" class="btn btn-success">Donate</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <footer class="footer">
         <div class="container">
