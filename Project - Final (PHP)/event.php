@@ -1,5 +1,5 @@
 <?php
-require_once('vendor/autoload.php');
+require_once('../vendor/autoload.php');
 
 session_start();
 $conn = new mysqli("localhost", "root", "", "alumni_management_system");
@@ -82,8 +82,8 @@ if(isset($_POST['submit_btn'])){
                 'amount' => $paymentInCents,
                 'description' => 'Payment for your donation',  // Add a description here
                 'redirect' => [
-                    'success' => 'http://6320-2001-4450-4fab-3b00-e9fc-5a3b-d425-9f0a.ngrok-free.app/event.php',  // Redirect on successful payment
-                    'failed' => 'http://6320-2001-4450-4fab-3b00-e9fc-5a3b-d425-9f0a.ngrok-free.app/event.php'  // Redirect on failed payment
+                    'success' => 'http://localhost/LATEST ITEC75A/Project - Final (PHP)/event.php',  // Redirect on successful payment
+                    'failed' => 'http://localhost/LATEST ITEC75A/Project - Final (PHP)/event.php'  // Redirect on failed payment
                 ]
             ]
         ]
@@ -803,19 +803,19 @@ $result = $conn->query($sql);
                     <form method="POST">
                         <div class="form-group">
                             <label for="donorName">Name</label>
-                            <input type="text" name="name" class="form-control" id="donorName" placeholder="Enter your name">
+                            <input type="text" name="name" class="form-control" id="donorName" placeholder="Enter your name" required>
                         </div>
                         <div class="form-group">
                             <label for="donorEmail">Email</label>
-                            <input type="email" name="email" class="form-control" id="donorEmail" placeholder="Enter your email">
+                            <input type="email" name="email" class="form-control" id="donorEmail" placeholder="Enter your email" required>
                         </div>
                         <div class="form-group">
                             <label for="donorEmail">Contact Number</label>
-                            <input type="number" name="contact_number" class="form-control" id="donorNumber" placeholder="Enter your email">
+                            <input type="number" name="contact_number" class="form-control" id="donorNumber" placeholder="Enter your contact number" required>
                         </div>
                         <div class="form-group">
                             <label for="donationAmount">Donation Amount</label>
-                            <input type="number" name="donation_amount" class="form-control" id="donationAmount" placeholder="Enter amount">
+                            <input type="number" name="donation_amount" class="form-control" id="donationAmount" placeholder="Enter amount" required>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
