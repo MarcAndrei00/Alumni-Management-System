@@ -261,10 +261,6 @@ if (isset($_GET['id'])) {
                                                 <label for="disabledTextInput" class="form-label">EMAIL ADDRESS</label>
                                                 <input email="email" id="disabledTextInput" class="form-control" value="<?php echo htmlspecialchars($email); ?>" />
                                             </div>
-                                            <div class="mb-3">
-                                                <label for="disabledTextInput" class="form-label">PASSWORD</label>
-                                                <input password="password" id="disabledTextInput" class="form-control" value="<?php echo htmlspecialchars($password); ?>" />
-                                            </div>
                                         </fieldset>
                                     </form>
                                 </div>

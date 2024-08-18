@@ -100,20 +100,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $confirmPass = $_POST['confirmPass'];
     $userId = $_GET['id'];
 
+    // Fetch the current hashed password from the database
     $query = "SELECT password FROM alumni WHERE alumni_id = $userId";
     $result = mysqli_query($conn, $query);
     $account = mysqli_fetch_assoc($result);
 
-    // Check if the current password is correct
-    if ($currentPass !== $account['password']) {
+    // Check if the current password matches the hashed password stored in the database
+    if (!password_verify($currentPass, $account['password'])) {
         $errorMessage = "Current password is incorrect.";
     }
     // Check if new password and confirm password match
     elseif ($newPass !== $confirmPass) {
         $errorMessage = "New password and confirm password do not match.";
     } else {
+        // Hash the new password
+        $hashedpassword = password_hash($newPass, PASSWORD_BCRYPT);
+
         // Update the password in the database
-        $updateQuery = "UPDATE alumni SET password = '$newPass' WHERE alumni_id = $userId";
+        $updateQuery = "UPDATE alumni SET password = '$hashedpassword' WHERE alumni_id = $userId";
         if (mysqli_query($conn, $updateQuery)) {
             echo "
             <script>
