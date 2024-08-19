@@ -528,7 +528,7 @@ if ($Message == 'import') {
                                     <div class="dropdown ms-2">
                                         <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="eventForDropdown" onclick="toggleDropdown()" style="height: 100%; width: 430px;">Select Courses</button>
                                         <div id="eventForMenu" class="dropdown-menu" style="display:none; position: absolute; background-color: white; border: 1px solid #ccc; padding: 10px;">
-                                            <label><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)" checked> ALL</label><br>
+                                            <label><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)" checked> All Courses</label><br>
                                             <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BAJ" checked> Batchelor of Arts in Journalism</label><br>
                                             <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BECEd" checked> Bachelor Of Secondary Education</label><br>
                                             <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BEEd" checked> Bachelor Of Elementary Education</label><br>

@@ -363,7 +363,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['log_email']) && isset(
     } else {
         // Check if password and confirm password match
         if ($password !== $confirm_password) {
-            
+
             // WARNING NOT MATCH PASSWORD
             $icon = 'warning';
             $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
@@ -533,7 +533,8 @@ function check_login($conn, $table, $log_email, $pass)
     $result = $stmt->get_result();
 
     if ($result->num_rows > 0) {
-        $user = $result->fetch_assoc(); {
+        $user = $result->fetch_assoc();
+        if (password_verify($pass, $user['password'])) {
             return $user;
         }
     }

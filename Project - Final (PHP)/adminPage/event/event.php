@@ -372,6 +372,7 @@ if (isset($_GET['ide'])) {
                                     <th scope="col" class="inline">VENUE</th>
                                     <th scope="col" class="inline">ADDRESS</th>
                                     <th scope="col" class="inline">DESCRIPTION</th>
+                                    <th scope="col" class="inline">EVENT FOR</th>
                                     <th scope="col" class="inline">GOING</th>
                                     <th scope="col" class="inline">INTERESTED</th>
                                     <th scope="col" class="inline">NOT INTERESTED</th>
@@ -393,6 +394,7 @@ if (isset($_GET['ide'])) {
                                             <td class="inline"><?php echo $row['venue'] ?></td>
                                             <td class="inline"><?php echo $row['address'] ?></td>
                                             <td class="inline"><?php echo $row['description'] ?></td>
+                                            <td class="inline"><?php echo $row['event_for'] ?></td>
                                             <td class="inline"><?php echo $row['going'] ?></td>
                                             <td class="inline"><?php echo $row['interested'] ?></td>
                                             <td class="inline"><?php echo $row['not_interested'] ?></td>

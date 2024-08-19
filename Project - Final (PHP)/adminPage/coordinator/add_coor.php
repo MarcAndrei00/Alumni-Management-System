@@ -118,7 +118,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $result = $conn->query($sql);
 
         $tempPass = sprintf("%06d", mt_rand(1, 999999));
-        $stmt = $conn->prepare("UPDATE coordinator SET password = '$tempPass' WHERE email = ?");
+        $hashedpassword = password_hash($tempPass, PASSWORD_BCRYPT);
+
+        $stmt = $conn->prepare("UPDATE coordinator SET password = '$hashedpassword' WHERE email = ?");
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $stmt->close();

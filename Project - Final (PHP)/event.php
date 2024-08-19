@@ -447,6 +447,56 @@ $result = $conn->query($sql);
             }
         }
 
+
+        .mission-section {
+            padding: 100px 40px;
+            background-color: #0F5132;
+            margin: 0;
+        }
+
+        .mission-section .container {
+            position: relative;
+            z-index: 1;
+            background-color: #fff;
+            padding: 60px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            max-width: 1900px;
+        }
+
+        .mission-section .row {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .mission-section .col-lg-6 {
+            flex: 1;
+            min-width: 100px;
+        }
+
+        .mission-section img {
+            height: auto;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .mission-section h2 {
+            margin-bottom: 20px;
+            font-size: 2.5rem;
+            font-weight: 700;
+        }
+
+        .mission-section p {
+            font-size: 1.3rem;
+            line-height: 1.6;
+            color: #555;
+            text-align: justify;
+            font-style: 'poppins';
+
+        }
+
         .vision-section {
             padding: 100px 40px;
             background-color: #0F5123;

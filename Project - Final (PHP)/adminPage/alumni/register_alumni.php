@@ -121,7 +121,9 @@ if (isset($_GET['id'])) {
 
 
     $tempPass = sprintf("%06d", mt_rand(1, 999999));
-    $stmt = $conn->prepare("UPDATE alumni SET password = '$tempPass' WHERE student_id = ?");
+    $hashedpassword = password_hash($tempPass, PASSWORD_BCRYPT);
+    
+    $stmt = $conn->prepare("UPDATE alumni SET password = '$hashedpassword' WHERE student_id = ?");
     $stmt->bind_param("s", $stud_id);
     $stmt->execute();
     $stmt->close();

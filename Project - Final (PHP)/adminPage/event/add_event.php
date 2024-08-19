@@ -83,8 +83,6 @@ $venue = "";
 $address = "";
 $eventFor = [];
 
-
-// get the data from form
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $title = strtoupper($_POST['title']);
     $date = $_POST['date'];
@@ -94,9 +92,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $address = $_POST['address'];
     $description = ucwords($_POST['description']);
 
+    // Get selected eventFor values from the form
+    if (isset($_POST['eventFor'])) {
+        $eventFor = $_POST['eventFor'];
+    }
+
     // List of all possible course values
     $allCourses = ['BAJ', 'BECEd', 'BEEd', 'BSBM', 'BSOA', 'BSEntrep', 'BSHM', 'BSIT', 'BSCS', 'BSc(Psych)'];
-
 
     // Check if $eventFor contains all courses
     if (array_diff($allCourses, $eventFor) === []) {
@@ -104,8 +106,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     } else {
         $eventForString = implode(',', $eventFor);
     }
-
-
 
     // for image
     if (isset($_FILES["image"]) && $_FILES["image"]["error"] == 0) {
@@ -125,7 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $icon = 'success';
     $iconHtml = '<i class="fas fa-check-circle"></i>';
     $title = 'Event added successfully.';
-    $redirectUrl = './coordinator.php';
+    $redirectUrl = './event.php';
 
     echo "<script>
             document.addEventListener('DOMContentLoaded', function() {
@@ -193,6 +193,37 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             display: flex;
             gap: 10px;
             /* Adjust the gap as needed */
+        }
+
+        .center-image {
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .dropdown-menu {
+            max-height: absolute;
+            /* Limit the height of the dropdown menu */
+            overflow-y: auto;
+            /* Add scroll if content exceeds height */
+            padding: 0;
+            /* Remove extra padding if needed */
+        }
+
+        .dropdown-menu label {
+            display: block;
+            /* Ensure each label takes up a full line */
+            margin-bottom: 5px;
+            /* Space between items */
+            white-space: nowrap;
+            /* Prevent text from wrapping */
+        }
+
+        .dropdown-menu input[type="checkbox"] {
+            margin-right: 10px;
+            /* Space between checkbox and label text */
         }
     </style>
 </head>
@@ -330,19 +361,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <div class="mb-3">
                                 <label for="eventForDropdown">Event For:</label>
                                 <div class="dropdown">
-                                    <button class="form-control" type="button" id="eventForDropdown" onclick="toggleDropdown()" style="width:160px;">Select Courses</button>
+                                    <button class="form-control" type="button" id="eventForDropdown" onclick="toggleDropdown()" style="height: 100%; width: 430px;">Select Courses</button>
                                     <div id="eventForMenu" class="dropdown-menu" style="display:none; position: absolute; background-color: white; border: 1px solid #ccc; padding: 10px;">
-                                        <label><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)" checked> ALL</label><br>
-                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BAJ" checked> BAJ</label><br>
-                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BECEd" checked> BECEd</label><br>
-                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BEEd" checked> BEEd</label><br>
-                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSBM" checked> BSBM</label><br>
-                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSOA" checked> BSOA</label><br>
-                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSEntrep" checked> BSEntrep</label><br>
-                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSHM" checked> BSHM</label><br>
-                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSIT" checked> BSIT</label><br>
-                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSCS" checked> BSCS</label><br>
-                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSc(Psych)" checked> BSc(Psych)</label>
+                                        <label><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)" checked> All Courses</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BAJ" checked> Batchelor of Arts in Journalism</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BECEd" checked> Bachelor Of Secondary Education</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BEEd" checked> Bachelor Of Elementary Education</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSBM" checked> Bachelor Of Science In Business Management</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSOA" checked> Bachelor of Science in Office Administration</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSEntrep" checked> Bachelor Of Science In Entrepreneurship</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSHM" checked> Bachelor Of Science In Hospitality Management</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSIT" checked> Bachelor of Science in Information Technology</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSCS" checked> Bachelor of Science in Computer Science</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSc(Psych)" checked> Bachelor Of Science In Psychology</label>
                                     </div>
                                 </div>
 
@@ -357,12 +388,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 <div class="container-fluid">
                                     <div class="row">
                                         <div class="mb-3">
-                                            <input class="form-control" type="file" name="image" onchange="getImagePreview(event)">
+                                            <input class="form-control" type="file" id="image" name="image" onchange="getImagePreview(event)">
                                         </div>
                                         <div class="col-md-12 mb-md-0 p-md-12" style="text-align: center;">
                                             <?php if (!empty($row['image'])): ?>
-                                                <!-- for display image -->
-                                                <img id="preview" src="data:image/jpeg;base64,<?php echo base64_encode($row['image']); ?>" alt="EVENT IMAGE">
+                                                <!-- Display image from the database -->
+                                                <img id="preview" src="data:image/jpeg;base64,<?php echo base64_encode($row['image']); ?>" alt="EVENT IMAGE" class="center-image">
+                                            <?php else: ?>
+                                                <!-- Placeholder for the image preview -->
+                                                <img id="preview" src="#" alt="EVENT IMAGE" class="center-image" style="display: none;">
                                             <?php endif; ?>
                                         </div>
                                     </div>
@@ -384,51 +418,39 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </div>
         </form>
     </div>
-    <!-- <script>
-        let eventPic = document.getElementById("event-pic");
-        let formFile = document.getElementById("formFile");
 
-        formFile.onchange = function() {
-            eventPic.src = URL.createObjectURL(formFile.files[0]);
-        }
-    </script> -->
     <!-- Script to display preview of selected image -->
     <script>
+        
         function getImagePreview(event) {
             var file = event.target.files[0];
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                var img = new Image();
-                img.onload = function() {
-                    var canvas = document.createElement('canvas');
-                    var ctx = canvas.getContext('2d');
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    ctx.drawImage(img, 0, 0, img.width, img.height);
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function(e) {
                     var preview = document.getElementById('preview');
-                    preview.src = canvas.toDataURL('image/jpeg'); // Adjust format if needed
+                    preview.src = e.target.result;
+                    preview.style.display = 'block'; // Show the image preview
                 };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
+                reader.readAsDataURL(file);
+            }
         }
 
-        // script to insert image to database
+        // Image validation and insertion script (optional)
         $(document).ready(function() {
             $('#insert').click(function() {
                 var image_name = $('#image').val();
                 if (image_name == '') {
-                    alert("please Select Profile")
+                    alert("Please select an image.");
                     return false;
                 } else {
                     var extension = $('#image').val().split('.').pop().toLowerCase();
-                    if (jquery.inArray(extenssion, ['gif', 'png', 'jpg', 'jpeg']) == -1) {
-                        alert("Invalid Image File")
+                    if ($.inArray(extension, ['gif', 'png', 'jpg', 'jpeg']) == -1) {
+                        alert("Invalid image file.");
                         $('#image').val('');
                         return false;
                     }
                 }
-            })
+            });
         });
 
         // FOR DROPDOWN CHECKLIST
@@ -462,47 +484,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             });
             document.getElementById('selectAll').checked = true;
         };
-
-
-        // Ensure SweetAlert2 is loaded
-        // document.addEventListener('DOMContentLoaded', function() {
-        //     console.log("DOM fully loaded and parsed");
-
-        //     const forms = document.querySelectorAll('.addNew');
-
-        //     forms.forEach(function(form) {
-        //         console.log("Attaching event listener to form:", form);
-
-        //         form.addEventListener('submit', function(event) {
-        //             event.preventDefault();
-        //             console.log("Form submit event triggered");
-
-        //             Swal.fire({
-        //                 title: 'Are you sure you want to continue?',
-        //                 icon: 'warning',
-        //                 iconHtml: '<i class="fas fa-exclamation-triangle"></i>',
-        //                 text: 'Once you proceed, this action cannot be undone.',
-        //                 showCancelButton: true,
-        //                 confirmButtonColor: '#e03444',
-        //                 cancelButtonColor: '#ffc404',
-        //                 confirmButtonText: 'Ok',
-        //                 cancelButtonText: 'Cancel',
-        //                 customClass: {
-        //                     confirmButton: 'confirm-button-class',
-        //                     cancelButton: 'cancel-button-class'
-        //                 }
-        //             }).then((result) => {
-        //                 if (result.isConfirmed) {
-        //                     console.log("User confirmed action");
-        //                     form.submit(); // Submit the form if confirmed
-        //                 } else {
-        //                     console.log("User canceled action");
-        //                 }
-        //             });
-        //         });
-        //     });
-        // });
-
 
         // FOR MESSAGEBOX WITHOUT TEXT ONLY
         function noTextRedirect(redirectUrl, title, icon, iconHtml) {
