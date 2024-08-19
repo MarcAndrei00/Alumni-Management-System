@@ -44,7 +44,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
   $row = $user_result->fetch_assoc();
 
   if ($user_result->num_rows > 0) {
-    
+
     $sql = "SELECT * FROM alumni WHERE alumni_id=$account";
     $result = $conn->query($sql);
     $row = $result->fetch_assoc();
@@ -66,7 +66,6 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     header('Location: ./login.php');
     exit();
   }
-  
 }
 // NO ACCOUNT IN SESSION
 else {
@@ -156,15 +155,16 @@ else {
       margin: 0;
     }
 
+
     .background {
-      background-image: url('bg2.png');
+      background-image: url("../assets/logins.jpg");
       /* Update the path accordingly if necessary */
       background-position: center;
-      background-repeat: no-repeat;
       background-size: cover;
+      opacity: blur(100px);
+      /* Adjust the blur level as needed */
       height: 100%;
       display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
     }
@@ -208,21 +208,24 @@ else {
 </head>
 
 <body>
+
   <div class="background">
     <div class="card">
-      <div class="card-body">
-        <div class="text-center mb-4">
-          <img src="cvsu.png" alt="Warning Icon" class="icon-size">
-        </div>
-        <h5 class="text-center mb-4">Forgot Password</h5>
-        <p class="text-center mb-4">Enter your email and we'll send you a link to reset your password.</p>
-        <form method="POST">
-          <div class="form-group">
-            <input type="email" name="email" class="form-control" id="email" placeholder="Enter your email" required>
+      <div>
+        <div class="card-body">
+          <div class="text-center mb-4">
+            <img src="cvsu.png" alt="Warning Icon" class="icon-size">
           </div>
-          <button type="submit" name="submit" class="btn btn-primary btn-block">Submit</button>
-        </form>
-        <a href="login.php" class="back-to-login">Back to Login</a>
+          <h5 class="text-center mb-4">Forgot Password</h5>
+          <p class="text-center mb-4">Enter your email and we'll send you a link to reset your password.</p>
+          <form method="POST">
+            <div class="form-group">
+              <input type="email" name="email" class="form-control" id="email" placeholder="Enter your email" required>
+            </div>
+            <button type="submit" name="submit" class="btn btn-primary btn-block">Submit</button>
+          </form>
+          <a href="login.php" class="back-to-login">Back to Login</a>
+        </div>
       </div>
     </div>
   </div>

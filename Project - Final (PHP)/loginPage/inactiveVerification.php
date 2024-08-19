@@ -235,7 +235,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     }
 
     .background {
-      background-image: url('bg2.png');
+      background-image: url("../assets/logins.jpg");
       /* Update the path accordingly if necessary */
       background-position: center;
       background-repeat: no-repeat;
