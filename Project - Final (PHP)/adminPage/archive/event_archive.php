@@ -1,7 +1,5 @@
 <?php
 session_start();
-
-session_start();
 $conn = new mysqli("localhost", "root", "", "alumni_management_system");
 
 // SESSION
@@ -117,21 +115,16 @@ $total_pages = ceil($total_records / $records_per_page);
 
 
 if (isset($_GET['ide'])) {
-    echo "
-        <script>
-        // Wait for the document to load
+    $icon = 'success';
+    $iconHtml = '<i class="fas fa-check-circle"></i>';
+    $title = 'Event restored successfully';
+
+    echo "<script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Use SweetAlert2 for the alert
-            Swal.fire({
-                title: 'Event Restored Successfully',
-                timer: 2000,
-                showConfirmButton: true, // Show the confirm button
-                confirmButtonColor: '#4CAF50', // Set the button color to green
-                confirmButtonText: 'OK' // Change the button text if needed
-            });
+            noTextMessage('$title', '$icon', '$iconHtml');
         });
-    </script>
-    ";
+    </script>";
+    sleep(2);
 }
 ?>
 
@@ -152,10 +145,41 @@ if (isset($_GET['ide'])) {
     </script>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- FOR PAGINATION -->
     <style>
+        /* FOR SWEETALERT */
+        .swal2-popup {
+            padding-bottom: 30px;
+            /* Adjust the padding as needed */
+        }
+
+        .confirm-button-class,
+        .cancel-button-class {
+            width: 150px;
+            /* Set the desired width */
+            height: 40px;
+            /* Set the desired height */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .confirm-button-class {
+            background-color: #e03444 !important;
+            color: white;
+        }
+
+        .cancel-button-class {
+            background-color: #ffc404 !important;
+            color: white;
+        }
+
+        /* FOR SWEETALERT  END LINE*/
+
+
         /*  DESIGN FOR SEARCH BAR AND PAGINATION */
         table {
             width: 100%;
@@ -370,7 +394,6 @@ if (isset($_GET['ide'])) {
                             <thead>
 
                                 <tr>
-                                    <th scope="col" class="inline">ID</th>
                                     <th scope="col" class="inline">TITLE</th>
                                     <th scope="col" class="inline">DATE</th>
                                     <th scope="col" class="inline">TIME</th>
@@ -380,7 +403,7 @@ if (isset($_GET['ide'])) {
                                     <th scope="col" class="inline">GOING</th>
                                     <th scope="col" class="inline">INTERESTED</th>
                                     <th scope="col" class="inline">NOT INTERESTED</th>
-                                    <th scope="col" class="inline">DATE CREATED</th>
+                                    <th scope="col" class="inline">DATE ARCHIVE</th>
                                     <th scope="col" class="inline">ACTION</th>
                                 </tr>
                             </thead>
@@ -392,7 +415,6 @@ if (isset($_GET['ide'])) {
 
                                 ?>
                                         <tr>
-                                            <td class="inline"><?php echo $row['event_id'] ?></td>
                                             <td class="inline"><?php echo $row['title'] ?></td>
                                             <td class="inline"><?php echo $row['date'] ?></td>
                                             <td class="inline"><?php echo htmlspecialchars($time) ?></td>
@@ -402,13 +424,12 @@ if (isset($_GET['ide'])) {
                                             <td class="inline"><?php echo $row['going'] ?></td>
                                             <td class="inline"><?php echo $row['interested'] ?></td>
                                             <td class="inline"><?php echo $row['not_interested'] ?></td>
-                                            <td class="inline"><?php echo $row['date_created'] ?></td>
+                                            <td class="inline"><?php echo $row['date_archived'] ?></td>
                                             <?php
                                             echo "
                                                 <td class='inline act'>
                                                     <div class='button'>
-                                                        <a class='btn btn-warning btn-sm' href='./update_event.php?id=$row[event_id]' style='font-size: 11.8px;'>Update</a>
-                                                        <a class='btn btn-danger btn-sm archive' href='./del_event.php?id=$row[event_id]' style='font-size: 11.8px;'>Archive</a>
+                                                        <a class='btn btn-success btn-sm archive' href='./restore_event.php?id=$row[event_id]' style='font-size: 11.8px;'>Restore</a>
                                                     </div>
                                                 </td>
                                             "; ?>
@@ -488,12 +509,19 @@ if (isset($_GET['ide'])) {
                         const href = this.getAttribute('href'); // Get the href attribute
 
                         Swal.fire({
-                            title: 'Do you want to continue?',
+                            title: 'Are you sure you want to continue?',
                             icon: 'warning',
+                            iconHtml: '<i class="fas fa-exclamation-triangle"></i>',
+                            text: 'Once you proceed, this action cannot be undone.',
                             showCancelButton: true,
                             confirmButtonColor: '#e03444',
                             cancelButtonColor: '#ffc404',
-                            confirmButtonText: 'Continue'
+                            confirmButtonText: 'Ok',
+                            cancelButtonText: 'Cancel',
+                            customClass: {
+                                confirmButton: 'confirm-button-class',
+                                cancelButton: 'cancel-button-class'
+                            }
                         }).then((result) => {
                             if (result.isConfirmed) {
                                 window.location.href = href; // Proceed with the navigation if confirmed
@@ -502,6 +530,22 @@ if (isset($_GET['ide'])) {
                     });
                 });
             });
+
+            // FOR MESSAGEBOX WITHOUT TEXT AND REDIRECT
+            function noTextMessage(title, icon, iconHtml) {
+                Swal.fire({
+                    icon: icon,
+                    iconHtml: iconHtml, // Custom icon using Font Awesome
+                    title: title,
+                    customClass: {
+                        popup: 'swal-custom'
+                    },
+                    showConfirmButton: true,
+                    confirmButtonColor: '#4CAF50',
+                    confirmButtonText: 'OK',
+                    timer: 5000
+                });
+            }
         </script>
 </body>
 

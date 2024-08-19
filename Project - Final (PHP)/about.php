@@ -195,7 +195,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
             font-weight: 700;
             /* Updated font */
             text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
-            color: #ffffff;
+            color: #fff;
             border-right: 0.15em solid #ffffff;
             /* Blinking cursor */
             white-space: nowrap;
@@ -261,7 +261,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
             font-size: 1.8rem;
             margin-top: 10px;
             font-weight: 600;
-            color: #ffffff;
+            color: #fec20c;
             cursor: pointer;
             text-decoration: none;
             padding: 15px 25px;
@@ -334,6 +334,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
             font-size: 4rem;
             margin: 0;
             animation: bounceIn 1s ease-out;
+            color: #fec20c;
         }
 
         @keyframes bounceIn {
@@ -698,7 +699,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     <section class="hero-section">
         <img src="assets/Imus-Campus-scaled.jpg" alt="Graduation Image" style="height: 550px;">
         <div class="overlay">
-            <h1><b>WELCOME ALUMNI</b></h1>
+            <h1><b>DISCOVER US</b></h1>
 
         </div>
     </section>
@@ -773,6 +774,220 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 
         </div>
     </section>
+
+    <section class="hello-heroes-section" data-aos="fade-up">
+        <h2><b>MEET OUR TEAM</b></h2>
+    </section>
+
+    <section id="team" style="background-color: #f4f4f4; padding: 40px 0;">
+    <div class="container">
+        <h2 style="text-align: center; font-family: 'Poppins', sans-serif;">TEAM LEADER</h2>
+        <div class="row justify-content-center">
+            <!-- Team Leader (Centered) -->
+            <div class="col-lg-4 col-md-6 mb-4 text-center">
+                <div class="team-member">
+                    <img src="assets/marc.jpeg" alt="Marc Andrei A. Toledo">
+                    <h3>Marc Andrei A. Toledo</h3>
+                    <p>Front-End</p>
+                    <!-- Animated Overlay Text -->
+                    <div class="team_overlay">
+                        <div class="animated-text">Marc leads our team with a clear vision and unmatched creativity. His knack for intuitive designs ensures that our users always have an engaging and seamless experience.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2 style="text-align: center; font-family: 'Poppins', sans-serif;">MEMBERS</h2>
+        <div class="row justify-content-center">
+            <!-- Team Members -->
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="team-member">
+                    <img src="assets/nix.jpeg" alt="Carlos jr O. Nicol">
+                    <h3>Carlos jr O. Nicol</h3>
+                    <p>Back-End</p>
+                    <div class="team_overlay">
+                        <div class="animated-text">Carlos is our go-to for anything on the back-end. His ability to create solid, scalable systems is the backbone of our project, keeping everything running smoothly.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="team-member">
+                    <img src="assets/jam.jpg" alt="Jamaielyn Z. Gascon">
+                    <h3>Jamaielyn Z. Gascon</h3>
+                    <p>Front-End</p>
+                    <div class="team_overlay">
+                        <div class="animated-text">Jam brings a fresh perspective to the team, combining creativity with technical skills to design user interfaces that truly stand out.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="team-member">
+                    <img src="assets/alen.jpeg" alt="Alen N. Fidelis">
+                    <h3>Alen N. Fidelis</h3>
+                    <p>Back-End</p>
+                    <div class="team_overlay">
+                        <div class="animated-text">Alen is all about efficiency and security. He makes sure our data flows securely and seamlessly, giving our project the solid foundation it needs.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="team-member">
+                    <img src="assets/jeps.jpeg" alt="John Patrick P. Macaspac">
+                    <h3>John Patrick P. Macaspac</h3>
+                    <p>Front-End</p>
+                    <div class="team_overlay">
+                        <div class="animated-text">JP is our front-end dynamo, always pushing the boundaries to create responsive, user-friendly interfaces that keep users engaged.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="team-member">
+                    <img src="assets/par.jpg" alt="John Patrick B. Par">
+                    <h3>John Patrick B. Par</h3>
+                    <p>Front-End</p>
+                    <div class="team_overlay">
+                        <div class="animated-text">John Patrick blends creativity with precision, crafting front-end designs that are not only beautiful but also highly functional and accessible.</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="team-member">
+                    <img src="assets/niel.jpg" alt="Dhaneil D. Lofamia">
+                    <h3>Dhaneil D. Lofamia</h3>
+                    <p>Back-End</p>
+                    <div class="team_overlay">
+                        <div class="animated-text">Dhaneil is a back-end wizard with a talent for solving complex problems. His work ensures that our systems are not just functional but optimized for performance.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+
+
+/* Container for team members */
+.team-member-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around; /* Distribute space between items */
+  align-items: stretch; /* Make all items the same height */
+}
+
+/* Individual team member card */
+.team-member {
+  width: 300px; /* Set a fixed width for uniformity */
+  height: 350px; /* Set a fixed height */
+  padding: 20px;
+  margin: 10px;
+  box-sizing: border-box;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* Profile image */
+.team-member img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover; /* Ensures the image maintains aspect ratio */
+  margin: 0 auto; /* Center the image */
+}
+
+/* Name and Role */
+.team-member h3, .team-member p {
+  font-family: 'Poppins', sans-serif;
+  margin: 10px 0;
+}
+
+/* Team title */
+.team-title {
+  text-align: center;
+  margin-bottom: 30px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 24px;
+  font-weight: bold;
+}
+
+    .team-member {
+        background-color: #ffffff;
+        padding: 20px;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+        max-width: 300px;
+        margin: 0 auto;
+    }
+
+    .team-member img {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        margin-bottom: 15px;
+        object-fit: cover;
+    }
+
+    .team-member h3 {
+        font-family: 'Poppins', sans-serif;
+        font-weight: bold;
+    }
+
+    .team-member p {
+        font-family: 'Poppins', sans-serif;
+        color: #555;
+        text-align: justify;
+    }
+
+    /* Hover and animation effects */
+    .team-member:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    /* team_overlay styling */
+    .team_overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background-color: rgba(0, 0, 0, 0.7);
+        height: 0;
+        overflow: hidden;
+        transition: height 0.4s ease;
+    }
+
+    .team-member:hover .team_overlay {
+        height: 100%;
+    }
+
+    .animated-text {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        color: #fff;
+        font-family: 'Poppins', sans-serif;
+        font-weight: bold;
+        text-align: center;
+        padding: 20px;
+        transform: translateY(100%);
+        transition: transform 0.4s ease;
+    }
+
+    .team-member:hover .animated-text {
+        transform: translateY(0);
+    }
+</style>
+
 
     <footer class="footer">
         <div class="container">

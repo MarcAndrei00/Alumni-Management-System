@@ -31,6 +31,7 @@ if ($alertMessage == 'Unverified') {
           });
         </script>";
       $alertMessage = 'Verified';
+      $_SESSION['alert'] = $alertMessage;
 }
 
 

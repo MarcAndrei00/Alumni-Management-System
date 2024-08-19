@@ -1,5 +1,11 @@
 <?php
 session_start();
+
+// IMPORTANT CODE ---------------
+use PHPMailer\PHPMailer\PHPMailer;
+
+require '../../vendor/autoload.php';
+
 $conn = new mysqli("localhost", "root", "", "alumni_management_system");
 
 // SESSION
@@ -89,40 +95,69 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $lname = ucwords($_POST['lname']);
     $contact = $_POST['contact'];
     $email = strtolower($_POST['email']);
-    $temp_password = $_POST['temp_pass'];
-
 
     // email and user existing check
     $emailCheck = mysqli_query($conn, "SELECT * FROM coordinator WHERE email='$email'");
     $emailCheck_archive = mysqli_query($conn, "SELECT * FROM coordinator_archive WHERE email='$email'");
 
-    if (mysqli_num_rows($emailCheck) > 0) {
-        $errorMessage = "Email Already Exists";
-        
-    } else if (mysqli_num_rows($emailCheck_archive) > 0) {
-        $errorMessage = "Email Already Exists";
-        
+    if (mysqli_num_rows($emailCheck) > 0 || mysqli_num_rows($emailCheck_archive) > 0) {
+        // WARNING EXISTING ACCOUNT
+        $icon = 'warning';
+        $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
+        $title = 'Email Already Exists!';
+        $text = 'Please try again.';
+
+        echo "<script>
+              document.addEventListener('DOMContentLoaded', function() {
+                  warningError('$title', '$text', '$icon', '$iconHtml');
+              });
+          </script>";
+        sleep(2);
     } else {
-        $sql = "INSERT INTO coordinator SET fname='$fname', mname='$mname', lname='$lname', contact='$contact', email='$email', password='$temp_password'";
+        $sql = "INSERT INTO coordinator SET fname='$fname', mname='$mname', lname='$lname', contact='$contact', email='$email'";
         $result = $conn->query($sql);
-        echo "
-            <script>
-                // Wait for the document to load
+
+        $tempPass = sprintf("%06d", mt_rand(1, 999999));
+        $stmt = $conn->prepare("UPDATE coordinator SET password = '$tempPass' WHERE email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $stmt->close();
+        $mail = new PHPMailer(true);
+
+        $mail->isSMTP();
+        $mail->Host       = 'smtp.gmail.com';
+        $mail->SMTPAuth   = true;
+        $mail->Username   = 'alumni.management07@gmail.com'; //NOTE gawa ka ng new email account nyo gaya nito, yan kasi ang magiging bridge/ sya ang mag sesend ng email
+        $mail->Password   = 'kcio bmde ffvc sfar';           // di ako sude dito pero eto ata ung password ng email / pagdi tanong mo nalang kay Nyel
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;  // pwede nyo rin naman gamitin nayang email namin pero hingi kalang muna permission kay dhaniel pre, 
+        $mail->Port       = 587;
+
+        $mail->setFrom('alumni.management07@gmail.com', 'Alumni Management'); // eto ung email at yung name ng email na makikita sa una
+        $mail->addAddress($email);
+
+        $mail->isHTML(true);
+        $mail->Subject = 'Account Update'; // eto ung mga laman ng email na isesend
+        $mail->Body    = 'Your account has been created by alumni administrator.
+                    <br>Your Email:<b>' . $email . '</b>.
+                    <br>Your Temporary password:<b>' . $tempPass . '</b>.
+                    <br><br>Do not forget to change password once you login.
+                    <br>Thank you and have a nice day. 
+                    <br><br>This is an automated message please do not reply.';
+        $mail->AltBody = 'Your account has been registered by alumni administrator.';
+
+        $mail->send();
+
+        $icon = 'success';
+        $iconHtml = '<i class="fas fa-check-circle"></i>';
+        $title = 'Coordinator added Successfully.';
+        $redirectUrl = './coordinator.php';
+
+        echo "<script>
                 document.addEventListener('DOMContentLoaded', function() {
-                    // Use SweetAlert2 for the alert
-                    Swal.fire({
-                            title: 'Coordinator Added Successfully',
-                            timer: 2000,
-                            showConfirmButton: true, // Show the confirm button
-                            confirmButtonColor: '#4CAF50', // Set the button color to green
-                            confirmButtonText: 'OK' // Change the button text if needed
-                    }).then(function() {
-                        // Redirect after the alert closes
-                        window.location.href = './coordinator.php';
-                    });
+                    noTextRedirect('$redirectUrl', '$title', '$icon', '$iconHtml');
                 });
-            </script>
-            ";
+            </script>";
+        sleep(2);
     }
 }
 ?>
@@ -141,7 +176,39 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <link rel="stylesheet" href="	https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        /* FOR SWEETALERT */
+        .swal2-popup {
+            padding-bottom: 30px;
+            /* Adjust the padding as needed */
+        }
+
+        .confirm-button-class,
+        .cancel-button-class {
+            width: 150px;
+            /* Set the desired width */
+            height: 40px;
+            /* Set the desired height */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .confirm-button-class {
+            background-color: #e03444 !important;
+            color: white;
+        }
+
+        .cancel-button-class {
+            background-color: #ffc404 !important;
+            color: white;
+        }
+
+        /* FOR SWEETALERT  END LINE*/
+    </style>
 </head>
 
 <body>
@@ -153,7 +220,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         <div class="side-content">
             <div class="profile">
-            <i class="bi bi-person-circle"></i>
+                <i class="bi bi-person-circle"></i>
                 <h4><?php echo $user['fname']; ?></h4>
                 <small style="color: white;"><?php echo $user['email']; ?></small>
             </div>
@@ -240,22 +307,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <div class="container-title">
                     <span>Add New Account</span>
                 </div>
-
-                <?php
-                if (!empty($errorMessage)) {
-                    echo "<script>";
-                    echo "Swal.fire({";
-                    echo "  icon: 'error',";
-                    echo "  title: 'Oops...',";
-                    echo "  text: '$errorMessage',";
-                    echo "  timer: 2000,";
-                    echo "})";
-                    echo "</script>";
-                }
-                ?>
-
                 <div class="container" id="content">
-                    <form action="" method="POST" enctype="multipart/form-data">
+                    <form action="" method="POST" class="addNew" enctype="multipart/form-data">
                         <div class="container">
                             <div class="row align-items-end">
                                 <div class="col">
@@ -309,16 +362,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             </div>
                         </div>
                         <div class="container">
-                            <div class="row align-items-end">
-                                <div class="col">
-                                    <label class="col-sm-3 col-form-label" style="font-size: 20px;" for="username">Temporary Password:</label>
-                                </div>
-                                <div class="col">
-                                    <input class="form-control" type="text" id="temp_pass" name="temp_pass" placeholder="Enter Password" required value="<?php echo $temp_password; ?>">
-                                </div>
-                            </div>
-                        </div>
-                        <div class="container">
                             <div class="row" style="margin-top:20px;">
                                 <div class="col" id="buttons">
                                     <div class="button">
@@ -336,44 +379,99 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     <!-- SCRIPT FOR DATCH SELECTOR -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const startYearSelect = document.getElementById('startYear');
-            const endYearSelect = document.getElementById('endYear');
+        // Ensure SweetAlert2 is loaded
+        // document.addEventListener('DOMContentLoaded', function() {
+        //     console.log("DOM fully loaded and parsed");
 
-            // Disable endYear select by default if no start year is selected
-            if (!startYearSelect.value) {
-                endYearSelect.disabled = true;
-            } else {
-                populateEndYearOptions(parseInt(startYearSelect.value));
-            }
+        //     const forms = document.querySelectorAll('.addNew');
 
-            startYearSelect.addEventListener('change', function() {
-                const selectedStartYear = parseInt(this.value);
-                endYearSelect.disabled = false;
+        //     forms.forEach(function(form) {
+        //         console.log("Attaching event listener to form:", form);
 
-                populateEndYearOptions(selectedStartYear);
+        //         form.addEventListener('submit', function(event) {
+        //             event.preventDefault();
+        //             console.log("Form submit event triggered");
+
+        //             Swal.fire({
+        //                 title: 'Are you sure you want to continue?',
+        //                 icon: 'warning',
+        //                 iconHtml: '<i class="fas fa-exclamation-triangle"></i>',
+        //                 text: 'Once you proceed, this action cannot be undone.',
+        //                 showCancelButton: true,
+        //                 confirmButtonColor: '#e03444',
+        //                 cancelButtonColor: '#ffc404',
+        //                 confirmButtonText: 'Ok',
+        //                 cancelButtonText: 'Cancel',
+        //                 customClass: {
+        //                     confirmButton: 'confirm-button-class',
+        //                     cancelButton: 'cancel-button-class'
+        //                 }
+        //             }).then((result) => {
+        //                 if (result.isConfirmed) {
+        //                     console.log("User confirmed action");
+        //                     form.submit(); // Submit the form if confirmed
+        //                 } else {
+        //                     console.log("User canceled action");
+        //                 }
+        //             });
+        //         });
+        //     });
+        // });
+
+
+        // FOR MESSAGEBOX
+        function alertMessage(redirectUrl, title, text, icon, iconHtml) {
+            Swal.fire({
+                icon: icon,
+                iconHtml: iconHtml, // Custom icon using Font Awesome
+                title: title,
+                text: text,
+                customClass: {
+                    popup: 'swal-custom'
+                },
+                showConfirmButton: true,
+                confirmButtonColor: '#4CAF50',
+                confirmButtonText: 'OK',
+                timer: 5000
+            }).then(() => {
+                window.location.href = redirectUrl; // Redirect to the desired page
             });
+        }
 
-            function populateEndYearOptions(selectedStartYear) {
-                const currentYear = new Date().getFullYear();
-                const yearRange = 21; // Adjust this number as needed
-                const selectedEndYear = endYearSelect.getAttribute('data-selected'); // Get the selected end year
+        // WARNING FOR DUPE ACCOUNT
+        function warningError(title, text, icon, iconHtml) {
+            Swal.fire({
+                icon: icon,
+                iconHtml: iconHtml, // Custom icon using Font Awesome
+                title: title,
+                text: text,
+                customClass: {
+                    popup: 'swal-custom'
+                },
+                showConfirmButton: true,
+                confirmButtonColor: '#4CAF50',
+                confirmButtonText: 'OK',
+                timer: 5000,
+            });
+        }
 
-                // Clear current endYear options
-                endYearSelect.innerHTML = '<option value="" selected hidden disabled>Batch: To Year</option>';
-
-                // Generate new options for endYear
-                for (let year = selectedStartYear + 1; year <= currentYear + yearRange; year++) {
-                    const option = document.createElement('option');
-                    option.value = year;
-                    option.textContent = year;
-                    if (year == selectedEndYear) {
-                        option.selected = true; // Preserve the selected end year
-                    }
-                    endYearSelect.appendChild(option);
-                }
-            }
-        });
+        // FOR MESSAGEBOX WITHOUT TEXT ONLY
+        function noTextRedirect(redirectUrl, title, icon, iconHtml) {
+            Swal.fire({
+                icon: icon,
+                iconHtml: iconHtml, // Custom icon using Font Awesome
+                title: title,
+                customClass: {
+                    popup: 'swal-custom'
+                },
+                showConfirmButton: true,
+                confirmButtonColor: '#4CAF50',
+                confirmButtonText: 'OK',
+                timer: 5000
+            }).then(() => {
+                window.location.href = redirectUrl; // Redirect to the desired page
+            });
+        }
     </script>
 </body>
 

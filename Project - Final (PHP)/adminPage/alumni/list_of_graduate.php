@@ -131,22 +131,92 @@ $total_pages = ceil($total_records / $records_per_page);
 
 
 if (isset($_GET['ide'])) {
-    echo "
-        <script>
-        // Wait for the document to load
+    $icon = 'success';
+    $iconHtml = '<i class="fas fa-check-circle"></i>';
+    $title = 'Account added successfully';
+
+    echo "<script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Use SweetAlert2 for the alert
-            Swal.fire({
-                title: 'Account Archived Successfully',
-                timer: 2000,
-                showConfirmButton: true, // Show the confirm button
-                confirmButtonColor: '#4CAF50', // Set the button color to green
-                confirmButtonText: 'OK' // Change the button text if needed
-            });
+            noTextMessage('$title', '$icon', '$iconHtml');
         });
-    </script>
-    ";
+    </script>";
 }
+
+
+// FOR IMPORT EXCEL
+if (isset($_SESSION['import'])) {
+    $Message = $_SESSION['import'];
+} else {
+    $Message = 'noImport';
+}
+
+if ($Message == 'import') {
+    $icon = 'success';
+    $iconHtml = '<i class="fas fa-check-circle"></i>';
+    $title = 'New records has been successfully.';
+
+    echo "<script>
+            document.addEventListener('DOMContentLoaded', function() {
+                noTextMessage('$title', '$icon', '$iconHtml');
+            });
+        </script>";
+    sleep(2);
+    $Message = 'noImport';
+    $_SESSION['import'] = $Message;
+} else if ($Message == 'uptodate') {
+    $icon = 'warning';
+    $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
+    $title = 'The records are up-to-date.';
+
+    echo "<script>
+            document.addEventListener('DOMContentLoaded', function() {
+                noTextMessage('$title', '$icon', '$iconHtml');
+            });
+        </script>";
+    sleep(2);
+    $Message = 'noImport';
+    $_SESSION['import'] = $Message;
+} else if ($Message == 'errorOpening') {
+    $icon = 'error';
+    $iconHtml = '<i class=\"fas fa-exclamation-circle\"></i>';
+    $title = 'Error Opening File.';
+
+    echo "<script>
+            document.addEventListener('DOMContentLoaded', function() {
+                noTextMessage('$title', '$icon', '$iconHtml');
+            });
+        </script>";
+    sleep(2);
+    $Message = 'noImport';
+    $_SESSION['import'] = $Message;
+} else if ($Message == 'errorImporting') {
+    $icon = 'error';
+    $iconHtml = '<i class=\"fas fa-exclamation-circle\"></i>';
+    $title = 'Error Importing Data: ' . mysqli_error($conn);
+
+    echo "<script>
+            document.addEventListener('DOMContentLoaded', function() {
+                noTextMessage('$title', '$icon', '$iconHtml');
+            });
+        </script>";
+    sleep(2);
+    $Message = 'noImport';
+    $_SESSION['import'] = $Message;
+} else if ($Message == 'invalid') {
+    $icon = 'error';
+    $iconHtml = '<i class=\"fas fa-exclamation-circle\"></i>';
+    $title = 'Invalid File: Please Upload CSV or Excel File.';
+
+    echo "<script>
+            document.addEventListener('DOMContentLoaded', function() {
+                noTextMessage('$title', '$icon', '$iconHtml');
+            });
+        </script>";
+    sleep(2);
+    $Message = 'noImport';
+    $_SESSION['import'] = $Message;
+}
+
 ?>
 
 
@@ -166,10 +236,41 @@ if (isset($_GET['ide'])) {
     </script>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- FOR PAGINATION -->
     <style>
+        /* FOR SWEETALERT */
+        .swal2-popup {
+            padding-bottom: 30px;
+            /* Adjust the padding as needed */
+        }
+
+        .confirm-button-class,
+        .cancel-button-class {
+            width: 150px;
+            /* Set the desired width */
+            height: 40px;
+            /* Set the desired height */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .confirm-button-class {
+            background-color: #e03444 !important;
+            color: white;
+        }
+
+        .cancel-button-class {
+            background-color: #ffc404 !important;
+            color: white;
+        }
+
+        /* FOR SWEETALERT  END LINE*/
+
+
         /*  DESIGN FOR SEARCH BAR AND PAGINATION */
         table {
             width: 100%;
@@ -363,7 +464,7 @@ if (isset($_GET['ide'])) {
                                 <div class="search">
                                     <form class="d-flex" action="import.php" method="post" name="upload_excel" enctype="multipart/form-data">
                                         <div class="container-fluid" id="search">
-                                            <input class="form-control me-2" type="file" name="file" id="file" required >
+                                            <input class="form-control me-2" type="file" name="file" id="file" required>
                                             <button class="btn btn-success" type="submit" id="submit" name="Import" data-loading-text="Loading..." style="padding-left: 34px; padding-right: 34px;">Upload</button>
                                         </div>
                                     </form>
@@ -448,7 +549,8 @@ if (isset($_GET['ide'])) {
                                             <?php
                                             echo "
                                                 <td class='inline act'>
-                                                    <a class='btn btn-info btn-sm' href='./graduate_info.php?id=$row[alumni_id]' style='font-size: 11.8px;'>More Info</a>
+                                                    <a class='btn btn-success btn-sm addAlumni' href='./register_alumni.php?id=$row[alumni_id]' style='font-size: 11.8px; padding: 5px 10px; width: 80px; text-align: center;'>Add</a>
+                                                    <a class='btn btn-info btn-sm' href='./graduate_info.php?id=$row[alumni_id]' style='font-size: 11.8px; padding: 5px 10px; width: 80px; text-align: center;'>More Info</a>
                                                 </td>
                                             "; ?>
                                         </tr>
@@ -514,7 +616,7 @@ if (isset($_GET['ide'])) {
             // forsweetalert confirm
             // Debugging: Ensure SweetAlert2 is loaded
             document.addEventListener('DOMContentLoaded', function() {
-                const archiveButtons = document.querySelectorAll('.archive');
+                const archiveButtons = document.querySelectorAll('.addAlumni');
 
                 archiveButtons.forEach(function(button) {
                     button.addEventListener('click', function(event) {
@@ -523,12 +625,19 @@ if (isset($_GET['ide'])) {
                         const href = this.getAttribute('href'); // Get the href attribute
 
                         Swal.fire({
-                            title: 'Do you want to continue?',
+                            title: 'Are you sure you want to continue?',
                             icon: 'warning',
+                            iconHtml: '<i class="fas fa-exclamation-triangle"></i>',
+                            text: 'Once you proceed, this action cannot be undone.',
                             showCancelButton: true,
                             confirmButtonColor: '#e03444',
                             cancelButtonColor: '#ffc404',
-                            confirmButtonText: 'Continue'
+                            confirmButtonText: 'Ok',
+                            cancelButtonText: 'Cancel',
+                            customClass: {
+                                confirmButton: 'confirm-button-class',
+                                cancelButton: 'cancel-button-class'
+                            }
                         }).then((result) => {
                             if (result.isConfirmed) {
                                 window.location.href = href; // Proceed with the navigation if confirmed
@@ -537,6 +646,22 @@ if (isset($_GET['ide'])) {
                     });
                 });
             });
+
+            // FOR MESSAGEBOX WITHOUT TEXT AND REDIRECT
+            function noTextMessage(title, icon, iconHtml) {
+                Swal.fire({
+                    icon: icon,
+                    iconHtml: iconHtml, // Custom icon using Font Awesome
+                    title: title,
+                    customClass: {
+                        popup: 'swal-custom'
+                    },
+                    showConfirmButton: true,
+                    confirmButtonColor: '#4CAF50',
+                    confirmButtonText: 'OK',
+                    timer: 5000
+                });
+            }
         </script>
 </body>
 

@@ -256,7 +256,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
             font-size: 1.8rem;
             margin-top: 10px;
             font-weight: 600;
-            color: #ffffff;
+            color: #89CFF0;
             cursor: pointer;
             text-decoration: none;
             padding: 15px 25px;
@@ -600,7 +600,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     <section class="hero-section">
         <img src="assets/Imus-Campus-scaled.jpg" alt="Graduation Image" style="height: 550px;">
         <div class="overlay">
-            <h1><b>CONTACT DETAILS</b></h1>
+            <h1 style="color:#89CFF0;"><b>CONTACT DETAILS</b></h1>
             <div class="animated-containers">
                 <div class="container">
                     <div class="animated-box" data-aos="fade-up">

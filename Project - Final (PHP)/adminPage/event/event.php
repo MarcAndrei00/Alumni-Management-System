@@ -115,7 +115,7 @@ $total_pages = ceil($total_records / $records_per_page);
 
 
 if (isset($_GET['ide'])) {
-echo "
+    echo "
     <script>
     // Wait for the document to load
     document.addEventListener('DOMContentLoaded', function() {
@@ -130,6 +130,17 @@ echo "
     });
 </script>
 ";
+
+    $icon = 'success';
+    $iconHtml = '<i class="fas fa-check-circle"></i>';
+    $title = 'Event archived successfully';
+
+    echo "<script>
+            document.addEventListener('DOMContentLoaded', function() {
+                noTextMessage('$title', '$icon', '$iconHtml');
+            });
+        </script>";
+    sleep(2);
 }
 ?>
 

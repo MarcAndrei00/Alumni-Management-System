@@ -77,45 +77,62 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 
 $title = "";
 $description = "";
-$schedule = "";
+$date = "";
+$time = "";
+$venue = "";
+$address = "";
+$eventFor = [];
+
 
 // get the data from form
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $title = strtoupper($_POST['title']);
-    $schedule = $_POST['schedule'];
+    $date = $_POST['date'];
+    $startTime = $_POST['startTime'];
+    $endTime = $_POST['endTime'];
+    $venue = $_POST['venue'];
+    $address = $_POST['address'];
     $description = ucwords($_POST['description']);
+
+    // List of all possible course values
+    $allCourses = ['BAJ', 'BECEd', 'BEEd', 'BSBM', 'BSOA', 'BSEntrep', 'BSHM', 'BSIT', 'BSCS', 'BSc(Psych)'];
+
+
+    // Check if $eventFor contains all courses
+    if (array_diff($allCourses, $eventFor) === []) {
+        $eventForString = "ALL";
+    } else {
+        $eventForString = implode(',', $eventFor);
+    }
+
+
 
     // for image
     if (isset($_FILES["image"]) && $_FILES["image"]["error"] == 0) {
         $file = addslashes(file_get_contents($_FILES["image"]["tmp_name"]));
-        $sql = "INSERT INTO event SET title='$title', schedule='$schedule', description='$description', image='$file'";
+        $sql = "INSERT INTO event SET title='$title', date='$date', start_time='$startTime', end_time='$endTime', venue='$venue', address='$address', event_for='$eventForString', description='$description', image='$file'";
     } else {
         // Path to the image file
         $filePath = '../../assets/no_image_available.png';
         $imageData = file_get_contents($filePath);
         $imageDataEscaped = addslashes($imageData);
-        $sql = "INSERT INTO event SET title='$title', schedule='$schedule', description='$description', image='$imageDataEscaped'";
+        $sql = "INSERT INTO event SET title='$title', date='$date', start_time='$startTime', end_time='$endTime', venue='$venue', address='$address', event_for='$eventForString', description='$description', image='$imageDataEscaped'";
     }
 
     $result = $conn->query($sql);
-    echo "
-            <script>
-                // Wait for the document to load
-                document.addEventListener('DOMContentLoaded', function() {
-                    // Use SweetAlert2 for the alert
-                    Swal.fire({
-                            title: 'Event Added Successfully',
-                            timer: 2000,
-                            showConfirmButton: true, // Show the confirm button
-                            confirmButtonColor: '#4CAF50', // Set the button color to green
-                            confirmButtonText: 'OK' // Change the button text if needed
-                    }).then(function() {
-                        // Redirect after the alert closes
-                        window.location.href = './event.php';
-                    });
-                });
-            </script>
-            ";
+
+    // FOR MESSAGEBOX WITHOUT TEXT ONLY
+    $icon = 'success';
+    $iconHtml = '<i class="fas fa-check-circle"></i>';
+    $title = 'Event added successfully.';
+    $redirectUrl = './coordinator.php';
+
+    echo "<script>
+            document.addEventListener('DOMContentLoaded', function() {
+                noTextRedirect('$redirectUrl', '$title', '$icon', '$iconHtml');
+            });
+        </script>";
+    sleep(2);
 }
 ?>
 
@@ -132,12 +149,50 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
+        /* FOR SWEETALERT */
+        .swal2-popup {
+            padding-bottom: 30px;
+            /* Adjust the padding as needed */
+        }
+
+        .confirm-button-class,
+        .cancel-button-class {
+            width: 150px;
+            /* Set the desired width */
+            height: 40px;
+            /* Set the desired height */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .confirm-button-class {
+            background-color: #e03444 !important;
+            color: white;
+        }
+
+        .cancel-button-class {
+            background-color: #ffc404 !important;
+            color: white;
+        }
+
+
         #preview {
             max-width: 700px;
             max-height: 700px;
             object-fit: contain;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 10px;
+            /* Adjust the gap as needed */
         }
     </style>
 </head>
@@ -242,7 +297,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <h1><strong>Event</strong></h1>
             </div>
         </main>
-        <form method="POST" enctype="multipart/form-data">
+        <form method="POST" class="addNew" enctype="multipart/form-data">
             <div class="container-fluid" id="page-content">
                 <div class="row">
                     <div class="container-fluid" id="main-container">
@@ -253,8 +308,44 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 <input type="text" name="title" class="form-control" id="formGroupExampleInput" placeholder="Enter Event Title" required>
                             </div>
                             <div class="mb-3">
-                                <label for="formGroupExampleInput2" class="form-label">Schedule</label>
-                                <input type="datetime-local" name="schedule" class="form-control" id="formGroupExampleInput2" required placeholder="">
+                                <label for="formGroupExampleInput2" class="form-label">Date</label>
+                                <input type="date" name="date" class="form-control" id="formGroupExampleInput2" required placeholder="">
+                            </div>
+                            <div class="mb-3">
+                                <label for="formGroupExampleInput3" class="form-label">Time</label>
+                                <div class="input-container">
+                                    <input type="time" name="startTime" class="form-control" id="formGroupExampleInput3" required placeholder="">
+                                    <span class="time-separator" style="margin-top:7px;">To</span>
+                                    <input type="time" name="endTime" class="form-control" id="formGroupExampleInput4" required placeholder="">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="formGroupExampleInput4" class="form-label">Venue</label>
+                                <input type="text" name="venue" class="form-control" id="formGroupExampleInput4" required placeholder="">
+                            </div>
+                            <div class="mb-3">
+                                <label for="formGroupExampleInput5" class="form-label">Address</label>
+                                <input type="text" name="address" class="form-control" id="formGroupExampleInput5" required placeholder="">
+                            </div>
+                            <div class="mb-3">
+                                <label for="eventForDropdown">Event For:</label>
+                                <div class="dropdown">
+                                    <button class="form-control" type="button" id="eventForDropdown" onclick="toggleDropdown()" style="width:160px;">Select Courses</button>
+                                    <div id="eventForMenu" class="dropdown-menu" style="display:none; position: absolute; background-color: white; border: 1px solid #ccc; padding: 10px;">
+                                        <label><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)" checked> ALL</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BAJ" checked> BAJ</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BECEd" checked> BECEd</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BEEd" checked> BEEd</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSBM" checked> BSBM</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSOA" checked> BSOA</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSEntrep" checked> BSEntrep</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSHM" checked> BSHM</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSIT" checked> BSIT</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSCS" checked> BSCS</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSc(Psych)" checked> BSc(Psych)</label>
+                                    </div>
+                                </div>
+
                             </div>
                             <div class="row">
                                 <div class="container-fluid">
@@ -269,8 +360,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                             <input class="form-control" type="file" name="image" onchange="getImagePreview(event)">
                                         </div>
                                         <div class="col-md-12 mb-md-0 p-md-12" style="text-align: center;">
-                                            <!-- for display image -->
-                                            <img id="preview" src="data:image/jpeg;base64,<?php echo base64_encode($row['image']); ?>" alt="EVENT IMAGE">
+                                            <?php if (!empty($row['image'])): ?>
+                                                <!-- for display image -->
+                                                <img id="preview" src="data:image/jpeg;base64,<?php echo base64_encode($row['image']); ?>" alt="EVENT IMAGE">
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                 </div>
@@ -337,6 +430,97 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 }
             })
         });
+
+        // FOR DROPDOWN CHECKLIST
+        // Toggle dropdown visibility
+        function toggleDropdown() {
+            var dropdown = document.getElementById('eventForMenu');
+            dropdown.style.display = (dropdown.style.display === 'none' || dropdown.style.display === '') ? 'block' : 'none';
+        }
+
+        // Toggle select all checkboxes
+        function toggleSelectAll(selectAllCheckbox) {
+            var checkboxes = document.querySelectorAll('.eventForCheckbox');
+            checkboxes.forEach(function(checkbox) {
+                checkbox.checked = selectAllCheckbox.checked;
+            });
+        }
+
+        // Uncheck 'ALL' when any individual checkbox is unchecked
+        document.querySelectorAll('.eventForCheckbox').forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+                if (!this.checked) {
+                    document.getElementById('selectAll').checked = false;
+                }
+            });
+        });
+
+        // Set initial state of the dropdown to have all checkboxes checked
+        window.onload = function() {
+            document.querySelectorAll('.eventForCheckbox').forEach(function(checkbox) {
+                checkbox.checked = true;
+            });
+            document.getElementById('selectAll').checked = true;
+        };
+
+
+        // Ensure SweetAlert2 is loaded
+        // document.addEventListener('DOMContentLoaded', function() {
+        //     console.log("DOM fully loaded and parsed");
+
+        //     const forms = document.querySelectorAll('.addNew');
+
+        //     forms.forEach(function(form) {
+        //         console.log("Attaching event listener to form:", form);
+
+        //         form.addEventListener('submit', function(event) {
+        //             event.preventDefault();
+        //             console.log("Form submit event triggered");
+
+        //             Swal.fire({
+        //                 title: 'Are you sure you want to continue?',
+        //                 icon: 'warning',
+        //                 iconHtml: '<i class="fas fa-exclamation-triangle"></i>',
+        //                 text: 'Once you proceed, this action cannot be undone.',
+        //                 showCancelButton: true,
+        //                 confirmButtonColor: '#e03444',
+        //                 cancelButtonColor: '#ffc404',
+        //                 confirmButtonText: 'Ok',
+        //                 cancelButtonText: 'Cancel',
+        //                 customClass: {
+        //                     confirmButton: 'confirm-button-class',
+        //                     cancelButton: 'cancel-button-class'
+        //                 }
+        //             }).then((result) => {
+        //                 if (result.isConfirmed) {
+        //                     console.log("User confirmed action");
+        //                     form.submit(); // Submit the form if confirmed
+        //                 } else {
+        //                     console.log("User canceled action");
+        //                 }
+        //             });
+        //         });
+        //     });
+        // });
+
+
+        // FOR MESSAGEBOX WITHOUT TEXT ONLY
+        function noTextRedirect(redirectUrl, title, icon, iconHtml) {
+            Swal.fire({
+                icon: icon,
+                iconHtml: iconHtml, // Custom icon using Font Awesome
+                title: title,
+                customClass: {
+                    popup: 'swal-custom'
+                },
+                showConfirmButton: true,
+                confirmButtonColor: '#4CAF50',
+                confirmButtonText: 'OK',
+                timer: 5000
+            }).then(() => {
+                window.location.href = redirectUrl; // Redirect to the desired page
+            });
+        }
     </script>
 </body>
 

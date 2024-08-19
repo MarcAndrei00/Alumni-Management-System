@@ -77,10 +77,17 @@ if (isset($_GET['id'])) {
         header('Location: ../../homepage.php');
         exit();
     }
+
+
     //insert data into table alumni_archive from alumni
-    $sql_restore = "INSERT INTO alumni (alumni_id, student_id, fname, mname, lname, gender, course, batch_startYear, batch_endYear, contact, address, email, password, picture, date_created)" .
-        "SELECT alumni_id, student_id, fname, mname, lname, gender, course, batch_startYear, batch_endYear, contact, address, email, password, picture, date_created FROM alumni_archive WHERE alumni_id=$alumni_id";
+    $sql_restore = "INSERT INTO alumni (alumni_id, student_id, fname, mname, lname, gender, course, batch_startYear, batch_endYear, contact, address, email, password, last_login, picture, date_created)" .
+        "SELECT alumni_id, student_id, fname, mname, lname, gender, course, batch_startYear, batch_endYear, contact, address, email, password, last_login, picture, date_created FROM alumni_archive WHERE alumni_id=$alumni_id";
     $conn->query($sql_restore);
+
+    $stmt = $conn->prepare("UPDATE alumni SET status = 'Unverified' WHERE alumni_id = ?");
+    $stmt->bind_param("s", $alumni_id);
+    $stmt->execute();
+    $stmt->close();
 
     //delete data in table alumni
     $sql_delete = "DELETE FROM alumni_archive WHERE alumni_id=$alumni_id";

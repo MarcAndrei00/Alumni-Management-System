@@ -115,11 +115,10 @@ if (isset($_POST["Import"])) {
             $csvFile = $filename . '.csv';
             convertToCsv($filename, $csvFile);
         } else {
-            echo "<script type=\"text/javascript\">
-                    alert(\"Invalid File: Please Upload CSV or Excel File.\");
-                    window.location = \"index.php\"
-                </script>";
-            exit();
+            // Invalid File: Please Upload CSV or Excel File.
+            $_SESSION['import'] = 'invalid';
+            header("Location: ./list_of_graduate.php");
+            exit;
         }
 
         if (($file = fopen($csvFile, "r")) !== FALSE) {
@@ -139,12 +138,18 @@ if (isset($_POST["Import"])) {
                     continue;
                 }
 
-                // Check if student_id already exists
-                $checkQuery = "SELECT * FROM list_of_graduate WHERE student_id = '$emapData[1]'";
-                $checkResult = mysqli_query($conn, $checkQuery);
+                $student_id = $emapData[1];
+                $email = $emapData[10];
 
-                if (mysqli_num_rows($checkResult) > 0) {
-                    // Skip inserting if student_id exists
+                // Check if student_id or email already exists in any of the tables
+                $emailCheck = mysqli_query($conn, "SELECT * FROM alumni WHERE email='$email'");
+                $emailCheck_archive = mysqli_query($conn, "SELECT * FROM alumni_archive WHERE email='$email'");
+                $idCheck = mysqli_query($conn, "SELECT * FROM alumni WHERE student_id='$student_id'");
+                $idCheck_archive = mysqli_query($conn, "SELECT * FROM alumni_archive WHERE student_id='$student_id'");
+                $gradCheck = mysqli_query($conn, "SELECT * FROM list_of_graduate WHERE student_id='$student_id' OR email='$email'");
+
+                if (mysqli_num_rows($emailCheck) > 0 || mysqli_num_rows($emailCheck_archive) > 0 || mysqli_num_rows($idCheck) > 0 || mysqli_num_rows($idCheck_archive) > 0 || mysqli_num_rows($gradCheck) > 0) {
+                    // Skip inserting if student_id or email exists in any of the tables
                     continue;
                 }
 
@@ -153,11 +158,10 @@ if (isset($_POST["Import"])) {
                                     VALUES ('$emapData[1]', '$emapData[2]', '$emapData[3]', '$emapData[4]', '$emapData[5]', '$emapData[6]', '$emapData[7]', '$emapData[8]', '$emapData[9]', '$emapData[10]')";
                 $result = mysqli_query($conn, $sql);
                 if (!$result) {
-                    echo "<script type=\"text/javascript\">
-                            alert(\"Error Importing Data: " . mysqli_error($conn) . "\");
-                            window.location = \"index.php\"
-                        </script>";
-                    exit();
+                    // Error Importing Data:
+                    $_SESSION['import'] = 'errorImporting';
+                    header("Location: ./list_of_graduate.php");
+                    exit;
                 }
 
                 $insertCount++; // Increment the counter if insertion is successful
@@ -165,25 +169,22 @@ if (isset($_POST["Import"])) {
             fclose($file);
 
             if ($insertCount > 0) {
-                echo "<script type=\"text/javascript\">
-                        alert(\"File has been successfully Imported.\");
-                        window.location = \"list_of_graduate.php\"
-                    </script>";
+                // File has been successfully Imported.
+                $_SESSION['import'] = 'import';
+                header("Location: ./list_of_graduate.php");
+                exit();
             } else {
-                echo "<script type=\"text/javascript\">
-                        alert(\"Records are up to date.\");
-                        window.location = \"list_of_graduate.php\"
-                    </script>";
+                // Records are up to date.
+                $_SESSION['import'] = 'uptodate';
+                header("Location: ./list_of_graduate.php");
+                exit();
             }
-
         } else {
-            echo "<script type=\"text/javascript\">
-                    alert(\"Error Opening File.\");
-                    window.location = \"list_of_graduate.php\"
-                </script>";
+            // Error Opening File
+            $_SESSION['import'] = 'errorOpening';
+            header("Location: ./list_of_graduate.php");
         }
 
         mysqli_close($conn);
     }
 }
-?>

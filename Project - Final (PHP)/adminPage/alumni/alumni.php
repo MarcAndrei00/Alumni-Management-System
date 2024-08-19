@@ -133,21 +133,16 @@ $total_pages = ceil($total_records / $records_per_page);
 
 
 if (isset($_GET['ide'])) {
-    echo "
-        <script>
-        // Wait for the document to load
+    $icon = 'success';
+    $iconHtml = '<i class="fas fa-check-circle"></i>';
+    $title = 'Account archived successfully';
+
+    echo "<script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Use SweetAlert2 for the alert
-            Swal.fire({
-                title: 'Account Archived Successfully',
-                timer: 2000,
-                showConfirmButton: true, // Show the confirm button
-                confirmButtonColor: '#4CAF50', // Set the button color to green
-                confirmButtonText: 'OK' // Change the button text if needed
-            });
+            noTextMessage('$title', '$icon', '$iconHtml');
         });
-    </script>
-    ";
+    </script>";
+    sleep(2);
 }
 ?>
 
@@ -173,6 +168,36 @@ if (isset($_GET['ide'])) {
 
     <!-- FOR PAGINATION -->
     <style>
+        /* FOR SWEETALERT */
+        .swal2-popup {
+            padding-bottom: 30px;
+            /* Adjust the padding as needed */
+        }
+
+        .confirm-button-class,
+        .cancel-button-class {
+            width: 150px;
+            /* Set the desired width */
+            height: 40px;
+            /* Set the desired height */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .confirm-button-class {
+            background-color: #e03444 !important;
+            color: white;
+        }
+
+        .cancel-button-class {
+            background-color: #ffc404 !important;
+            color: white;
+        }
+
+        /* FOR SWEETALERT  END LINE*/
+
+
         /*  DESIGN FOR SEARCH BAR AND PAGINATION */
         table {
             width: 100%;
@@ -375,9 +400,6 @@ if (isset($_GET['ide'])) {
                             </div>
                             <div class="col" style="text-align: end;">
                                 <div class="add-button">
-                                    <a style="text-decoration: none;" href='./add_alumni.php'>
-                                        <button id="add-new-btn">Add New +</button>
-                                    </a>
                                     <a class='btn btn-secondary border border-dark' href='./list_of_graduate.php' style="margin-left: 1%; padding-left: 4.1px; padding-right: 5.4px; white-space: nowrap;">Unregister Acccount</a>
                                 </div>
                             </div>
@@ -428,8 +450,8 @@ if (isset($_GET['ide'])) {
                                             <?php
                                             echo "
                                                 <td class='inline act'>
-                                                    <a class='btn btn-danger btn-sm archive' href='./del_alumni.php?id=$row[alumni_id]' style='font-size: 11.8px;'>Archive</a>
-                                                    <a class='btn btn-info btn-sm' href='./alumni_info.php?id=$row[alumni_id]' style='font-size: 11.8px;'>More Info</a>
+                                                    <a class='btn btn-danger btn-sm archive' href='./del_alumni.php?id=$row[alumni_id]' style='font-size: 11.8px; padding: 5px 10px; width: 80px; text-align: center;'>Archive</a>
+                                                    <a class='btn btn-info btn-sm' href='./alumni_info.php?id=$row[alumni_id]' style='font-size: 11.8px; padding: 5px 10px; width: 80px; text-align: center;'>More Info</a>
                                                 </td>
                                             "; ?>
                                         </tr>
@@ -504,12 +526,19 @@ if (isset($_GET['ide'])) {
                         const href = this.getAttribute('href'); // Get the href attribute
 
                         Swal.fire({
-                            title: 'Do you want to continue?',
+                            title: 'Are you sure you want to continue?',
                             icon: 'warning',
+                            iconHtml: '<i class="fas fa-exclamation-triangle"></i>',
+                            text: 'Once you proceed, this action cannot be undone.',
                             showCancelButton: true,
                             confirmButtonColor: '#e03444',
                             cancelButtonColor: '#ffc404',
-                            confirmButtonText: 'Continue'
+                            confirmButtonText: 'Ok',
+                            cancelButtonText: 'Cancel',
+                            customClass: {
+                                confirmButton: 'confirm-button-class',
+                                cancelButton: 'cancel-button-class'
+                            }
                         }).then((result) => {
                             if (result.isConfirmed) {
                                 window.location.href = href; // Proceed with the navigation if confirmed
@@ -520,40 +549,56 @@ if (isset($_GET['ide'])) {
             });
 
             // FOR MESSAGEBOX
-        function alertMessage(redirectUrl, title, text, icon, iconHtml) {
-            Swal.fire({
-                icon: icon,
-                iconHtml: iconHtml, // Custom icon using Font Awesome
-                title: title,
-                text: text,
-                customClass: {
-                    popup: 'swal-custom'
-                },
-                showConfirmButton: true,
-                confirmButtonColor: '#4CAF50',
-                confirmButtonText: 'OK',
-                timer: 5000
-            }).then(() => {
-                window.location.href = redirectUrl; // Redirect to the desired page
-            });
-        }
+            function alertMessage(redirectUrl, title, text, icon, iconHtml) {
+                Swal.fire({
+                    icon: icon,
+                    iconHtml: iconHtml, // Custom icon using Font Awesome
+                    title: title,
+                    text: text,
+                    customClass: {
+                        popup: 'swal-custom'
+                    },
+                    showConfirmButton: true,
+                    confirmButtonColor: '#4CAF50',
+                    confirmButtonText: 'OK',
+                    timer: 5000
+                }).then(() => {
+                    window.location.href = redirectUrl; // Redirect to the desired page
+                });
+            }
 
-        // WARNING FOR DUPE ACCOUNT
-        function warningError(title, text, icon, iconHtml) {
-            Swal.fire({
-                icon: icon,
-                iconHtml: iconHtml, // Custom icon using Font Awesome
-                title: title,
-                text: text,
-                customClass: {
-                    popup: 'swal-custom'
-                },
-                showConfirmButton: true,
-                confirmButtonColor: '#4CAF50',
-                confirmButtonText: 'OK',
-                timer: 5000,
-            });
-        }
+            // WARNING FOR DUPE ACCOUNT
+            function warningError(title, text, icon, iconHtml) {
+                Swal.fire({
+                    icon: icon,
+                    iconHtml: iconHtml, // Custom icon using Font Awesome
+                    title: title,
+                    text: text,
+                    customClass: {
+                        popup: 'swal-custom'
+                    },
+                    showConfirmButton: true,
+                    confirmButtonColor: '#4CAF50',
+                    confirmButtonText: 'OK',
+                    timer: 5000,
+                });
+            }
+
+            // FOR MESSAGEBOX WITHOUT TEXT AND REDIRECT
+            function noTextMessage(title, icon, iconHtml) {
+                Swal.fire({
+                    icon: icon,
+                    iconHtml: iconHtml, // Custom icon using Font Awesome
+                    title: title,
+                    customClass: {
+                        popup: 'swal-custom'
+                    },
+                    showConfirmButton: true,
+                    confirmButtonColor: '#4CAF50',
+                    confirmButtonText: 'OK',
+                    timer: 5000
+                });
+            }
         </script>
 </body>
 

@@ -1,10 +1,10 @@
+
 <?php
-require_once('../vendor/autoload.php');
+require_once('vendor/autoload.php');
 
 session_start();
 $conn = new mysqli("localhost", "root", "", "alumni_management_system");
 
-$client = new \GuzzleHttp\Client(); 
 // SESSION
 if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     $account = $_SESSION['user_id'];
@@ -67,7 +67,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     }
 }
 
-if(isset($_POST['submit_btn'])){
+if (isset($_POST['submit_btn'])) {
     $payment = $_POST['donation_amount'];
 
     // Multiply the payment by 100 to convert it to cents
@@ -82,8 +82,8 @@ if(isset($_POST['submit_btn'])){
                 'amount' => $paymentInCents,
                 'description' => 'Payment for your donation',  // Add a description here
                 'redirect' => [
-                    'success' => 'http://localhost/LATEST ITEC75A/Project - Final (PHP)/event.php',  // Redirect on successful payment
-                    'failed' => 'http://localhost/LATEST ITEC75A/Project - Final (PHP)/event.php'  // Redirect on failed payment
+                    'success' => 'http://6320-2001-4450-4fab-3b00-e9fc-5a3b-d425-9f0a.ngrok-free.app/event.php',  // Redirect on successful payment
+                    'failed' => 'http://6320-2001-4450-4fab-3b00-e9fc-5a3b-d425-9f0a.ngrok-free.app/event.php'  // Redirect on failed payment
                 ]
             ]
         ]
@@ -101,10 +101,10 @@ if(isset($_POST['submit_btn'])){
 
     // Decode the JSON response
     $responseData = json_decode($response->getBody(), true);
-    
+
     // Extract the checkout URL
     $checkoutUrl = $responseData['data']['attributes']['checkout_url'];
-    
+
     // Redirect the user to the checkout URL
     header('Location: ' . $checkoutUrl);
     exit(); // Terminate the script to ensure the redirect happens
@@ -261,7 +261,7 @@ $result = $conn->query($sql);
 
         .buttons .btn {
             display: inline-block;
-            width: 150px;
+            width: 200px;
             /* Set the width as per your requirement */
             text-align: center;
             /* Center the text */
@@ -329,7 +329,7 @@ $result = $conn->query($sql);
             font-size: 1.8rem;
             margin-top: 10px;
             font-weight: 600;
-            color: #ffffff;
+            color: #fec20c;
             cursor: pointer;
             text-decoration: none;
             padding: 15px 25px;
@@ -402,6 +402,7 @@ $result = $conn->query($sql);
             font-size: 4rem;
             margin: 0;
             animation: bounceIn 1s ease-out;
+            color: #fec20c;
         }
 
         @keyframes bounceIn {
@@ -421,54 +422,7 @@ $result = $conn->query($sql);
             }
         }
 
-        .mission-section {
-            padding: 100px 40px;
-            background-color: #0F5132;
-            margin: 0;
-        }
-
-        .mission-section .container {
-            position: relative;
-            z-index: 1;
-            background-color: #fff;
-            padding: 60px;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            max-width: 1900px;
-        }
-
-        .mission-section .row {
-            position: relative;
-            z-index: 1;
-            display: flex;
-            flex-wrap: wrap;
-        }
-
-        .mission-section .col-lg-6 {
-            flex: 1;
-            min-width: 100px;
-        }
-
-        .mission-section img {
-            height: auto;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        .mission-section h2 {
-            margin-bottom: 20px;
-            font-size: 2.5rem;
-            font-weight: 700;
-        }
-
-        .mission-section p {
-            font-size: 1.3rem;
-            line-height: 1.6;
-            color: #555;
-            text-align: justify;
-            font-style: 'poppins';
-
-        }
+        
 
         .hello-heroes-section h2 {
             font-size: 4rem;
@@ -677,6 +631,23 @@ $result = $conn->query($sql);
                 /* Darker shade on hover/focus */
             }
         }
+
+        .btsTWO {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btnTWO {
+            flex: 1;
+            text-align: center;
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            border: none;
+            font-size: 16px;
+            min-width: 100px;
+
+        }
     </style>
 </head>
 
@@ -749,11 +720,11 @@ $result = $conn->query($sql);
                                 <p class="card-text"><small class="text-muted"><b>ADDRESS: </b><?php echo $row['address']; ?></small></p>
                                 <!-- Buttons for Donation and View Details -->
                                 <div class="buttons buttons1">
-                                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#donateModal">
-                                    <a href="./loginPage/login.php" class="btn btn-info btn-view-details">View Details</a>
-                                </div>  
+                                    <button type="button" class="btn btn-success btnTWO" data-toggle="modal" data-target="#donateModal">Donate</button>
+                                    
                             </div>
                         </div>
+                    </div>
                     </div>
                 </section>
             <?php
@@ -772,8 +743,7 @@ $result = $conn->query($sql);
                                 <p class="card-text"><small class="text-muted"><b>ADDRESS: </b><?php echo $row['address']; ?></small></p>
                                 <!-- Buttons for Donation and View Details -->
                                 <div class="buttons">
-                                    <button type="button" class="btn btn-success" data-toggle="modal" data-target="#donateModal">
-                                    <a href="./loginPage/login.php" class="btn btn-info btn-view-details">View Details</a>
+                                    <button type="button" class="btn btn-success btnTWO" data-toggle="modal" data-target="#donateModal">Donate</button>
                                 </div>
                             </div>
                             <div class="col-lg-6 mb-4 mb-lg-0 d-flex justify-content-center" data-aos="fade-right">
@@ -789,7 +759,7 @@ $result = $conn->query($sql);
         echo "<p>No events found.</p>";
     }
     ?>
-    
+
     <div class="modal fade" id="donateModal" tabindex="-1" aria-labelledby="donateModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -803,19 +773,19 @@ $result = $conn->query($sql);
                     <form method="POST">
                         <div class="form-group">
                             <label for="donorName">Name</label>
-                            <input type="text" name="name" class="form-control" id="donorName" placeholder="Enter your name" required>
+                            <input type="text" name="name" class="form-control" id="donorName" placeholder="Enter your name">
                         </div>
                         <div class="form-group">
                             <label for="donorEmail">Email</label>
-                            <input type="email" name="email" class="form-control" id="donorEmail" placeholder="Enter your email" required>
+                            <input type="email" name="email" class="form-control" id="donorEmail" placeholder="Enter your email">
                         </div>
                         <div class="form-group">
                             <label for="donorEmail">Contact Number</label>
-                            <input type="number" name="contact_number" class="form-control" id="donorNumber" placeholder="Enter your contact number" required>
+                            <input type="number" name="contact_number" class="form-control" id="donorNumber" placeholder="Enter your email">
                         </div>
                         <div class="form-group">
                             <label for="donationAmount">Donation Amount</label>
-                            <input type="number" name="donation_amount" class="form-control" id="donationAmount" placeholder="Enter amount" required>
+                            <input type="number" name="donation_amount" class="form-control" id="donationAmount" placeholder="Enter amount">
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>

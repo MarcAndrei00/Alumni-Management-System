@@ -82,8 +82,8 @@ if (isset($_GET['id'])) {
 
 
     //insert data into table alumni_archive from alumni
-    $sql_archive = "INSERT INTO coordinator (coor_id, fname, mname, lname, contact, email, password, date_created)" .
-        "SELECT coor_id, fname, mname, lname, contact, email, password, date_created FROM coordinator_archive WHERE coor_id=$coor_id";
+    $sql_archive = "INSERT INTO coordinator (coor_id, fname, mname, lname, contact, email, password, last_login, date_created)" .
+        "SELECT coor_id, fname, mname, lname, contact, email, password, last_login, date_created FROM coordinator_archive WHERE coor_id=$coor_id";
     $conn->query($sql_archive);
 
     //delete data in table alumni

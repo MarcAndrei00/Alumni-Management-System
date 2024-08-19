@@ -92,21 +92,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     // Show the data of alumni
     if (!isset($_GET['id'])) {
         if (isset($_GET['ide'])) {
-            echo "
-                <script>
-                // Wait for the document to load
-                document.addEventListener('DOMContentLoaded', function() {
-                    // Use SweetAlert2 for the alert
-                    Swal.fire({
-                        title: 'Profile Updated Successfully',
-                        timer: 2000,
-                        showConfirmButton: true, // Show the confirm button
-                        confirmButtonColor: '#4CAF50', // Set the button color to green
-                        confirmButtonText: 'OK' // Change the button text if needed
+            $icon = 'success';
+            $iconHtml = '<i class="fas fa-check-circle"></i>';
+            $title = 'Profile Updated Successfully';
+
+            echo "<script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        noTextMessage('$title', '$icon', '$iconHtml');
                     });
-                });
-            </script>
-            ";
+                </script>";
+            sleep(2);
             $alumni_id = $_GET['ide'];
 
             //read data from table alumni
@@ -494,6 +489,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                 confirmButtonColor: '#4CAF50',
                 confirmButtonText: 'OK',
                 timer: 5000,
+            });
+        }
+
+        // FOR MESSAGEBOX WITHOUT TEXT AND REDIRECT
+        function noTextMessage(title, icon, iconHtml) {
+            Swal.fire({
+                icon: icon,
+                iconHtml: iconHtml, // Custom icon using Font Awesome
+                title: title,
+                customClass: {
+                    popup: 'swal-custom'
+                },
+                showConfirmButton: true,
+                confirmButtonColor: '#4CAF50',
+                confirmButtonText: 'OK',
+                timer: 5000
             });
         }
     </script>

@@ -115,67 +115,67 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if (mysqli_num_rows($alumni_idCheck) > 0) {
 
-    // Check if email or student ID exists in both the active and archive tables
-    $emailCheck = mysqli_query($conn, "SELECT * FROM alumni WHERE email='$email'");
-    $emailCheck_archive = mysqli_query($conn, "SELECT * FROM alumni_archive WHERE email='$email'");
-    $idCheck = mysqli_query($conn, "SELECT * FROM alumni WHERE student_id='$stud_id'");
-    $idCheck_archive = mysqli_query($conn, "SELECT * FROM alumni_archive WHERE student_id='$stud_id'");
+        // Check if email or student ID exists in both the active and archive tables
+        $emailCheck = mysqli_query($conn, "SELECT * FROM alumni WHERE email='$email'");
+        $emailCheck_archive = mysqli_query($conn, "SELECT * FROM alumni_archive WHERE email='$email'");
+        $idCheck = mysqli_query($conn, "SELECT * FROM alumni WHERE student_id='$stud_id'");
+        $idCheck_archive = mysqli_query($conn, "SELECT * FROM alumni_archive WHERE student_id='$stud_id'");
 
-    // Email and student ID validation
-    if (mysqli_num_rows($emailCheck) > 0 || mysqli_num_rows($emailCheck_archive) > 0) {
+        // Email and student ID validation
+        if (mysqli_num_rows($emailCheck) > 0 || mysqli_num_rows($emailCheck_archive) > 0) {
 
-        // WARNING EXISTING ACCOUNT
-        $icon = 'warning';
-        $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
-        $title = 'Email Already Exists!';
-        $text = 'Please try again.';
+            // WARNING EXISTING ACCOUNT
+            $icon = 'warning';
+            $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
+            $title = 'Email Already Exists!';
+            $text = 'Please try again.';
 
-        echo "<script>
+            echo "<script>
                     document.addEventListener('DOMContentLoaded', function() {
                         warningError('$title', '$text', '$icon', '$iconHtml');
                     });
                 </script>";
-        sleep(2);
-    } elseif (mysqli_num_rows($idCheck) > 0 || mysqli_num_rows($idCheck_archive) > 0) {
+            sleep(2);
+        } elseif (mysqli_num_rows($idCheck) > 0 || mysqli_num_rows($idCheck_archive) > 0) {
 
-        // WARNING EXISTING ACCOUNT
-        $icon = 'warning';
-        $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
-        $title = 'Student ID Already Exists!';
-        $text = 'Please try again.';
+            // WARNING EXISTING ACCOUNT
+            $icon = 'warning';
+            $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
+            $title = 'Student ID Already Exists!';
+            $text = 'Please try again.';
 
-        echo "<script>
+            echo "<script>
                     document.addEventListener('DOMContentLoaded', function() {
                         warningError('$title', '$text', '$icon', '$iconHtml');
                     });
                 </script>";
-        sleep(2);
-    } else {
-        $filePath = '../../assets/profile_icon.jpg';
-        $imageData = file_get_contents($filePath);
-        $imageDataEscaped = addslashes($imageData);
+            sleep(2);
+        } else {
+            $filePath = '../../assets/profile_icon.jpg';
+            $imageData = file_get_contents($filePath);
+            $imageDataEscaped = addslashes($imageData);
 
-        $sql = "INSERT INTO alumni SET student_id='$stud_id', fname='$fname', mname='$mname', lname='$lname', gender='$gender', course='$course', batch_startYear='$fromYear', batch_endYear='$toYear', contact='$contact', address='$address', email='$email', password='$temp_password', picture='$imageDataEscaped'";
-        $result = $conn->query($sql);
+            $sql = "INSERT INTO alumni SET student_id='$stud_id', fname='$fname', mname='$mname', lname='$lname', gender='$gender', course='$course', batch_startYear='$fromYear', batch_endYear='$toYear', contact='$contact', address='$address', email='$email', password='$temp_password', picture='$imageDataEscaped'";
+            $result = $conn->query($sql);
 
-        //delete data in table list_of_graduate
-        $sql_delete = "DELETE FROM list_of_graduate WHERE student_id=$stud_id";
-        $conn->query($sql_delete);
+            //delete data in table list_of_graduate
+            $sql_delete = "DELETE FROM list_of_graduate WHERE student_id=$stud_id";
+            $conn->query($sql_delete);
 
-        // SUCCESS LOGIN ADMIN
-        $icon = 'success';
-        $iconHtml = '<i class="fas fa-check-circle"></i>';
-        $title = 'Alumni Added Successfully';
-        $text = 'You will be redirected shortly to the Alumni List.';
-        $redirectUrl = './alumni.php';
+            // SUCCESS LOGIN ADMIN
+            $icon = 'success';
+            $iconHtml = '<i class="fas fa-check-circle"></i>';
+            $title = 'Alumni Added Successfully';
+            $text = 'You will be redirected shortly to the Alumni List.';
+            $redirectUrl = './alumni.php';
 
-        echo "<script>
+            echo "<script>
                     document.addEventListener('DOMContentLoaded', function() {
                         alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
                     });
                 </script>";
-        sleep(2);
-    }
+            sleep(2);
+        }
     } else {
         // WARNING NO ALUMNI
         $icon = 'error';
