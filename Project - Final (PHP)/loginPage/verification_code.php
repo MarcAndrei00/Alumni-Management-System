@@ -327,7 +327,7 @@ else if (isset($_POST['resendCode'])) {
     }
 
     .background {
-      background-image: url('bg2.png');
+      background-image: url("../assets/logins.jpg");
       /* Update the path accordingly if necessary */
       background-position: center;
       background-repeat: no-repeat;
