@@ -114,6 +114,18 @@ if ($result->num_rows > 0) {
     <link rel="stylesheet" href="	https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
+    <style>
+    .btn {
+        width: 210px; /* Adjust width as needed */
+        height: 40px; /* Adjust height as needed */
+        font-size: 16px; /* Adjust font size as needed */
+        text-align: center;
+        border: none;
+        border-radius: 5px; /* Optional: for rounded corners */
+        cursor: pointer;
+        margin: 5px; /* Optional: to add space between buttons */
+    }
+</style>
 </head>
 
 <body>
@@ -245,9 +257,16 @@ if ($result->num_rows > 0) {
                             <div class="container-fluid">
                                 <div class="buttons">
                                     <?php echo "
-                                    <a href='./update.php?id=$row[admin_id]'><button type='button' class='btn' id='button1'>UPDATE INFO</button></a>
-                                    <a href='./change_pass.php?id=$row[admin_id]'><button type='button' class='btn' id='button2'>CHANGE PASSWORD</button></a>
-                                    "; ?>
+                                            <a href='./update.php?id=$row[admin_id]'>
+                                                <button type='button' class='btn' id='button1'>UPDATE INFO</button>
+                                            </a>
+                                            <a href='./update_email.php?id=$row[admin_id]'>
+                                                <button type='button' class='btn' id='button1'>CHANGE EMAIL</button>
+                                            </a>
+                                            <a href='./change_pass.php?id=$row[admin_id]'>
+                                                <button type='button' class='btn' id='button2'>CHANGE PASSWORD</button>
+                                            </a>
+                                            "; ?>
                                 </div>
                             </div>
                         </div>

@@ -67,7 +67,6 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
             sleep(2);
             header('Location: ../../loginPage/verification_code.php');
             exit();
-
         }
     }
 } else {
@@ -136,7 +135,7 @@ if (isset($_GET['id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-    <title>Admin Profile</title>
+    <title>Alumni Profile</title>
     <link rel="shortcut icon" href="../../assets/cvsu.png" type="image/svg+xml">
     <link rel="stylesheet" href="css/profile.css">
     <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
@@ -145,6 +144,40 @@ if (isset($_GET['id'])) {
     <link rel="stylesheet" href="	https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        .btn {
+            width: 210px;
+            /* Consistent width */
+            height: 40px;
+            /* Consistent height */
+            font-size: 16px;
+            /* Consistent font size */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            overflow: hidden;
+            /* Prevents scrollbars from appearing */
+            text-align: center;
+            /* Ensures text is centered */
+        }
+
+        .buttons {
+            display: flex;
+            gap: 10px;
+            /* Space between buttons */
+            overflow: hidden;
+            /* Prevents scrollbars from appearing */
+        }
+
+        .btn-link {
+            text-decoration: none;
+            /* Remove underline from links */
+        }
+    </style>
 </head>
 
 <body>
@@ -265,15 +298,36 @@ if (isset($_GET['id'])) {
                                     </form>
                                 </div>
                             </div>
+                            <div class="container-fluid" id="content-container">
+                                <div class="information">
+                                    <form>
+                                        <fieldset disabled>
+                                            <div class="mb-3">
+                                                <label for="disabledTextInput" class="form-label">RECOVERY EMAIL</label>
+                                                <input email="email" id="disabledTextInput" class="form-control" value="<?php echo htmlspecialchars($email); ?>" />
+                                            </div>
+                                        </fieldset>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
                         <div class="row">
                             <div class="container-fluid">
                                 <div class="buttons">
                                     <?php echo "
-                                    <a href='./update.php?id=$row[alumni_id]'><button type='button' class='btn' id='button1'>UPDATE INFO</button></a>
-                                    <a style='text-align: center;' href='./update_profile.php?id=$row[alumni_id]'><button type='button' class='btn' id='button1'>CHANGE PROFILE</button></a>
-                                    <a href='./change_pass.php?id=$row[alumni_id]'><button type='button' class='btn' id='button2'>CHANGE PASSWORD</button></a>
-                                    "; ?>
+                                        <a href='./update.php?id={$row['alumni_id']}' class='btn-link'>
+                                            <button type='button' class='btn' id='button1'>UPDATE INFO</button>
+                                        </a>
+                                        <a href='./update_profile.php?id={$row['alumni_id']}' class='btn-link'>
+                                            <button type='button' class='btn' id='button1'>RECOVERY EMAIL</button>
+                                        </a>
+                                        <a href='./update_profile.php?id={$row['alumni_id']}' class='btn-link'>
+                                            <button type='button' class='btn' id='button1'>CHANGE PROFILE</button>
+                                        </a>
+                                        <a href='./change_pass.php?id={$row['alumni_id']}' class='btn-link'>
+                                            <button type='button' class='btn' id='button2'>CHANGE PASSWORD</button>
+                                        </a>
+                                        "; ?>
                                 </div>
                             </div>
                         </div>
