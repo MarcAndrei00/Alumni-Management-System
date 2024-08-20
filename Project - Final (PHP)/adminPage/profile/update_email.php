@@ -3,7 +3,6 @@ session_start();
 $conn = new mysqli("localhost", "root", "", "alumni_management_system");
 
 use PHPMailer\PHPMailer\PHPMailer;
-
 require '../../vendor/autoload.php';
 
 // SESSION

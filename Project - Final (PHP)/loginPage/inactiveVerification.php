@@ -83,8 +83,8 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 
       if (mysqli_num_rows($check_verifcode_qry) > 0) {
         $delete_qry = mysqli_query($conn, "DELETE FROM recovery_code WHERE verification_code = '$verif_code'");
-        $sql_restore = "INSERT INTO alumni (alumni_id, student_id, fname, mname, lname, gender, course, batch_startYear, batch_endYear, contact, address, email, password, status, picture, date_created)" .
-          "SELECT alumni_id, student_id, fname, mname, lname, gender, course, batch_startYear, batch_endYear, contact, address, email, password, status, picture, date_created FROM alumni_archive WHERE alumni_id=$account";
+        $sql_restore = "INSERT INTO alumni (alumni_id, student_id, fname, mname, lname, gender, course, batch_startYear, batch_endYear, contact, address, email, recovery_email, password, status, picture, date_created)" .
+          "SELECT alumni_id, student_id, fname, mname, lname, gender, course, batch_startYear, batch_endYear, contact, address, email, recovery_email, password, status, picture, date_created FROM alumni_archive WHERE alumni_id=$account";
         $conn->query($sql_restore);
 
         //delete data in table alumni

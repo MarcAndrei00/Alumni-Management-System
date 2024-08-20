@@ -4,11 +4,12 @@ $conn = new mysqli("localhost", "root", "", "alumni_management_system");
 
 // IMPORTANT CODE ---------------
 use PHPMailer\PHPMailer\PHPMailer;
+
 require '../../vendor/autoload.php';
 
 // SESSION
-$inputEmail = $_SESSION['inputEmail'];
-if ($inputEmail == 0) {
+$recoveryEmail = $_SESSION['inputEmail'];
+if ($recoveryEmail == 0) {
   header('Location: ./login.php');
   exit();
 }
@@ -25,7 +26,8 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 
   if ($user_result->num_rows > 0) {
     // User is an admin
-    $user = $user_result->fetch_assoc();
+    header('Location: ../../adminPage/dashboard_admin.php');
+    exit();
   }
   $stmt->close();
 
@@ -55,10 +57,10 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     $row = $result->fetch_assoc();
 
     if ($row['status'] == "Verified") {
-      // User is a verified alumni
-      header('Location: ../../alumniPage/dashboard_user.php');
-      exit();
+      // User is an alumni
+      $user = $user_result->fetch_assoc();
     } else {
+      $stmt->close();
       $_SESSION['email'] = $account_email;
       $_SESSION['alert'] = 'Unverified';
       sleep(2);
@@ -69,7 +71,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
   $stmt->close();
 
   // Check if user is an alumni_archive
-  $stmt = $conn->prepare("SELECT * FROM admin WHERE admin_id = ? AND email = ?");
+  $stmt = $conn->prepare("SELECT * FROM alumni WHERE alumni_id = ? AND email = ?");
   $stmt->bind_param("ss", $account, $account_email);
   $stmt->execute();
   $user_result = $stmt->get_result();
@@ -78,15 +80,21 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['verif_code']) && isset($_POST['submit_code'])) {
       $verif_code = $_POST['verif_code'];
 
+
       $check_verifcode_qry = mysqli_query($conn, "SELECT verification_code FROM recovery_code WHERE verification_code = '$verif_code'");
 
       if (mysqli_num_rows($check_verifcode_qry) > 0) {
+        $emailCheck = mysqli_query($conn, "SELECT recovery_email FROM alumni WHERE email='$account_email' AND alumni_id='$account'");
 
-        $sql_archive = "UPDATE admin SET email = '$inputEmail' WHERE admin_id=$account";
-        $conn->query($sql_archive);
+        if (mysqli_num_rows($emailCheck) > 0) {
+          $sql = "UPDATE alumni SET recovery_email='$recoveryEmail' WHERE alumni_id=$account";
+          $result = $conn->query($sql);
+        } else {
+          $sql = "INSERT INTO alumni SET recovery_email='$recoveryEmail' WHERE alumni_id=$account";
+          $result = $conn->query($sql);
+        }
 
-        $_SESSION['user_email'] = $inputEmail;
-        $delete_qry = mysqli_query($conn, "DELETE FROM recovery_code WHERE email='$inputEmail'");
+        $delete_qry = mysqli_query($conn, "DELETE FROM recovery_code WHERE email='$recoveryEmail'");
 
         // SUCCESS VERIF 
         $icon = 'success';
@@ -96,13 +104,12 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
         $redirectUrl = './profile.php';
 
         echo "<script>
-              document.addEventListener('DOMContentLoaded', function() {
-                alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
-              });
-            </script>";
+          document.addEventListener('DOMContentLoaded', function() {
+            alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
+          });
+        </script>";
         sleep(2);
       } else {
-
         // ERROR VERIF NOT MATCH
         $icon = 'error';
         $iconHtml = '<i class=\"fas fa-exclamation-circle\"></i>';
@@ -110,15 +117,15 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
         $text = 'Please try again.';
 
         echo "<script>
-            document.addEventListener('DOMContentLoaded', function() {
-              warningError('$title', '$text', '$icon', '$iconHtml');
-            });
-          </script>";
+        document.addEventListener('DOMContentLoaded', function() {
+          warningError('$title', '$text', '$icon', '$iconHtml');
+        });
+      </script>";
         sleep(2);
       }
     } // BACK BUTTON
     else if (isset($_POST['back_btn'])) {
-      $sql_delete = "DELETE FROM recovery_code WHERE email='$inputEmail'";
+      $sql_delete = "DELETE FROM recovery_code WHERE email='$recoveryEmail'";
       $conn->query($sql_delete);
       header('Location: ./profile.php');
       exit();
@@ -128,7 +135,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
       // DELETE OLD VERIF CODE
       $sql_delete = "DELETE FROM recovery_code WHERE email=?";
       $stmt = $conn->prepare($sql_delete);
-      $stmt->bind_param("s", $inputEmail);
+      $stmt->bind_param("s", $recoveryEmail);
       $stmt->execute();
       $stmt->close();
 
@@ -137,7 +144,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 
       // Insert new verification code into the database
       $stmt = $conn->prepare("INSERT INTO recovery_code (email, verification_code) VALUES (?, ?)");
-      $stmt->bind_param("ss", $inputEmail, $verification_code);
+      $stmt->bind_param("ss", $recoveryEmail, $verification_code);
       $stmt->execute();
       $stmt->close();
 
@@ -153,7 +160,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
       $mail->Port       = 587;
 
       $mail->setFrom('alumni.management07@gmail.com', 'Alumni Management');
-      $mail->addAddress($inputEmail);
+      $mail->addAddress($recoveryEmail);
 
       $mail->isHTML(true);
       $mail->Subject = 'Verification Code';

@@ -2,6 +2,10 @@
 session_start();
 $conn = new mysqli("localhost", "root", "", "alumni_management_system");
 
+use PHPMailer\PHPMailer\PHPMailer;
+
+require '../../vendor/autoload.php';
+
 // SESSION
 if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     $account = $_SESSION['user_id'];
@@ -79,8 +83,6 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 // FOR PROFILE IMAGE
 //read data from table alumni
 
-$contact = "";
-$address = "";
 
 $sql = "SELECT * FROM alumni WHERE alumni_id=$account";
 $result = $conn->query($sql);
@@ -107,28 +109,110 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         exit;
     }
 
-    // data from table alumni where student_id = $alumni_id = $_GET['id']; get from alumni list update
-    // data from table alumni where student_id = $alumni_id = $_GET['id']; get from alumni list update
-    $contact = $row['contact'];
-    $address = $row['address'];
+    $recoveryEmail = $row['recovery_email'];
 } else {
-    $contact = $_POST['contact'];
-    $address = ucwords($_POST['address']);
-
-    $sql = "UPDATE alumni SET contact='$contact', address='$address' WHERE alumni_id=$account";
+    $sql = "SELECT * FROM alumni WHERE alumni_id=$account";
     $result = $conn->query($sql);
+    $row = $result->fetch_assoc();
 
-    $icon = 'success';
-    $iconHtml = '<i class="fas fa-check-circle"></i>';
-    $title = 'Info updated successfully';
-    $redirectUrl = './profile.php';
+    $recoveryEmail = strtolower($_POST['recoveryEmail']);
 
-    echo "<script>
-            document.addEventListener('DOMContentLoaded', function() {
-                noTextRedirect('$redirectUrl', '$title', '$icon', '$iconHtml');
-            });
-        </script>";
-    sleep(2);
+
+    // Check if email or student ID exists in both the active and archive tables
+    $emailCheck = mysqli_query($conn, "SELECT recovery_email FROM alumni WHERE email='$recoveryEmail'");
+    $emailCheck_archive = mysqli_query($conn, "SELECT recovery_email FROM alumni_archive WHERE email='$recoveryEmail'");
+    $idCheck = mysqli_query($conn, "SELECT recovery_email FROM alumni WHERE email='$recoveryEmail'");
+    $idCheck_archive = mysqli_query($conn, "SELECT recovery_email FROM alumni_archive WHERE email='$recoveryEmail'");
+
+    // Email and student ID validation
+    if (mysqli_num_rows($emailCheck) > 0 || mysqli_num_rows($emailCheck_archive) > 0) {
+
+        // WARNING EXISTING ACCOUNT
+        $icon = 'warning';
+        $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
+        $title = 'Email Already Exists!';
+        $text = 'Please try again.';
+
+        echo "<script>
+              document.addEventListener('DOMContentLoaded', function() {
+                  warningError('$title', '$text', '$icon', '$iconHtml');
+              });
+          </script>";
+        sleep(2);
+    } elseif (mysqli_num_rows($idCheck) > 0 || mysqli_num_rows($idCheck_archive) > 0) {
+
+        // WARNING EXISTING ACCOUNT
+        $icon = 'warning';
+        $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
+        $title = 'Email Already Exists!';
+        $text = 'Please try again.';
+
+        echo "<script>
+              document.addEventListener('DOMContentLoaded', function() {
+                  warningError('$title', '$text', '$icon', '$iconHtml');
+              });
+          </script>";
+        sleep(2);
+    } else {
+        $sql_delete = "DELETE FROM recovery_code WHERE email=?";
+        $stmt = $conn->prepare($sql_delete);
+        $stmt->bind_param("s", $recoveryEmail);
+        $stmt->execute();
+        $stmt->close();
+
+        // Generate new verification code
+        $verification_code = sprintf("%06d", mt_rand(1, 999999));
+
+        // Insert new verification code into the database
+        $stmt = $conn->prepare("INSERT INTO recovery_code (email, verification_code) VALUES (?, ?)");
+        $stmt->bind_param("ss", $recoveryEmail, $verification_code);
+        $stmt->execute();
+        $stmt->close();
+
+        // Send verification code via email
+        $mail = new PHPMailer(true);
+
+        $mail->isSMTP();
+        $mail->Host       = 'smtp.gmail.com';
+        $mail->SMTPAuth   = true;
+        $mail->Username   = 'alumni.management07@gmail.com';
+        $mail->Password   = 'kcio bmde ffvc sfar';  // Ensure this is securely stored and not hardcoded
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port       = 587;
+
+        $mail->setFrom('alumni.management07@gmail.com', 'Alumni Management');
+        $mail->addAddress($recoveryEmail);
+
+        $mail->isHTML(true);
+        $mail->Subject = 'Verification Code';
+        $mail->Body    = 'Your verification code is <b>' . $verification_code . '</b>
+                        <br>for your recovery email';
+        $mail->AltBody = 'Your verification code is ' . $verification_code;
+
+        $mail->send();
+
+        $_SESSION['inputEmail'] = $recoveryEmail;
+
+        $icon = 'success';
+        $iconHtml = '<i class="fas fa-check-circle"></i>';
+        $title = 'Verification code successfully send';
+        $text = 'You will be redirected shortly to verify the email.';
+        $redirectUrl = './emailVerification.php';
+
+        echo "<script>
+              document.addEventListener('DOMContentLoaded', function() {
+                  alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
+              });
+          </script>";
+    }
+
+    //     $sql = "UPDATE alumni SET recovery_email ='$recoveryEmail' WHERE alumni_id=$account";
+    //     $result = $conn->query($sql);
+
+
+    //     $sql = "INSERT INTO alumni SET recovery_email ='$recoveryEmail' WHERE alumni_id=$account";
+    //     $result = $conn->query($sql);
+
 }
 ?>
 
@@ -258,17 +342,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                     <div class="container-fluid" id="main-container">
                         <div class="container-fluid" id="content-container">
                             <div class="information">
-                                <form action="update.php" method="POST" class="addNew">
+                                <form action="recoveryEmail.php" method="POST" > <!-- class="addNew" -->
                                     <div class="mb-3">
-                                        <label for="formGroupExampleInput" class="form-label">CONTACT</label>
-                                        <input type="text" id="student_id" name="contact" class="form-control" id="formGroupExampleInput" value="<?php echo htmlspecialchars("$contact"); ?>">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="formGroupExampleInput" class="form-label">ADDRESS</label>
-                                        <input type="text" name="address" class="form-control" id="formGroupExampleInput" value="<?php echo htmlspecialchars("$address"); ?>">
+                                        <label for="formGroupExampleInput" class="form-label">RECOVERY EMAIL</label>
+                                        <input type="email" name="recoveryEmail" class="form-control" id="formGroupExampleInput" required value="<?php echo htmlspecialchars("$recoveryEmail"); ?>">
                                     </div>
                                     <div class="buttons">
-                                        <button type="submit" class="btn" id="button1" value="Update">UPDATE</button>
+                                        <button type="submit" class="btn" id="button1" value="Update">CONFIRM</button>
                                         <a href="./profile.php"><button type="button" class="btn" id="button1">CANCEL</button></a>
                                     </div>
                                 </form>
@@ -356,6 +436,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                         studentIdInput.value = value;
                     });
                 });
+
+                // WARNING FOR DUPE ACCOUNT
+                function warningError(title, text, icon, iconHtml) {
+                    Swal.fire({
+                        icon: icon,
+                        iconHtml: iconHtml, // Custom icon using Font Awesome
+                        title: title,
+                        text: text,
+                        customClass: {
+                            popup: 'swal-custom'
+                        },
+                        showConfirmButton: true,
+                        confirmButtonColor: '#4CAF50',
+                        confirmButtonText: 'OK',
+                        timer: 5000,
+                    });
+                }
+
+                // FOR MESSAGEBOX
+                function alertMessage(redirectUrl, title, text, icon, iconHtml) {
+                    Swal.fire({
+                        icon: icon,
+                        iconHtml: iconHtml, // Custom icon using Font Awesome
+                        title: title,
+                        text: text,
+                        customClass: {
+                            popup: 'swal-custom'
+                        },
+                        showConfirmButton: true,
+                        confirmButtonColor: '#4CAF50',
+                        confirmButtonText: 'OK',
+                        timer: 5000
+                    }).then(() => {
+                        window.location.href = redirectUrl; // Redirect to the desired page
+                    });
+                }
             </script>
 </body>
 

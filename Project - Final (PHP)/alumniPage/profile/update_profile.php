@@ -1,12 +1,8 @@
 <?php
 session_start();
+$conn = new mysqli("localhost", "root", "", "alumni_management_system");
 
-$servername = "localhost";
-$db_username = "root";
-$db_password = "";
-$db_name = "alumni_management_system";
-$conn = new mysqli($servername, $db_username, $db_password, $db_name);
-
+// SESSION
 if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     $account = $_SESSION['user_id'];
     $account_email = $_SESSION['user_email'];
@@ -37,6 +33,19 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     }
     $stmt->close();
 
+    // Check if user is a alumni_archive
+    $stmt = $conn->prepare("SELECT * FROM alumni_archive WHERE alumni_id = ? AND email = ?");
+    $stmt->bind_param("ss", $account, $account_email);
+    $stmt->execute();
+    $user_result = $stmt->get_result();
+
+    if ($user_result->num_rows > 0) {
+        session_destroy();
+        header("Location: ../../homepage.php");
+        exit();
+    }
+    $stmt->close();
+
     // Check if user is an alumni
     $stmt = $conn->prepare("SELECT * FROM alumni WHERE alumni_id = ? AND email = ?");
     $stmt->bind_param("ss", $account, $account_email);
@@ -44,11 +53,25 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     $user_result = $stmt->get_result();
 
     if ($user_result->num_rows > 0) {
-        // User is an alumni
-        $user = $user_result->fetch_assoc();
+        $sql = "SELECT * FROM alumni WHERE alumni_id=$account";
+        $result = $conn->query($sql);
+        $row = $result->fetch_assoc();
+
+        if ($row['status'] == "Verified") {
+            // User is an alumni
+            $user = $user_result->fetch_assoc();
+        } else {
+            $stmt->close();
+            $_SESSION['email'] = $account_email;
+            $_SESSION['alert'] = 'Unverified';
+            sleep(2);
+            header('Location: ../../loginPage/verification_code.php');
+            exit();
+        }
     }
-    $stmt->close();
 } else {
+    // Redirect to login if no matching user found
+    session_destroy();
     header('Location: ../../homepage.php');
     exit();
 }
@@ -92,24 +115,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     }
 
     $result = $conn->query($sql);
-    echo "
-            <script>
-                // Wait for the document to load
-                document.addEventListener('DOMContentLoaded', function() {
-                    // Use SweetAlert2 for the alert
-                    Swal.fire({
-                            title: 'Info Updated Successfully',
-                            timer: 2000,
-                            showConfirmButton: true, // Show the confirm button
-                            confirmButtonColor: '#4CAF50', // Set the button color to green
-                            confirmButtonText: 'OK' // Change the button text if needed
-                    }).then(function() {
-                        // Redirect after the alert closes
-                        window.location.href = './profile.php?id=$alumni_id';
-                    });
-                });
-            </script>
-            ";
+    sleep(2);
+    header("location: ./profile.php?id=$alumni_id");
+    exit;
 }
 ?>
 
@@ -127,7 +135,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     <link rel="stylesheet" href="	https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        .swal2-popup {
+            padding-bottom: 30px;
+            /* Adjust the padding as needed */
+        }
+
+        .confirm-button-class,
+        .cancel-button-class {
+            width: 150px;
+            /* Set the desired width */
+            height: 40px;
+            /* Set the desired height */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            /* Hide the overflow to prevent scroll bars */
+            white-space: nowrap;
+            /* Prevent text wrapping */
+        }
+
+        .confirm-button-class {
+            background-color: #e03444 !important;
+            color: white;
+        }
+
+        .cancel-button-class {
+            background-color: #ffc404 !important;
+            color: white;
+        }
+    </style>
 </head>
 
 <body>
@@ -202,7 +245,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                 </div>
                 <div class="container" id="content">
                     <!-- PROFILE -->
-                    <form action="" method="POST" enctype="multipart/form-data" onsubmit="return submitForm(this);">
+                    <form action="" method="POST" enctype="multipart/form-data"> <!-- class="addNew" -->
                         <div class="container text-center" id="start">
                             <div class="row align-items-end">
                                 <div class="col">
@@ -271,22 +314,44 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         });
 
 
-        function submitForm(form) {
-            Swal.fire({
-                    title: 'Do you want to continue?',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#e03444',
-                    cancelButtonColor: '#ffc404',
-                    confirmButtonText: 'Submit'
-                })
-                .then((result) => {
-                    if (result.isConfirmed) {
-                        form.submit(); // Submit the form
-                    }
+        // CONFIRM SUBMITION
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOM fully loaded and parsed");
+
+            const forms = document.querySelectorAll('.addNew');
+
+            forms.forEach(function(form) {
+                console.log("Attaching event listener to form:", form);
+
+                form.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    console.log("Form submit event triggered");
+
+                    Swal.fire({
+                        title: 'Are you sure you want to continue?',
+                        icon: 'warning',
+                        iconHtml: '<i class="fas fa-exclamation-triangle"></i>',
+                        text: 'Once you proceed, this action cannot be undone.',
+                        showCancelButton: true,
+                        confirmButtonColor: '#e03444',
+                        cancelButtonColor: '#ffc404',
+                        confirmButtonText: 'Ok',
+                        cancelButtonText: 'Cancel',
+                        customClass: {
+                            confirmButton: 'confirm-button-class',
+                            cancelButton: 'cancel-button-class'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            console.log("User confirmed action");
+                            form.submit(); // Submit the form if confirmed
+                        } else {
+                            console.log("User canceled action");
+                        }
+                    });
                 });
-            return false; // Prevent default form submission
-        }
+            });
+        });
     </Script>
 </body>
 

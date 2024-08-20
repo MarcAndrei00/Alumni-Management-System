@@ -104,6 +104,7 @@ if ($result->num_rows > 0) {
     $address = $row['address'];
     $email = $row['email'];
     $password = $row['password'];
+    $recoveryEmail = $row['recovery_email'];
 
     // Add more fields as needed
 } else {
@@ -111,21 +112,15 @@ if ($result->num_rows > 0) {
 }
 
 if (isset($_GET['id'])) {
-    echo "
-        <script>
-        // Wait for the document to load
-        document.addEventListener('DOMContentLoaded', function() {
-            // Use SweetAlert2 for the alert
-            Swal.fire({
-                title: 'Profile Updated Successfully',
-                timer: 2000,
-                showConfirmButton: true, // Show the confirm button
-                confirmButtonColor: '#4CAF50', // Set the button color to green
-                confirmButtonText: 'OK' // Change the button text if needed
+    $icon = 'success';
+    $iconHtml = '<i class="fas fa-check-circle"></i>';
+    $title = 'Profile updated successfully';
+
+    echo "<script>
+            document.addEventListener('DOMContentLoaded', function() {
+                noTextMessage('$title', '$icon', '$iconHtml');
             });
-        });
-    </script>
-    ";
+        </script>";
 }
 ?>
 
@@ -143,7 +138,11 @@ if (isset($_GET['id'])) {
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="	https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 
     <style>
         .btn {
@@ -304,7 +303,7 @@ if (isset($_GET['id'])) {
                                         <fieldset disabled>
                                             <div class="mb-3">
                                                 <label for="disabledTextInput" class="form-label">RECOVERY EMAIL</label>
-                                                <input email="email" id="disabledTextInput" class="form-control" value="<?php echo htmlspecialchars($email); ?>" />
+                                                <input email="email" id="disabledTextInput" class="form-control" value="<?php echo htmlspecialchars($recoveryEmail); ?>" />
                                             </div>
                                         </fieldset>
                                     </form>
@@ -318,7 +317,7 @@ if (isset($_GET['id'])) {
                                         <a href='./update.php?id={$row['alumni_id']}' class='btn-link'>
                                             <button type='button' class='btn' id='button1'>UPDATE INFO</button>
                                         </a>
-                                        <a href='./update_profile.php?id={$row['alumni_id']}' class='btn-link'>
+                                        <a href='./recoveryEmail.php?id={$row['alumni_id']}' class='btn-link'>
                                             <button type='button' class='btn' id='button1'>RECOVERY EMAIL</button>
                                         </a>
                                         <a href='./update_profile.php?id={$row['alumni_id']}' class='btn-link'>
@@ -358,6 +357,22 @@ if (isset($_GET['id'])) {
             preview.src = image;
             preview.style.width = '83px';
             preview.style.height = '83px';
+        }
+
+        // FOR MESSAGEBOX WITHOUT TEXT AND REDIRECT
+        function noTextMessage(title, icon, iconHtml) {
+            Swal.fire({
+                icon: icon,
+                iconHtml: iconHtml, // Custom icon using Font Awesome
+                title: title,
+                customClass: {
+                    popup: 'swal-custom'
+                },
+                showConfirmButton: true,
+                confirmButtonColor: '#4CAF50',
+                confirmButtonText: 'OK',
+                timer: 5000
+            });
         }
     </script>
 </body>
