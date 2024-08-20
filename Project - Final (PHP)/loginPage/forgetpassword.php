@@ -77,8 +77,13 @@ else {
     $verification_code = mysqli_real_escape_string($conn, $verification_code);
 
     $check_email_status_qry = mysqli_query($conn, "SELECT status FROM alumni WHERE email = '$email'");
+    $check_email_admin_qry = mysqli_query($conn, "SELECT * FROM admin WHERE email = '$email'");
+    $check_email_coordinator_qry = mysqli_query($conn, "SELECT * FROM coordinator WHERE email = '$email'");
 
-    if (mysqli_num_rows($check_email_status_qry) > 0) {
+    $check_email_alumniarchive_qry = mysqli_query($conn, "SELECT status FROM alumni_archive WHERE email = '$email'");
+    $alumni_archive_checkstatus = mysqli_fetch_assoc($check_email_alumniarchive_qry);
+
+    if (mysqli_num_rows($check_email_status_qry) > 0 || mysqli_num_rows($check_email_admin_qry) > 0 || mysqli_num_rows($check_email_coordinator_qry) > 0) {
       // Email exists and is verified
       $insert_verifcodes_qry = mysqli_query($conn, "INSERT INTO recovery_code(email,verification_code)
               VALUES('$email','$verification_code')");
@@ -108,6 +113,48 @@ else {
       $iconHtml = '<i class="fas fa-check-circle"></i>';
       $title = 'Verification code successfully send';
       $text = 'You will be redirected shortly to verify the email.';
+      $redirectUrl = './verification_code.php';
+
+      echo "<script>
+              document.addEventListener('DOMContentLoaded', function() {
+                  alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
+              });
+          </script>";
+    }else if ($alumni_archive_checkstatus['status'] == "Inactive") {
+      // VERIFY ALUMNI_ARCHIVE INACTIVE ACCOUNT
+      $email = $_POST['email'];
+      $verification_code = sprintf("%06d", mt_rand(1, 999999));
+      $email = mysqli_real_escape_string($conn, $email);
+      $verification_code = mysqli_real_escape_string($conn, $verification_code);
+
+      $insert_verifcodes_qry = mysqli_query($conn, "INSERT INTO recovery_code(email,verification_code)
+                                               VALUES('$email','$verification_code')");
+      $mail = new PHPMailer(true);
+
+      $mail->isSMTP();
+      $mail->Host       = 'smtp.gmail.com';
+      $mail->SMTPAuth   = true;
+      $mail->Username   = 'alumni.management07@gmail.com';
+      $mail->Password   = 'kcio bmde ffvc sfar';
+      $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+      $mail->Port       = 587;
+
+      $mail->setFrom('alumni.management07@gmail.com', 'Alumni Management');
+      $mail->addAddress($email);
+
+      $mail->isHTML(true);
+      $mail->Subject = 'Verification Code';
+      $mail->Body    = 'Your verification code is <b>' . $verification_code . '</b>';
+      $mail->AltBody = 'Your verification code is ' . $verification_code;
+
+      $mail->send();
+      $_SESSION['email'] = $email;
+
+      // WARNING INACTIVE
+      $icon = 'warning';
+      $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
+      $title = 'Your Account is still Inactive!';
+      $text = 'We send a verification code to your email.';
       $redirectUrl = './verification_code.php';
 
       echo "<script>
@@ -159,7 +206,7 @@ else {
       box-sizing: border-box;
       font-family: 'Poppins', sans-serif;
     }
-        
+
     body,
     html {
       height: 100%;

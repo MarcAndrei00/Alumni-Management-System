@@ -2,8 +2,6 @@
 session_start();
 $conn = new mysqli("localhost", "root", "", "alumni_management_system");
 
-use PHPMailer\PHPMailer\PHPMailer;
-
 require '../vendor/autoload.php';
 
 if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
@@ -41,7 +39,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     $stmt->bind_param("ss", $account, $account_email);
     $stmt->execute();
     $user_result = $stmt->get_result();
-
+    
     if ($user_result->num_rows > 0) {
         $sql = "SELECT * FROM alumni WHERE alumni_id=$account";
         $result = $conn->query($sql);
@@ -70,28 +68,53 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     }
 
     // Handle form submission
-    if (isset($_POST['submit'])) {
+    if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit'])) {
         $new_pass = $_POST['password'];
         $confirm_pass = $_POST['confirm_password'];
 
-        if ($new_pass === $confirm_pass) {
-            // Update password
-            $match_pass_qry = mysqli_query($conn, "UPDATE alumni SET password = '$confirm_pass' WHERE email = '$email'");
+        $hashedpassword = password_hash($confirm_pass, PASSWORD_BCRYPT);
 
-            // SUCCESS CHANGE PASS
-            $icon = 'success';
-            $iconHtml = '<i class="fas fa-check-circle"></i>';
-            $title = 'Password has been changed!';
-            $text = 'Now you can login with your new password.';
-            $redirectUrl = './login.php';
+        $archive_qry = mysqli_query($conn,"SELECT * FROM alumni_archive WHERE email = '$email'");
+        $archive_row = mysqli_fetch_assoc($archive_qry);
 
-            echo "<script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
-                    });
-                </script>";
-            sleep(2);
-        }
+        if($new_pass === $confirm_pass){
+            if($archive_row['status'] == "Inactive"){
+                $match_pass_qry = mysqli_query($conn, "UPDATE alumni_archive SET password = '$hashedpassword' WHERE email = '$email'");
+    
+                // SUCCESS CHANGE PASS
+                $icon = 'success';
+                $iconHtml = '<i class="fas fa-check-circle"></i>';
+                $title = 'Your Account is still Inactive!';
+                $text = 'Now you can login with your new password and Activate your account.';
+                $redirectUrl = './login.php';
+    
+                echo "<script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
+                        });
+                    </script>";
+                sleep(2);
+            }
+            else{
+                $match_pass_qry = mysqli_query($conn, "UPDATE alumni SET password = '$hashedpassword' WHERE email = '$email'");
+                $match_pass_qry = mysqli_query($conn, "UPDATE admin SET password = '$hashedpassword' WHERE email = '$email'");
+                $match_pass_qry = mysqli_query($conn, "UPDATE coordinator SET password = '$hashedpassword' WHERE email = '$email'");
+    
+                // SUCCESS CHANGE PASS
+                $icon = 'success';
+                $iconHtml = '<i class="fas fa-check-circle"></i>';
+                $title = 'Password has been changed!';
+                $text = 'Now you can login with your new password.';
+                $redirectUrl = './login.php';
+    
+                echo "<script>
+                        document.addEventListener('DOMContentLoaded', function() {
+                            alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
+                        });
+                    </script>";
+                sleep(2);
+            }
+        } 
     }
 }
 // Redirect if email is not set

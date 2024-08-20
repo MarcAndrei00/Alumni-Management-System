@@ -70,6 +70,11 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
   $stmt->bind_param("ss", $account, $account_email);
   $stmt->execute();
   $user_result = $stmt->get_result();
+  
+  $stmt = $conn->prepare("SELECT * FROM alumni_archive WHERE alumni_id = ? AND email = ?");
+  $stmt->bind_param("ss", $account, $account_email);
+  $stmt->execute();
+  $user_result = $stmt->get_result();
 
   // TO VERIFIED ACCOUNT 
   if ($user_result->num_rows > 0) {
@@ -77,6 +82,9 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     $result = $conn->query($sql);
     $row = $result->fetch_assoc();
 
+    $sql = "SELECT * FROM alumni_archive WHERE alumni_id=$account";
+    $result = $conn->query($sql);
+    $roww = $result->fetch_assoc();
 
     if ($row['status'] == "Verified") {
       // User is a verified alumni
@@ -247,7 +255,45 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
           </script>";
     sleep(2);
   }
-} // BACK BUTTON
+}else if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['verif_code']) && isset($_POST['submit_code']) && $roww['status'] == "Inactive") {
+  $verif_code = $_POST['verif_code'];
+
+  $check_verifcode_qry = mysqli_query($conn, "SELECT verification_code FROM recovery_code WHERE verification_code = '$verif_code'");
+
+  if (mysqli_num_rows($check_verifcode_qry) > 0) {
+    $delete_qry = mysqli_query($conn, "DELETE FROM recovery_code WHERE verification_code = '$verif_code'");
+
+    // SUCCESS CODE MATCH
+    $icon = 'success';
+    $iconHtml = '<i class="fas fa-check-circle"></i>';
+    $title = 'Verification code match!';
+    $text = 'You will be redirected shortly to change your password';
+    $redirectUrl = './newpassword.php';
+
+    echo "<script>
+            document.addEventListener('DOMContentLoaded', function() {
+              alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
+            });
+          </script>";
+    sleep(2);
+  } else {
+
+    // ERROR VERIF NOT MATCH
+    $icon = 'error';
+    $iconHtml = '<i class=\"fas fa-exclamation-circle\"></i>';
+    $title = 'Verification code does not match!';
+    $text = 'Please try again.';
+
+    echo "<script>
+            document.addEventListener('DOMContentLoaded', function() {
+              warningError('$title', '$text', '$icon', '$iconHtml');
+            });
+          </script>";
+    sleep(2);
+  }
+}
+
+// BACK BUTTON
 else if (isset($_POST['back_btn'])) {
   $sql_delete = "DELETE FROM recovery_code WHERE email='$email'";
   $conn->query($sql_delete);
