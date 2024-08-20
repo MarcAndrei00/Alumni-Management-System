@@ -7,7 +7,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     $account = $_SESSION['user_id'];
     $account_email = $_SESSION['user_email'];
 
-    $user_pass = mysqli_query($conn,"SELECT password FROM coordinator WHERE coor_id = '$account'");
+    $user_pass = mysqli_query($conn, "SELECT password FROM coordinator WHERE coor_id = '$account'");
     $current_pass = mysqli_fetch_assoc($user_pass);
     $_SESSION['current_pass'] = $current_pass['password'];
 
@@ -104,37 +104,80 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $account = mysqli_fetch_assoc($result);
 
     // Check if the current password is correct
-    // Check if new password and confirm password match
-    if ($newPass !== $confirmPass) {
-        $errorMessage = "New password and confirm password do not match.";
-    } else {
-        // Update the password in the database
-        $updateQuery = "UPDATE coor SET password = '$newPass' WHERE coor_id = $userId";
-        if (mysqli_query($conn, $updateQuery)) {
-            echo "
-            <script>
-                // Wait for the document to load
+    // Check if the current password matches the hashed password stored in the database
+    if (!password_verify($currentPass, $account['password'])) {
+        $icon = 'warning';
+        $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
+        $title = 'Incorrect current password!';
+        $text = 'Please try again.';
+
+        echo "<script>
                 document.addEventListener('DOMContentLoaded', function() {
-                    // Use SweetAlert2 for the alert
-                    Swal.fire({
-                            title: 'Password Change Successfully',
-                            timer: 2000,
-                            showConfirmButton: true, // Show the confirm button
-                            confirmButtonColor: '#4CAF50', // Set the button color to green
-                            confirmButtonText: 'OK' // Change the button text if needed
-                    }).then(function() {
-                        // Redirect after the alert closes
-                        window.location.href = './profile.php';
-                    });
+                    warningError('$title', '$text', '$icon', '$iconHtml');
                 });
-            </script>
-            ";
+            </script>";
+        sleep(2);
+    }
+    // no current pass
+    elseif ($newPass !== $confirmPass) {
+        $icon = 'warning';
+        $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
+        $title = 'Passwords do not match.';
+        $text = 'Please try again.';
+
+        echo "<script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    warningError('$title', '$text', '$icon', '$iconHtml');
+                });
+            </script>";
+        sleep(2);
+    }
+    // Check if new password and confirm password match
+    elseif (password_verify($newPass, $account['password'])) {
+        $icon = 'warning';
+        $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
+        $title = 'You cannot use the current password.';
+        $text = 'Please try again.';
+
+        echo "<script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    warningError('$title', '$text', '$icon', '$iconHtml');
+                });
+            </script>";
+        sleep(2);
+    } else {
+        // Hash the new password
+        $hashedpassword = password_hash($newPass, PASSWORD_BCRYPT);
+
+        // Update the password in the database
+        $updateQuery = "UPDATE coordinator SET password = '$hashedpassword' WHERE coor_id = $userId";
+        if (mysqli_query($conn, $updateQuery)) {
+            $icon = 'success';
+            $iconHtml = '<i class="fas fa-check-circle"></i>';
+            $title = 'Password change Successfully.';
+            $redirectUrl = './profile.php';
+
+            echo "<script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        noTextRedirect('$redirectUrl', '$title', '$icon', '$iconHtml');
+                    });
+                </script>";
+            sleep(2);
         } else {
-            $errorMessage = "Error changing password. Please try again.";
+            $icon = 'warning';
+            $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
+            $title = 'Error changing password!';
+            $text = 'Please try again.';
+
+            echo "<script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    warningError('$title', '$text', '$icon', '$iconHtml');
+                });
+            </script>";
+            sleep(2);
         }
     }
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -153,7 +196,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-growl/1.0.0/jquery.bootstrap-growl.min.js" integrity="sha512-pBoUgBw+mK85IYWlMTSeBQ0Djx3u23anXFNQfBiIm2D8MbVT9lr+IxUccP8AMMQ6LCvgnlhUCK3ZCThaBCr8Ng==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        .swal2-popup {
+            padding-bottom: 30px;
+            /* Adjust the padding as needed */
+        }
+
+        .confirm-button-class,
+        .cancel-button-class {
+            width: 150px;
+            /* Set the desired width */
+            height: 40px;
+            /* Set the desired height */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            /* Hide the overflow to prevent scroll bars */
+            white-space: nowrap;
+            /* Prevent text wrapping */
+        }
+
+        .confirm-button-class {
+            background-color: #e03444 !important;
+            color: white;
+        }
+
+        .cancel-button-class {
+            background-color: #ffc404 !important;
+            color: white;
+        }
+    </style>
 </head>
 
 <body>
@@ -251,44 +329,30 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </div>
 
             <div class="container-fluid" id="page-content">
-            <?php
-                if (!empty($errorMessage)) {
-                    echo "<script>";
-                    echo "Swal.fire({";
-                    echo "  icon: 'error',";
-                    echo "  title: 'Oops...',";
-                    echo "  text: '$errorMessage',";
-                    echo "  timer: 2000,";
-                    echo "})";
-                    echo "</script>";
-                }
-                ?>
-
-
                 <div class="row">
                     <div class="container-fluid" id="main-container">
                         <div class="container-fluid" id="content-container">
-                        <span>
-                            <h3>CHANGE PASSWORD</h3>
-                        </span>
-                        <div class="alert alert-danger text-center error-list" id="real-time-errors"></div>
-                        <br>
-                        <form method="POST" onsubmit="return submitForm(this);">
+                            <span>
+                                <h3>CHANGE PASSWORD</h3>
+                            </span>
+                            <div class="alert alert-danger text-center error-list" id="real-time-errors"></div>
+                            <br>
+                            <form method="POST" class="addNew">
                                 <div class="mb-3" class="infield" style="position: relative;">
                                     <label for="formGroupExampleInput" class="form-label">Enter Current Password</label>
                                     <input type="hidden" id="current_passwordd" value="<?php echo $_SESSION['current_pass'] ?>">
                                     <input type="password" name="currentPass" class="form-control" id="formGroupExampleInput" onkeyup="validatePassword()" required>
-                                    <img id="togglePassword" src="eye-close.png" alt="Show/Hide Password"  onclick="togglePasswordVisibility('formGroupExampleInput', 'togglePassword')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 75%; transform: translateY(-50%); cursor: pointer;" />
+                                    <img id="togglePassword" src="eye-close.png" alt="Show/Hide Password" onclick="togglePasswordVisibility('formGroupExampleInput', 'togglePassword')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 75%; transform: translateY(-50%); cursor: pointer;" />
                                 </div>
                                 <div class="mb-3" class="infield" style="position: relative;">
                                     <label for="formGroupExampleInput2" class="form-label">Change Password</label>
                                     <input type="password" name="newPass" class="form-control" id="formGroupExampleInput2" onkeyup="validatePassword()" required>
-                                    <img id="togglePasswordd" src="eye-close.png" alt="Show/Hide Password"  onclick="togglePasswordVisibility('formGroupExampleInput2', 'togglePasswordd')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 75%; transform: translateY(-50%); cursor: pointer;" />
+                                    <img id="togglePasswordd" src="eye-close.png" alt="Show/Hide Password" onclick="togglePasswordVisibility('formGroupExampleInput2', 'togglePasswordd')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 75%; transform: translateY(-50%); cursor: pointer;" />
                                 </div>
                                 <div class="mb-3" class="infield" style="position: relative;">
-                                    <label for="formGroupExampleInput3" class="form-label">Confirm Password</label>
+                                    <label for="formGroupExampleInput2" class="form-label">Confirm Password</label>
                                     <input type="password" name="confirmPass" class="form-control" id="formGroupExampleInput3" onkeyup="validatePassword()" required>
-                                    <img id="toggleConfirmPassword" src="eye-close.png" alt="Show/Hide Password"  onclick="togglePasswordVisibility('formGroupExampleInput3', 'toggleConfirmPassword')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 75%; transform: translateY(-50%); cursor: pointer;" />
+                                    <img id="toggleConfirmPassword" src="eye-close.png" alt="Show/Hide Password" onclick="togglePasswordVisibility('formGroupExampleInput3', 'toggleConfirmPassword')" style="height: 15px; width: 20px; position: absolute; right: 10px; top: 75%; transform: translateY(-50%); cursor: pointer;" />
                                 </div>
                                 <div class="row">
                                     <div class="container-fluid">
@@ -304,24 +368,56 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
             </div>
     </div>
-
+    <!-- Script to display preview of selected image -->
     <script>
-        function submitForm(form) {
-            Swal.fire({
-                    title: 'Do you want to continue?',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#e03444',
-                    cancelButtonColor: '#ffc404',
-                    confirmButtonText: 'Submit'
-                })
-                .then((result) => {
-                    if (result.isConfirmed) {
-                        form.submit(); // Submit the form
-                    }
-                });
-            return false; // Prevent default form submission
+        function getImagePreview(event) {
+            var image = URL.createObjectURL(event.target.files[0]);
+            var preview = document.getElementById('preview');
+            preview.src = image;
+            preview.style.width = '83px';
+            preview.style.height = '83px';
         }
+
+
+        // CONFIRM SUBMITION
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOM fully loaded and parsed");
+
+            const forms = document.querySelectorAll('.addNew');
+
+            forms.forEach(function(form) {
+                console.log("Attaching event listener to form:", form);
+
+                form.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    console.log("Form submit event triggered");
+
+                    Swal.fire({
+                        title: 'Are you sure you want to continue?',
+                        icon: 'warning',
+                        iconHtml: '<i class="fas fa-exclamation-triangle"></i>',
+                        text: 'Once you proceed, this action cannot be undone.',
+                        showCancelButton: true,
+                        confirmButtonColor: '#e03444',
+                        cancelButtonColor: '#ffc404',
+                        confirmButtonText: 'Ok',
+                        cancelButtonText: 'Cancel',
+                        customClass: {
+                            confirmButton: 'confirm-button-class',
+                            cancelButton: 'cancel-button-class'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            console.log("User confirmed action");
+                            form.submit(); // Submit the form if confirmed
+                        } else {
+                            console.log("User canceled action");
+                        }
+                    });
+                });
+            });
+        });
+
         function togglePasswordVisibility(passwordId, toggleId) {
             var passwordField = document.getElementById(passwordId);
             var toggleIcon = document.getElementById(toggleId);
@@ -334,6 +430,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 toggleIcon.src = 'eye-close.png'; // Use the image for hiding password
             }
         }
+
         function validatePassword() {
             var current_password = document.getElementById("current_passwordd").value;
             var entered_password = document.getElementById("formGroupExampleInput").value;
@@ -346,37 +443,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             errorContainer.innerHTML = "";
 
             // Validation for current password
-            if (entered_password !== '') {
-                if (current_password !== entered_password) {
-                    errorMessages.push("Your current password doesn't match.");
-                }
-            }else if (new_password !== '') {
+            // if (entered_password !== '' && current_password !== entered_password) {
+            //     errorMessages.push("Your current password doesn't match.");
+            // }
+
+            // Validation for new password
+            if (new_password !== '') {
                 if (new_password.length < 8) {
                     errorMessages.push("Password must be at least 8 characters long.");
-                }
-                else if (!/[A-Z]/.test(new_password)) {
+                } else if (!/[A-Z]/.test(new_password)) {
                     errorMessages.push("Password must contain at least one uppercase letter.");
-                }
-                else if (!/[a-z]/.test(new_password)) {
+                } else if (!/[a-z]/.test(new_password)) {
                     errorMessages.push("Password must contain at least one lowercase letter.");
-                }
-                else if (!/\d/.test(new_password)) {
+                } else if (!/\d/.test(new_password)) {
                     errorMessages.push("Password must contain at least one digit.");
-                }
-                else if (!/[^a-zA-Z\d]/.test(new_password)) {
+                } else if (!/[^a-zA-Z\d]/.test(new_password)) {
                     errorMessages.push("Password must contain at least one special character.");
-                }
-                else if (confirm_password && new_password !== confirm_password) {
+                } else if (confirm_password !== '' && new_password !== confirm_password) {
                     errorMessages.push("Passwords do not match.");
                 }
             }
-             else {
-                errorContainer.style.display = 'none';
-                return;
-            }
-
-            // Validation for new password
-            
 
             // Display error messages
             if (errorMessages.length > 0) {
@@ -395,6 +481,40 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             }
         }
 
+        // FOR MESSAGEBOX WITHOUT TEXT ONLY
+        function noTextRedirect(redirectUrl, title, icon, iconHtml) {
+            Swal.fire({
+                icon: icon,
+                iconHtml: iconHtml, // Custom icon using Font Awesome
+                title: title,
+                customClass: {
+                    popup: 'swal-custom'
+                },
+                showConfirmButton: true,
+                confirmButtonColor: '#4CAF50',
+                confirmButtonText: 'OK',
+                timer: 5000
+            }).then(() => {
+                window.location.href = redirectUrl; // Redirect to the desired page
+            });
+        }
+
+        // ERROR PASS
+        function warningError(title, text, icon, iconHtml) {
+            Swal.fire({
+                icon: icon,
+                iconHtml: iconHtml, // Custom icon using Font Awesome
+                title: title,
+                text: text,
+                customClass: {
+                    popup: 'swal-custom'
+                },
+                showConfirmButton: true,
+                confirmButtonColor: '#4CAF50',
+                confirmButtonText: 'OK',
+                timer: 5000,
+            });
+        }
     </script>
 </body>
 

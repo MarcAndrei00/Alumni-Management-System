@@ -465,7 +465,7 @@ sleep(2);
 
 
 
-
+<!-- VERSION 1 -->
 <!-- STYLE FOR MESSAGE BOX FOR BOTH FORM AND BUTTON SUBMITION -->
 <style>
     /* FOR SWEETALERT */
@@ -494,6 +494,90 @@ sleep(2);
     }
 
     /* FOR SWEETALERT  END LINE*/
+</style>
+
+<!-- VERSION 2 NO SCROLLBAR -->
+<style>
+    .swal2-popup {
+        padding-bottom: 30px;
+        /* Adjust the padding as needed */
+    }
+
+    .confirm-button-class,
+    .cancel-button-class {
+        width: 150px;
+        /* Set the desired width */
+        height: 40px;
+        /* Set the desired height */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        /* Hide the overflow to prevent scroll bars */
+        white-space: nowrap;
+        /* Prevent text wrapping */
+    }
+
+    .confirm-button-class {
+        background-color: #e03444 !important;
+        color: white;
+    }
+
+    .cancel-button-class {
+        background-color: #ffc404 !important;
+        color: white;
+    }
+</style>
+
+<!-- VERSION 3 NO SCROLLBAR -->
+<style>
+    /* FOR SWEETALERT */
+    .swal2-popup {
+        padding-bottom: 30px;
+        /* Adjust the padding as needed */
+        overflow: hidden;
+        /* Hide the overflow to prevent scroll bars */
+    }
+
+    .swal2-title {
+        overflow: hidden;
+        /* Ensure no overflow in the title */
+        text-overflow: ellipsis;
+        /* Add ellipsis if the title is too long */
+        /* Prevent text wrapping in the title */
+        margin-bottom: 20px;
+        /* Add margin to adjust spacing */
+    }
+
+    .swal2-content {
+        overflow: hidden;
+        /* Hide the overflow to prevent scroll bars */
+    }
+
+    .confirm-button-class,
+    .cancel-button-class {
+        width: 150px;
+        /* Set the desired width */
+        height: 40px;
+        /* Set the desired height */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        /* Hide the overflow to prevent scroll bars */
+        white-space: nowrap;
+        /* Prevent text wrapping */
+    }
+
+    .confirm-button-class {
+        background-color: #e03444 !important;
+        color: white;
+    }
+
+    .cancel-button-class {
+        background-color: #ffc404 !important;
+        color: white;
+    }
 </style>
 
 
@@ -544,8 +628,13 @@ sleep(2);
 </script>
 
 
+<!-- LINK NEEDED FOR SUBMITION FORM -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-
+<!-- VERSION1 -->
 <!-- MESSAGE BOX FOR BUTTON SUBMITION -->
 <a class='btn btn-danger btn-sm archive' href='./del_alumni.php'>Archive</a>
 <script>
@@ -583,7 +672,47 @@ sleep(2);
 </script>
 
 
+<!-- VERSION2 -->
+<script>
+    // CONFIRM SUBMITION
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log("DOM fully loaded and parsed");
 
+        const forms = document.querySelectorAll('.addNew');
+
+        forms.forEach(function(form) {
+            console.log("Attaching event listener to form:", form);
+
+            form.addEventListener('submit', function(event) {
+                event.preventDefault();
+                console.log("Form submit event triggered");
+
+                Swal.fire({
+                    title: 'Are you sure you want to continue?',
+                    icon: 'warning',
+                    iconHtml: '<i class="fas fa-exclamation-triangle"></i>',
+                    text: 'Once you proceed, this action cannot be undone.',
+                    showCancelButton: true,
+                    confirmButtonColor: '#e03444',
+                    cancelButtonColor: '#ffc404',
+                    confirmButtonText: 'Ok',
+                    cancelButtonText: 'Cancel',
+                    customClass: {
+                        confirmButton: 'confirm-button-class',
+                        cancelButton: 'cancel-button-class'
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        console.log("User confirmed action");
+                        form.submit(); // Submit the form if confirmed
+                    } else {
+                        console.log("User canceled action");
+                    }
+                });
+            });
+        });
+    });
+</script>
 
 
 
@@ -819,7 +948,7 @@ if ($result->num_rows > 0) {
             $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
             $title = 'Unsuccessfully';
             $text = 'Account exceed 5 yearc of inactive connot restored.';
-            
+
             echo "<script>
                     document.addEventListener('DOMContentLoaded', function() {
                         warningError('$title', '$text', '$icon', '$iconHtml');

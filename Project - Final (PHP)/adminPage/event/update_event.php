@@ -230,6 +230,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             margin-right: 10px;
             /* Space between checkbox and label text */
         }
+
     </style>
 </head>
 
@@ -480,7 +481,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             });
         });
 
-
+        // CONFIRM SUBMITION
         document.addEventListener('DOMContentLoaded', function() {
             console.log("DOM fully loaded and parsed");
 

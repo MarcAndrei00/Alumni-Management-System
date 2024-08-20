@@ -186,6 +186,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         .swal2-popup {
             padding-bottom: 30px;
             /* Adjust the padding as needed */
+            overflow: hidden;
+            /* Hide the overflow to prevent scroll bars */
+        }
+
+        .swal2-title {
+            overflow: hidden;
+            /* Ensure no overflow in the title */
+            text-overflow: ellipsis;
+            /* Add ellipsis if the title is too long */
+            /* Prevent text wrapping in the title */
+            margin-bottom: 20px;
+            /* Add margin to adjust spacing */
+        }
+
+        .swal2-content {
+            overflow: hidden;
+            /* Hide the overflow to prevent scroll bars */
         }
 
         .confirm-button-class,
@@ -197,6 +214,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow: hidden;
+            /* Hide the overflow to prevent scroll bars */
+            white-space: nowrap;
+            /* Prevent text wrapping */
         }
 
         .confirm-button-class {
@@ -208,8 +229,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             background-color: #ffc404 !important;
             color: white;
         }
-
-        /* FOR SWEETALERT  END LINE*/
     </style>
 </head>
 

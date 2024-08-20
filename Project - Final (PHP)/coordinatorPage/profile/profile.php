@@ -231,10 +231,6 @@ if ($result->num_rows > 0) {
                                                 <label for="disabledTextInput" class="form-label">EMAIL ADDRESS</label>
                                                 <input email="email" id="disabledTextInput" class="form-control" placeholder="Email" value="<?php echo htmlspecialchars($email); ?>" />
                                             </div>
-                                            <div class="mb-3">
-                                                <label for="disabledTextInput" class="form-label">PASSWORD</label>
-                                                <input password="email" id="disabledTextInput" class="form-control" placeholder="Password" value="<?php echo htmlspecialchars($password); ?>" />
-                                            </div>
                                     </form>
                                 </div>
                             </div>
