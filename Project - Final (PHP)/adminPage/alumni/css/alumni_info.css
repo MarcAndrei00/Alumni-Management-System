@@ -115,6 +115,7 @@ font-weight: bold;
 .profile h4 {
     color: #fff;
     font-weight: 500;
+    overflow-y: hidden;
 }
 
 .profile small {

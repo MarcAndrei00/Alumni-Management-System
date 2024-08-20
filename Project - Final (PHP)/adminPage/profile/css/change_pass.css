@@ -360,3 +360,23 @@ main {
     font-size: 80px;
     font-weight: lighter;
 }
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 10px;
+    border-radius: 5px;
+    margin: 10px 0;
+    border: 1px solid #f5c6cb;
+    text-align: center;
+    font-family: Arial, sans-serif;
+}
+
+.error-message {
+    margin: 0;
+    font-size: 14px;
+}
+
+#real-time-errors {
+    display: none; /* Hidden by default */
+}

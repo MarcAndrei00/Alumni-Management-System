@@ -1,9 +1,12 @@
 
 <?php
 require_once('vendor/autoload.php');
+require_once('../vendor/autoload.php');
 
 session_start();
 $conn = new mysqli("localhost", "root", "", "alumni_management_system");
+
+$client = new \GuzzleHttp\Client();
 
 // SESSION
 if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
@@ -67,47 +70,65 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     }
 }
 
+
 if (isset($_POST['submit_btn'])) {
-    $payment = $_POST['donation_amount'];
+    $name = $_POST['name'];
+    $email = $_POST['email'];
+    $contact_number = $_POST['contact_number'];
+    $donation = $_POST['donation_amount'];
 
-    // Multiply the payment by 100 to convert it to cents
-    $paymentInCents = $payment * 100;
+    if ($donation <= 0) {
+        $icon = 'error';
+        $iconHtml = '<i class=\"fas fa-exclamation-circle\"></i>';
+        $title = 'You input a negative value.';
+        $text = 'Please input an appropriate donation.';
 
-    $_SESSION['paymentInCents'] = $paymentInCents;
+        echo "<script>
+                document.addEventListener('DOMContentLoaded', function() {
+                warningError('$title', '$text', '$icon', '$iconHtml');
+                });
+            </script>";
+        sleep(2);
+    } else {
+        // Multiply the payment by 100 to convert it to cents
+        $donationInCents = $donation * 100;
 
-    // Define the request body with the required description
-    $requestBody = [
-        'data' => [
-            'attributes' => [
-                'amount' => $paymentInCents,
-                'description' => 'Payment for your donation',  // Add a description here
-                'redirect' => [
-                    'success' => 'http://6320-2001-4450-4fab-3b00-e9fc-5a3b-d425-9f0a.ngrok-free.app/event.php',  // Redirect on successful payment
-                    'failed' => 'http://6320-2001-4450-4fab-3b00-e9fc-5a3b-d425-9f0a.ngrok-free.app/event.php'  // Redirect on failed payment
+        $donation_qry = mysqli_query($conn, "INSERT INTO donation_table (name, email, contact_number, donation_amount)
+        VALUES('$name','$email','$contact_number','$donation')");
+
+        // Define the request body with the required description
+        $requestBody = [
+            'data' => [
+                'attributes' => [
+                    'amount' => $donationInCents,
+                    'description' => 'Payment for your donation',  // Add a description here
                 ]
             ]
-        ]
-    ];
+        ];
 
-    // Send the request to the PayMongo API
-    $response = $client->request('POST', 'https://api.paymongo.com/v1/links', [
-        'body' => json_encode($requestBody),  // Convert the request body to JSON
-        'headers' => [
-            'accept' => 'application/json',
-            'authorization' => 'Basic c2tfdGVzdF9QSEUyUTNlQ3luc1lOcWNhYW03ejRFenk6',
-            'content-type' => 'application/json',
-        ],
-    ]);
+        // Send the request to the PayMongo API
+        $response = $client->request('POST', 'https://api.paymongo.com/v1/links', [
+            'body' => json_encode($requestBody),  // Convert the request body to JSON
+            'headers' => [
+                'accept' => 'application/json',
+                'authorization' => 'Basic c2tfdGVzdF9QSEUyUTNlQ3luc1lOcWNhYW03ejRFenk6',
+                'content-type' => 'application/json',
+            ],
+        ]);
 
-    // Decode the JSON response
-    $responseData = json_decode($response->getBody(), true);
+        // Decode the JSON response
+        $responseData = json_decode($response->getBody(), true);
 
-    // Extract the checkout URL
-    $checkoutUrl = $responseData['data']['attributes']['checkout_url'];
+        // Extract the checkout URL
+        $checkoutUrl = $responseData['data']['attributes']['checkout_url'];
 
-    // Redirect the user to the checkout URL
-    header('Location: ' . $checkoutUrl);
-    exit(); // Terminate the script to ensure the redirect happens
+        // Store the URL in the session
+        $_SESSION['checkout_url'] = $checkoutUrl;
+
+        // Redirect to a new page
+        header('Location: redirect.php');
+        exit();
+    }
 }
 // Read data from table alumni
 $sql = "SELECT * FROM event";
@@ -698,6 +719,26 @@ $result = $conn->query($sql);
             min-width: 100px;
 
         }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border: 1px solid #f5c6cb;
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+
+        .error-message {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        #real-time-errors {
+            display: none; /* Hidden by default */
+        }
     </style>
 </head>
 
@@ -823,19 +864,20 @@ $result = $conn->query($sql);
                     <form method="POST">
                         <div class="form-group">
                             <label for="donorName">Name</label>
-                            <input type="text" name="name" class="form-control" id="donorName" placeholder="Enter your name">
+                            <input type="text" name="name" class="form-control" id="donorName" placeholder="Enter your name" required>
                         </div>
                         <div class="form-group">
                             <label for="donorEmail">Email</label>
-                            <input type="email" name="email" class="form-control" id="donorEmail" placeholder="Enter your email">
+                            <input type="email" name="email" class="form-control" id="donorEmail" placeholder="Enter your email" required>
                         </div>
                         <div class="form-group">
                             <label for="donorEmail">Contact Number</label>
-                            <input type="number" name="contact_number" class="form-control" id="donorNumber" placeholder="Enter your email">
+                            <input type="number" name="contact_number" class="form-control" id="donorNumber" placeholder="Enter your contact number" required>
                         </div>
                         <div class="form-group">
                             <label for="donationAmount">Donation Amount</label>
-                            <input type="number" name="donation_amount" class="form-control" id="donationAmount" placeholder="Enter amount">
+                            <input type="number" name="donation_amount" class="form-control" id="donationAmount" onkeyup="donationValue()" placeholder="Enter amount" required>
+                            <div class="alert alert-danger text-center error-list" id="real-time-errors"></div>
                         </div>
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -898,6 +940,38 @@ $result = $conn->query($sql);
                 timer: 5000,
             });
         }
+        function donationValue() {
+            var donation = document.getElementById("donationAmount").value;
+            var errorMessages = [];
+            var errorContainer = document.getElementById("real-time-errors");
+
+            // Clear previous error messages
+            errorContainer.innerHTML = "";
+
+            // Validation rules
+            if (donation >= 0) {
+                errorContainer.style.display = 'none';
+                return;
+            }else{
+                errorMessages.push("Please enter a positive donation amount. Negative values are not allowed.");
+            }
+
+            // Display error messages
+            if (errorMessages.length > 0) {
+                errorMessages.forEach(function(error) {
+                    var p = document.createElement("p");
+                    p.innerText = error;
+                    p.className = "error-message";
+                    errorContainer.appendChild(p);
+                });
+                // Ensure the error container is visible
+                errorContainer.style.display = 'block';
+            } else {
+                // Hide the error container if there are no errors
+                errorContainer.style.display = 'none';
+            }
+        }
+
     </script>
     <script>
         AOS.init();

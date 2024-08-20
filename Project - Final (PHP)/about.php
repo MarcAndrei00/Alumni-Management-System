@@ -852,8 +852,8 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
             </div>
             <div class="col-lg-4 col-md-6 mb-4">
                 <div class="team-member">
-                    <img src="assets/niel.jpg" alt="Dhaneil D. Lofamia">
-                    <h3>Dhaneil D. Lofamia</h3>
+                    <img src="assets/niel.jpg" alt="Dhaniel D. Lofamia">
+                    <h3>Dhaniel D. Lofamia</h3>
                     <p>Back-End</p>
                     <div class="team_overlay">
                         <div class="animated-text">Dhaneil is a back-end wizard with a talent for solving complex problems. His work ensures that our systems are not just functional but optimized for performance.</div>

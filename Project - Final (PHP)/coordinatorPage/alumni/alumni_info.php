@@ -270,7 +270,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
         <main>
             <div class="page-header">
-                <h1><strong>Alumni</strong></h1>
+                <h1 style="overflow-y: hidden;"><strong>Alumni</strong></h1>
             </div>
         </main>
         <div class="container" id="container-full">

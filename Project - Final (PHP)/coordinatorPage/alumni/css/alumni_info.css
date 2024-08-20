@@ -3,7 +3,7 @@
 
 
 * {
-    overflow: hidden;
+    overflow-x: hidden;
     margin: 0;
     padding: 0;
     text-decoration: none;
@@ -115,9 +115,12 @@ font-weight: bold;
     border: 3px solid #fff;
 }
 
+
+
 .profile h4 {
     color: #fff;
     font-weight: 500;
+    overflow-y: hidden;
 }
 
 .profile small {
