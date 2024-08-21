@@ -39,7 +39,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     $stmt->bind_param("ss", $account, $account_email);
     $stmt->execute();
     $user_result = $stmt->get_result();
-    
+
     if ($user_result->num_rows > 0) {
         $sql = "SELECT * FROM alumni WHERE alumni_id=$account";
         $result = $conn->query($sql);
@@ -50,7 +50,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
             header('Location: ../alumniPage/dashboard_user.php');
             exit();
         } else {
-            
+
             $_SESSION['email'] = $account_email;
             $_SESSION['alert'] = 'Unverified';
             sleep(2);
@@ -74,39 +74,38 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 
         $hashedpassword = password_hash($confirm_pass, PASSWORD_BCRYPT);
 
-        $archive_qry = mysqli_query($conn,"SELECT * FROM alumni_archive WHERE email = '$email'");
+        $archive_qry = mysqli_query($conn, "SELECT * FROM alumni_archive WHERE email = '$email'");
         $archive_row = mysqli_fetch_assoc($archive_qry);
 
-        if($new_pass === $confirm_pass){
-            if($archive_row['status'] == "Inactive"){
+        if ($new_pass === $confirm_pass) {
+            if ($archive_row['status'] == "Inactive") {
                 $match_pass_qry = mysqli_query($conn, "UPDATE alumni_archive SET password = '$hashedpassword' WHERE email = '$email'");
-    
+
                 // SUCCESS CHANGE PASS
                 $icon = 'success';
                 $iconHtml = '<i class="fas fa-check-circle"></i>';
                 $title = 'Your Account is still Inactive!';
                 $text = 'Now you can login with your new password and Activate your account.';
                 $redirectUrl = './login.php';
-    
+
                 echo "<script>
                         document.addEventListener('DOMContentLoaded', function() {
                             alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
                         });
                     </script>";
                 sleep(2);
-            }
-            else{
+            } else {
                 $match_pass_qry = mysqli_query($conn, "UPDATE alumni SET password = '$hashedpassword' WHERE email = '$email'");
                 $match_pass_qry = mysqli_query($conn, "UPDATE admin SET password = '$hashedpassword' WHERE email = '$email'");
                 $match_pass_qry = mysqli_query($conn, "UPDATE coordinator SET password = '$hashedpassword' WHERE email = '$email'");
-    
+
                 // SUCCESS CHANGE PASS
                 $icon = 'success';
                 $iconHtml = '<i class="fas fa-check-circle"></i>';
                 $title = 'Password has been changed!';
                 $text = 'Now you can login with your new password.';
                 $redirectUrl = './login.php';
-    
+
                 echo "<script>
                         document.addEventListener('DOMContentLoaded', function() {
                             alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
@@ -114,7 +113,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
                     </script>";
                 sleep(2);
             }
-        } 
+        }
     }
 }
 // Redirect if email is not set
@@ -141,14 +140,14 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
         }
 
         .background {
-            background-image: url('bg2.png');
+            background-image: url("../assets/logins.jpg");
             /* Update the path accordingly if necessary */
             background-position: center;
-            background-repeat: no-repeat;
             background-size: cover;
+            opacity: blur(100px);
+            /* Adjust the blur level as needed */
             height: 100%;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
         }
@@ -186,6 +185,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
             width: 48px;
             height: 48px;
         }
+
         .alert-danger {
             background-color: #f8d7da;
             color: #721c24;
@@ -203,7 +203,8 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
         }
 
         #real-time-errors {
-            display: none; /* Hidden by default */
+            display: none;
+            /* Hidden by default */
         }
     </style>
 </head>
@@ -283,6 +284,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
                 timer: 5000,
             });
         }
+
         function validatePassword() {
             var password = document.getElementById("password").value;
             var confirmPassword = document.getElementById("confirm_password").value;
@@ -300,20 +302,15 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
             } else {
                 if (password.length < 8) {
                     errorMessages.push("Password must be at least 8 characters long.");
-                }
-                else if (!/[A-Z]/.test(password)) {
+                } else if (!/[A-Z]/.test(password)) {
                     errorMessages.push("Password must contain at least one uppercase letter.");
-                }
-                else if (!/[a-z]/.test(password)) {
+                } else if (!/[a-z]/.test(password)) {
                     errorMessages.push("Password must contain at least one lowercase letter.");
-                }
-                else if (!/\d/.test(password)) {
+                } else if (!/\d/.test(password)) {
                     errorMessages.push("Password must contain at least one digit.");
-                }
-                else if (!/[^a-zA-Z\d]/.test(password)) {
+                } else if (!/[^a-zA-Z\d]/.test(password)) {
                     errorMessages.push("Password must contain at least one special character.");
-                }
-                else if (confirmPassword && password !== confirmPassword) {
+                } else if (confirmPassword && password !== confirmPassword) {
                     errorMessages.push("Passwords do not match.");
                 }
             }

@@ -67,7 +67,6 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
             sleep(2);
             header('Location: ../../loginPage/verification_code.php');
             exit();
-
         }
     }
 } else {
@@ -347,9 +346,11 @@ if (isset($_GET['ide'])) {
                         <thead>
 
                             <tr>
-                                <th scope="col" class="inline">ID</th>
                                 <th scope="col" class="inline">TITLE</th>
-                                <th scope="col" class="inline">SCHEDULE</th>
+                                <th scope="col" class="inline">DATE</th>
+                                <th scope="col" class="inline">TIME</th>
+                                <th scope="col" class="inline">VENUE</th>
+                                <th scope="col" class="inline">ADDRESS</th>
                                 <th scope="col" class="inline">DESCRIPTION</th>
                                 <th scope="col" class="inline">DATE CREATED</th>
                                 <th scope="col" class="inline">ACTION</th>
@@ -359,12 +360,15 @@ if (isset($_GET['ide'])) {
                             <?php
                             if ($result->num_rows > 0) {
                                 while ($row = $result->fetch_assoc()) {
+                                    $time = $row["start_time"] . " - " . $row["end_time"];
 
                             ?>
                                     <tr>
-                                        <td class="inline"><?php echo $row['event_id'] ?></td>
                                         <td class="inline"><?php echo $row['title'] ?></td>
-                                        <td class="inline"><?php echo $row['schedule'] ?></td>
+                                        <td class="inline"><?php echo $row['date'] ?></td>
+                                        <td class="inline"><?php echo htmlspecialchars($time) ?></td>
+                                        <td class="inline"><?php echo $row['venue'] ?></td>
+                                        <td class="inline"><?php echo $row['address'] ?></td>
                                         <td class="inline"><?php echo $row['description'] ?></td>
                                         <td class="inline"><?php echo $row['date_created'] ?></td>
                                         <?php

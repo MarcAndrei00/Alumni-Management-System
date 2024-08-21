@@ -516,7 +516,7 @@ if ($Message == 'import') {
 
                         <div class="row">
                             <!-- Left side: Search bar and dropdown (col-8) -->
-                            <div class="col-9 d-flex align-items-center">
+                            <div class="col-7 d-flex align-items-center">
                                 <div class="d-flex align-items-center" style="flex: 1;">
                                     <!-- Search Form -->
                                     <form class="d-flex" role="search" style="flex: 1;">
@@ -525,7 +525,7 @@ if ($Message == 'import') {
                                     </form>
 
                                     <!-- Dropdown Button -->
-                                    <div class="dropdown ms-2">
+                                    <!-- <div class="dropdown ms-2">
                                         <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="eventForDropdown" onclick="toggleDropdown()" style="height: 100%; width: 430px;">Select Courses</button>
                                         <div id="eventForMenu" class="dropdown-menu" style="display:none; position: absolute; background-color: white; border: 1px solid #ccc; padding: 10px;">
                                             <label><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)" checked> All Courses</label><br>
@@ -540,12 +540,12 @@ if ($Message == 'import') {
                                             <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSCS" checked> Bachelor of Science in Computer Science</label><br>
                                             <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSc(Psych)" checked> Bachelor Of Science In Psychology</label>
                                         </div>
-                                    </div>
+                                    </div> -->
                                 </div>
                             </div>
 
                             <!-- Right side: Unregister Account button (col-4) -->
-                            <div class="col-3 d-flex align-items-center justify-content-end">
+                            <div class="col-5 d-flex align-items-center justify-content-end">
                                 <div class="add-button">
                                     <a class='btn btn-secondary border border-dark' href='./alumni.php' style="margin-left: 1%; padding-left: 4.1px; padding-right: 5.4px; white-space: nowrap;">Alumni Account</a>
                                 </div>

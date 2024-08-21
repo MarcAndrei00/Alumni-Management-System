@@ -18,7 +18,7 @@ body {
     justify-content: center;
     align-items: center;
     font-family: 'Poppins', sans-serif;
-    background-image: url("https://cvsu-imus.edu.ph/assets/images/social-image.jpg?66b6d2b10cdf");
+    background-image: url("../../assets/logins.jpg");
     /* Update the path accordingly if necessary */
     background-position: center;
     background-size: cover;

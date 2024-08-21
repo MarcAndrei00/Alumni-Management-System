@@ -63,6 +63,11 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
         exit();
     }
 }
+
+// Read data from table alumni
+$sql = "SELECT * FROM contact_page";
+$result = $conn->query($sql);
+$row = $result->fetch_assoc();
 ?>
 
 <!DOCTYPE html>
@@ -600,22 +605,20 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     <section class="hero-section">
         <img src="assets/Imus-Campus-scaled.jpg" alt="Graduation Image" style="height: 550px;">
         <div class="overlay">
-            <h1 style="color:#89CFF0;"><b>CONTACT DETAILS</b></h1>
+            <h1 style="color:#89CFF0;"><b><?php echo $row['page_title']; ?></b></h1>
             <div class="animated-containers">
                 <div class="container">
                     <div class="animated-box" data-aos="fade-up">
                         <h3><i class="fas fa-map-marker-alt"></i> LOCATION: </h3>
-                        <p>Cavite Civic Center,
-                            Palico IV, Imus City, Cavite</p>
+                        <p><?php echo $row['address']; ?></p>
                     </div>
                     <div class="animated-box" data-aos="fade-up" data-aos-delay="100">
                         <h3><i class="fas fa-envelope"></i> EMAIL: </h3>
-                        <p>alumni.management07@gmail.com</>
-                        </p>
+                        <p><?php echo $row['email']; ?></p>
                     </div>
                     <div class="animated-box" data-aos="fade-up" data-aos-delay="200">
                         <h3><i class="fas fa-phone-alt"></i> CONTACT NO: </h3>
-                        <p>09123456789</p>
+                        <p>0<?php echo $row['contact']; ?></p>
                     </div>
                 </div>
 
