@@ -77,23 +77,23 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 
 
 // COUNTS
-    //query for alumni count
-    $sql_alumni = "SELECT COUNT(student_id) AS alumni_count FROM alumni";
-    $result_alumni = $conn->query($sql_alumni);
-    $row_alumni = $result_alumni->fetch_assoc();
-    $count_alumni = $row_alumni['alumni_count'];
+//query for alumni count
+$sql_alumni = "SELECT COUNT(student_id) AS alumni_count FROM alumni";
+$result_alumni = $conn->query($sql_alumni);
+$row_alumni = $result_alumni->fetch_assoc();
+$count_alumni = $row_alumni['alumni_count'];
 
-    //query for alumni count
-    $sql_coordinator = "SELECT COUNT(coor_id) AS coordinators_count FROM coordinator";
-    $result_coordinator = $conn->query($sql_coordinator);
-    $row_coordinator = $result_coordinator->fetch_assoc();
-    $coordinator_count = $row_coordinator['coordinators_count'];
+//query for alumni count
+$sql_coordinator = "SELECT COUNT(coor_id) AS coordinators_count FROM coordinator";
+$result_coordinator = $conn->query($sql_coordinator);
+$row_coordinator = $result_coordinator->fetch_assoc();
+$coordinator_count = $row_coordinator['coordinators_count'];
 
-    //query for events count
-    $sql_event = "SELECT COUNT(event_id) AS events_count FROM event";
-    $result_event = $conn->query($sql_event);
-    $row_event = $result_event->fetch_assoc();
-    $event_count = $row_event['events_count'];
+//query for events count
+$sql_event = "SELECT COUNT(event_id) AS events_count FROM event";
+$result_event = $conn->query($sql_event);
+$row_event = $result_event->fetch_assoc();
+$event_count = $row_event['events_count'];
 
 
 $sql = "SELECT course, COUNT(*) as count FROM alumni GROUP BY course";
@@ -138,7 +138,7 @@ $labels_alumniCount = ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'June', 'July', 'A
 $data_alumniCount = array_fill(0, 12, 0);
 
 if ($res_alumniCount->num_rows > 0) {
-    while($row_alumniCount = $res_alumniCount->fetch_assoc()) {
+    while ($row_alumniCount = $res_alumniCount->fetch_assoc()) {
         $data_alumniCount[$row_alumniCount['month'] - 1] = $row_alumniCount['count'];
     }
 }
@@ -257,7 +257,7 @@ if ($res_alumniCount->num_rows > 0) {
             </div>
 
             <div class="container mt-4 p-3 shadow bg-white rounded d-flex justify-content-between">
-               <div>
+                <div>
                     <button id="download-pdf" class="btn btn-primary">Download as PDF</button>
                     <button id="refresh-page" class="btn btn-secondary">Refresh</button>
                 </div>
@@ -269,6 +269,9 @@ if ($res_alumniCount->num_rows > 0) {
             <div class="container mt-4 p-3 shadow bg-white rounded">
                 <form id="report-form">
                     <div class="summary-boxes">
+                        <div id="hidden-content" style="display:none;">
+                            <img src="../../assets/head.jpg" id="header-image" style="width:100%; height:auto;">
+                        </div>
                         <div class="summary-box" id="alumni">
                             <h2>Total Alumni Registered</h2>
                             <p><?php echo $count_alumni; ?></p>
@@ -280,91 +283,91 @@ if ($res_alumniCount->num_rows > 0) {
                     </div>
                 </form>
             </div>
-        <div class="container mt-4 p-3 shadow bg-white rounded d-flex justify-content-between">
-            <div class="chartCard">
-                <div class="chartBox">
-                    <canvas id="myChart"></canvas>
+            <div class="container mt-4 p-3 shadow bg-white rounded d-flex justify-content-between">
+                <div class="chartCard">
+                    <div class="chartBox">
+                        <canvas id="myChart"></canvas>
+                    </div>
+                </div>
+                <!-- Pie Charts -->
+                <div class="chartCard">
+                    <div class="chartBox">
+                        <canvas id="registeredUnregisteredChart"></canvas>
+                    </div>
                 </div>
             </div>
-            <!-- Pie Charts -->
-            <div class="chartCard">
-                <div class="chartBox">
-                    <canvas id="registeredUnregisteredChart"></canvas>
+            <div class="container mt-4 p-3 shadow bg-white rounded d-flex justify-content-between">
+                <div class="chartCard">
+                    <div class="chartBox">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+                <div class="chartCard">
+                    <div class="chartBoxs">
+                        <canvas id="statusPerCourseChart"></canvas>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="container mt-4 p-3 shadow bg-white rounded d-flex justify-content-between">
-            <div class="chartCard">
-                <div class="chartBox">
-                    <canvas id="statusChart"></canvas>
+            <div class="container mt-4 p-3 shadow bg-white rounded d-flex justify-content-between">
+                <!-- Bar Charts -->
+                <div class="chartCard">
+                    <div class="chartBoxs">
+                        <canvas id="registeredPerCourseChart"></canvas>
+                    </div>
+                </div>
+                <div class="chartCard">
+                    <div class="chartBoxs">
+                        <canvas id="eventsPerMonthChart"></canvas>
+                    </div>
                 </div>
             </div>
-            <div class="chartCard">
-                <div class="chartBoxs">
-                    <canvas id="statusPerCourseChart"></canvas>
+            <div class="container mt-4 p-3 shadow bg-white rounded d-flex justify-content-between">
+                <div class="chartCard">
+                    <div class="chartBoxs">
+                        <canvas id="registeredPerMonthChart"></canvas>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="container mt-4 p-3 shadow bg-white rounded d-flex justify-content-between">
-            <!-- Bar Charts -->
-            <div class="chartCard">
-                <div class="chartBoxs">
-                    <canvas id="registeredPerCourseChart"></canvas>
-                </div>
-            </div>
-            <div class="chartCard">
-                <div class="chartBoxs">
-                    <canvas id="eventsPerMonthChart"></canvas>
-                </div>
-            </div>
-        </div>
-        <div class="container mt-4 p-3 shadow bg-white rounded d-flex justify-content-between">
-            <div class="chartCard">
-                <div class="chartBoxs">
-                    <canvas id="registeredPerMonthChart"></canvas>
-                </div>
-            </div>
-        </div>
 
-      </div>
-        </main>
+    </div>
+    </main>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha512-JPcRR8yFa8mmCsfrw4TNte1ZvF1e3+1SdGMslZvmrzDYxS69J7J49vkFL8u6u8PlPJK+H3voElBtUCzaXj+6ig==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
-                const data = {
-        labels: ['BSIT', 'BSCS', 'BSOA', 'BAJ', 'BECED', 'BEED', 'BSBM', 'BSENTREP', 'BSHM', 'BSPsych'], // Updated labels
-        datasets: [{
-            label: 'Alumni Registered',
-            data: [18,  12, 16, 19, 12, 10, 15, 11, 13, 17], // Ensure data corresponds to each course
-            backgroundColor: [
-            'rgba(255, 26, 104, 0.5)',
-            'rgba(54, 162, 235, 0.5)',
-            'rgba(255, 206, 86, 0.5)',
-            'rgba(75, 192, 192, 0.5)',
-            'rgba(153, 102, 255, 0.5)',
-            'rgba(255, 159, 64, 0.5)',
-            'rgba(0, 0, 0, 0.5)',
-            'rgba(123, 50, 123, 0.5)',
-            'rgba(189, 183, 107, 0.5)',
-            'rgba(72, 61, 139, 0.5)'
-            ],
-            borderColor: [
-            'rgba(255, 26, 104, 1)',
-            'rgba(54, 162, 235, 1)',
-            'rgba(255, 206, 86, 1)',
-            'rgba(75, 192, 192, 1)',
-            'rgba(153, 102, 255, 1)',
-            'rgba(255, 159, 64, 1)',
-            'rgba(0, 0, 0, 1)',
-            'rgba(123, 50, 123, 1)',
-            'rgba(189, 183, 107, 1)',
-            'rgba(72, 61, 139, 1)'
-            ],
-            borderWidth: 1
-        }]
+        const data = {
+            labels: ['BSIT', 'BSCS', 'BSOA', 'BAJ', 'BECED', 'BEED', 'BSBM', 'BSENTREP', 'BSHM', 'BSPsych'], // Updated labels
+            datasets: [{
+                label: 'Alumni Registered',
+                data: [18, 12, 16, 19, 12, 10, 15, 11, 13, 17], // Ensure data corresponds to each course
+                backgroundColor: [
+                    'rgba(255, 26, 104, 0.5)',
+                    'rgba(54, 162, 235, 0.5)',
+                    'rgba(255, 206, 86, 0.5)',
+                    'rgba(75, 192, 192, 0.5)',
+                    'rgba(153, 102, 255, 0.5)',
+                    'rgba(255, 159, 64, 0.5)',
+                    'rgba(0, 0, 0, 0.5)',
+                    'rgba(123, 50, 123, 0.5)',
+                    'rgba(189, 183, 107, 0.5)',
+                    'rgba(72, 61, 139, 0.5)'
+                ],
+                borderColor: [
+                    'rgba(255, 26, 104, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(0, 0, 0, 1)',
+                    'rgba(123, 50, 123, 1)',
+                    'rgba(189, 183, 107, 1)',
+                    'rgba(72, 61, 139, 1)'
+                ],
+                borderWidth: 1
+            }]
         };
 
         // Use the same course names for datalabels
@@ -372,99 +375,99 @@ if ($res_alumniCount->num_rows > 0) {
 
         // config 
         const config = {
-        type: 'pie',
-        data,
-        options: {
-            plugins: {
-            tooltip: {
-                enabled: false
-            },
-            datalabels: {
-                formatter: (value, context) => {
-                const datapoints = context.chart.data.datasets[0].data;
-                const totalSum = datapoints.reduce((total, datapoint) => total + datapoint, 0);
-                const percentageValue = (value / totalSum * 100).toFixed(1);
-                return `${percentageValue}%`;  // Only display the percentage
-                }
-            }
-            }
-        },
-        plugins: [ChartDataLabels],
-        };
-        // Common Colors for Consistency
-    const colors = {
-        background: [
-            'rgba(255, 26, 104, 0.2)',
-            'rgba(54, 162, 235, 0.2)',
-            'rgba(255, 206, 86, 0.2)',
-            'rgba(75, 192, 192, 0.2)',
-            'rgba(153, 102, 255, 0.2)',
-            'rgba(255, 159, 64, 0.2)',
-            'rgba(0, 0, 0, 0.2)',
-            'rgba(123, 50, 123, 0.2)',
-            'rgba(189, 183, 107, 0.2)',
-            'rgba(72, 61, 139, 0.2)'
-        ],
-        border: [
-            'rgba(255, 26, 104, 1)',
-            'rgba(54, 162, 235, 1)',
-            'rgba(255, 206, 86, 1)',
-            'rgba(75, 192, 192, 1)',
-            'rgba(153, 102, 255, 1)',
-            'rgba(255, 159, 64, 1)',
-            'rgba(0, 0, 0, 1)',
-            'rgba(123, 50, 123, 1)',
-            'rgba(189, 183, 107, 1)',
-            'rgba(72, 61, 139, 1)'
-        ]
-    };
-
-    // Config for Pie Charts
-    function createPieChart(ctx, labels, data, colors) {
-        return new Chart(ctx, {
             type: 'pie',
-            data: {
-                labels: labels,
-                datasets: [{
-                    data: data,
-                    backgroundColor: colors.background,
-                    borderColor: colors.border,
-                    borderWidth: 1
-                }]
-            },
+            data,
             options: {
                 plugins: {
+                    tooltip: {
+                        enabled: false
+                    },
                     datalabels: {
                         formatter: (value, context) => {
                             const datapoints = context.chart.data.datasets[0].data;
                             const totalSum = datapoints.reduce((total, datapoint) => total + datapoint, 0);
                             const percentageValue = (value / totalSum * 100).toFixed(1);
-                            return `${percentageValue}%`;
+                            return `${percentageValue}%`; // Only display the percentage
                         }
                     }
                 }
             },
             plugins: [ChartDataLabels],
-        });
-    }
+        };
+        // Common Colors for Consistency
+        const colors = {
+            background: [
+                'rgba(255, 26, 104, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)',
+                'rgba(0, 0, 0, 0.2)',
+                'rgba(123, 50, 123, 0.2)',
+                'rgba(189, 183, 107, 0.2)',
+                'rgba(72, 61, 139, 0.2)'
+            ],
+            border: [
+                'rgba(255, 26, 104, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)',
+                'rgba(0, 0, 0, 1)',
+                'rgba(123, 50, 123, 1)',
+                'rgba(189, 183, 107, 1)',
+                'rgba(72, 61, 139, 1)'
+            ]
+        };
 
-    // Config for Bar Charts
-    function createBarChart(ctx, labels, datasets) {
-        return new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: labels,
-                datasets: datasets
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
+        // Config for Pie Charts
+        function createPieChart(ctx, labels, data, colors) {
+            return new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors.background,
+                        borderColor: colors.border,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    plugins: {
+                        datalabels: {
+                            formatter: (value, context) => {
+                                const datapoints = context.chart.data.datasets[0].data;
+                                const totalSum = datapoints.reduce((total, datapoint) => total + datapoint, 0);
+                                const percentageValue = (value / totalSum * 100).toFixed(1);
+                                return `${percentageValue}%`;
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels],
+            });
+        }
+
+        // Config for Bar Charts
+        function createBarChart(ctx, labels, datasets) {
+            return new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
                     }
                 }
-            }
-        });
-    }
+            });
+        }
 
         // Pie Chart: Registered vs Unregistered Alumni
         const registeredUnregisteredChart = createPieChart(
@@ -486,8 +489,7 @@ if ($res_alumniCount->num_rows > 0) {
         const statusPerCourseChart = createBarChart(
             document.getElementById('statusPerCourseChart'),
             ['BSIT', 'BSCS', 'BSOA', 'BAJ', 'BECED', 'BEED', 'BSBM', 'BSENTREP', 'BSHM', 'BSPsych'],
-            [
-                {
+            [{
                     label: 'Verified',
                     data: [50, 30, 70, 60, 40, 50, 70, 65, 75, 80],
                     backgroundColor: colors.background[0]
@@ -509,74 +511,81 @@ if ($res_alumniCount->num_rows > 0) {
         const registeredPerCourseChart = createBarChart(
             document.getElementById('registeredPerCourseChart'),
             ['BSIT', 'BSCS', 'BSOA', 'BAJ', 'BECED', 'BEED', 'BSBM', 'BSENTREP', 'BSHM', 'BSPsych'],
-            [
-                {
-                    label: 'Registered Alumni Per Course',
-                    data: [300, 400, 200, 350, 300, 400, 450, 425, 475, 500],
-                    backgroundColor: colors.background[3]
-                }
-            ]
+            [{
+                label: 'Registered Alumni Per Course',
+                data: [300, 400, 200, 350, 300, 400, 450, 425, 475, 500],
+                backgroundColor: colors.background[3]
+            }]
         );
 
         // Bar Chart: Events Created Per Month
         const eventsPerMonthChart = createBarChart(
             document.getElementById('eventsPerMonthChart'),
             ['January', 'February', 'March', 'April'],
-            [
-                {
-                    label: 'Events Created',
-                    data: [5, 10, 8, 6],
-                    backgroundColor: colors.background[4]
-                }
-            ]
+            [{
+                label: 'Events Created',
+                data: [5, 10, 8, 6],
+                backgroundColor: colors.background[4]
+            }]
         );
 
         // Bar Chart: Alumni Registered Per Month
         const registeredPerMonthChart = createBarChart(
             document.getElementById('registeredPerMonthChart'),
             ['January', 'February', 'March', 'April'],
-            [
-                {
-                    label: 'Registered Alumni Every Month',
-                    data: [25, 35, 40, 30],
-                    backgroundColor: colors.background[5]
-                }
-            ]
+            [{
+                label: 'Registered Alumni Every Month',
+                data: [25, 35, 40, 30],
+                backgroundColor: colors.background[5]
+            }]
         );
 
 
-    // render init block
-    const myChart = new Chart(
-      document.getElementById('myChart'),
-      config
-    );
+        // render init block
+        const myChart = new Chart(
+            document.getElementById('myChart'),
+            config
+        );
 
         document.getElementById('download-pdf').addEventListener('click', () => {
             const element = document.querySelector('form');
+            const hiddenContent = document.getElementById('hidden-content').innerHTML;
+
+            // Create a temporary container to hold both the form and hidden content
+            const tempContainer = document.createElement('div');
+            tempContainer.innerHTML = hiddenContent + element.innerHTML;
 
             // Get the current date
             const currentDate = new Date();
             const formattedDate = currentDate.toISOString().slice(0, 10);
 
             const opt = {
-                margin: 1,
+                margin: 0.50,
                 filename: `alumni-report-${formattedDate}.pdf`,
                 image: {
                     type: 'jpeg',
                     quality: 0.98
                 },
                 html2canvas: {
-                    scale: 2
+                    scale: 1
                 },
                 jsPDF: {
                     unit: 'in',
                     format: 'legal',
-                    orientation: 'landscape'
+                    orientation: 'portrait'
                 }
             };
 
-            html2pdf().from(element).set(opt).save();
+            // Generate the PDF from the temporary container
+            html2pdf().from(tempContainer).set(opt).save();
         });
+
+
+        html2pdf().from(element).set(opt).save().then(() => {
+        // Remove the temporary image after generating the PDF
+        tempImg.remove();
+        });
+
 
         document.getElementById('refresh-page').addEventListener('click', () => {
             location.reload();
