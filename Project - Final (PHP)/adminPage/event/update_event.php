@@ -86,7 +86,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     $description = $row['description'];
     $eventFor = explode(',', $row['event_for']); // Convert the comma-separated string to an array
 
-    $address_parts = explode(' ', $row['address']);
+    $address_parts = explode(', ', $row['address']);
 
     // Assign from the end of the array
     $province = array_pop($address_parts); // Cavite
@@ -124,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $city = ucwords($_POST['city']);
         $province = ucwords($_POST['province']);
 
-        $address = ucwords($_POST['house_no']) . ' ' . ucwords($_POST['brgy']) . ' ' . ucwords($_POST['city']) . ' ' . ucwords($_POST['province']);
+        $address = ucwords($_POST['house_no']) . ', ' . ucwords($_POST['brgy']) . ', ' . ucwords($_POST['city']) . ', ' . ucwords($_POST['province']);
 
 
         // List of all possible course values

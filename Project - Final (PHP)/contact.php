@@ -68,6 +68,8 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 $sql = "SELECT * FROM contact_page";
 $result = $conn->query($sql);
 $row = $result->fetch_assoc();
+$address = $row['address'];
+$displayAddress = str_replace(',', '', $address);
 ?>
 
 <!DOCTYPE html>
@@ -610,7 +612,7 @@ $row = $result->fetch_assoc();
                 <div class="container">
                     <div class="animated-box" data-aos="fade-up">
                         <h3><i class="fas fa-map-marker-alt"></i> LOCATION: </h3>
-                        <p><?php echo $row['address']; ?></p>
+                        <p><?php echo $displayAddress; ?></p>
                     </div>
                     <div class="animated-box" data-aos="fade-up" data-aos-delay="100">
                         <h3><i class="fas fa-envelope"></i> EMAIL: </h3>

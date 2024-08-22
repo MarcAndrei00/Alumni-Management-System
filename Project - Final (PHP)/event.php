@@ -1,4 +1,3 @@
-
 <?php
 require_once('vendor/autoload.php');
 require_once('../vendor/autoload.php');
@@ -454,7 +453,7 @@ $result = $conn->query($sql);
             }
         }
 
-        
+
 
         .hello-heroes-section h2 {
             font-size: 4rem;
@@ -748,7 +747,8 @@ $result = $conn->query($sql);
         }
 
         #real-time-errors {
-            display: none; /* Hidden by default */
+            display: none;
+            /* Hidden by default */
         }
     </style>
 </head>
@@ -804,6 +804,10 @@ $result = $conn->query($sql);
     if ($result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
             // Check if the event_id is odd or even
+
+            $address = $row['address'];
+            $displayAddress = str_replace(',', '', $address);
+
             if ($row['event_id'] % 2 == 1) {
                 // Odd event_id: display in mission-section
     ?>
@@ -819,14 +823,14 @@ $result = $conn->query($sql);
                                 <p class="card-text"><small class="text-muted"><b>DATE: </b><?php echo $row['date']; ?></small></p>
                                 <p class="card-text"><small class="text-muted"><b>TIME: </b><?php echo $row['start_time']; ?> To <?php echo $row['end_time']; ?></small></p>
                                 <p class="card-text"><small class="text-muted"><b>VENUE: </b><?php echo $row['venue']; ?></small></p>
-                                <p class="card-text"><small class="text-muted"><b>ADDRESS: </b><?php echo $row['address']; ?></small></p>
+                                <p class="card-text"><small class="text-muted"><b>ADDRESS: </b><?php echo $displayAddress; ?></small></p>
                                 <!-- Buttons for Donation and View Details -->
                                 <div class="buttons buttons1">
                                     <button type="button" class="btn btn-success btnTWO" data-toggle="modal" data-target="#donateModal">Donate</button>
-                                    
+
+                                </div>
                             </div>
                         </div>
-                    </div>
                     </div>
                 </section>
             <?php
@@ -842,7 +846,7 @@ $result = $conn->query($sql);
                                 <p class="card-text"><small class="text-muted"><b>DATE: </b><?php echo $row['date']; ?></small></p>
                                 <p class="card-text"><small class="text-muted"><b>TIME: </b><?php echo $row['start_time']; ?> To <?php echo $row['end_time']; ?></small></p>
                                 <p class="card-text"><small class="text-muted"><b>VENUE: </b><?php echo $row['venue']; ?></small></p>
-                                <p class="card-text"><small class="text-muted"><b>ADDRESS: </b><?php echo $row['address']; ?></small></p>
+                                <p class="card-text"><small class="text-muted"><b>ADDRESS: </b><?php echo $displayAddress; ?></small></p>
                                 <!-- Buttons for Donation and View Details -->
                                 <div class="buttons">
                                     <button type="button" class="btn btn-success btnTWO" data-toggle="modal" data-target="#donateModal">Donate</button>
@@ -951,6 +955,7 @@ $result = $conn->query($sql);
                 timer: 5000,
             });
         }
+
         function donationValue() {
             var donation = document.getElementById("donationAmount").value;
             var errorMessages = [];
@@ -963,7 +968,7 @@ $result = $conn->query($sql);
             if (donation >= 0) {
                 errorContainer.style.display = 'none';
                 return;
-            }else{
+            } else {
                 errorMessages.push("Please enter a positive donation amount. Negative values are not allowed.");
             }
 
@@ -982,7 +987,6 @@ $result = $conn->query($sql);
                 errorContainer.style.display = 'none';
             }
         }
-
     </script>
     <script>
         AOS.init();

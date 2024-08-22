@@ -108,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     }
 
     $contact = $row['contact'];
-    $address_parts = explode(' ', $row['address']);
+    $address_parts = explode(', ', $row['address']);
 
     // Assign from the end of the array
     $province = array_pop($address_parts); // Cavite
@@ -125,7 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     $city = ucwords($_POST['city']);
     $province = ucwords($_POST['province']);
 
-    $address = ucwords($_POST['house_no']) . ' ' . ucwords($_POST['brgy']) . ' ' . ucwords($_POST['city']) . ' ' . ucwords($_POST['province']);
+    $address = ucwords($_POST['house_no']) . ', ' . ucwords($_POST['brgy']) . ', ' . ucwords($_POST['city']) . ', ' . ucwords($_POST['province']);
 
     $sql = "UPDATE alumni SET contact='$contact', address='$address' WHERE alumni_id=$account";
     $result = $conn->query($sql);

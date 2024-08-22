@@ -125,6 +125,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             $batch = $row["batch"];
             $contact = $row['contact'];
             $address = $row['address'];
+            $displayAddress = str_replace(',', '', $address);
             $email = $row['email'];
             $file = $row['picture'];
         } else {
@@ -153,6 +154,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $course = $row['course'];
         $contact = $row['contact'];
         $address = $row['address'];
+        $displayAddress = str_replace(',', '', $address);
         $email = $row['email'];
         $file = $row['picture'];
 
@@ -392,7 +394,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                                 <label class="col-sm-3 col-form-label" style="font-size: 20px;" for="address">Address:</label>
                             </div>
                             <div class="col">
-                                <input class="form-control" type="text" id="username" name="address" disabled value="<?php echo $address; ?>">
+                                <input class="form-control" type="text" id="username" name="address" disabled value="<?php echo $displayAddress; ?>">
                             </div>
                         </div>
                     </div>
