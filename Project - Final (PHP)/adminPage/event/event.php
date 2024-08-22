@@ -384,25 +384,14 @@ if (isset($_GET['ide'])) {
                                 <?php
                                 if ($result->num_rows > 0) {
                                     while ($row = $result->fetch_assoc()) {
-<<<<<<< HEAD
-                                        // Convert start_time and end_time to 12-hour format with AM/PM
-                                        $startTime = date('g:i A', strtotime($row["start_time"]));
-                                        $endTime = date('g:i A', strtotime($row["end_time"]));
-                                        $time = $startTime . " - " . $endTime;
-
-                                        // Date and time formatting combined in a single column
-                                        $date = date('F j, Y, g:i A', strtotime($row['date_created']));
-                                        $dateCreated = date('F j, Y, g:i A', strtotime($row['date_created']));
-=======
                                         $time = $row["start_time"] . " - " . $row["end_time"];
                                         $address = $row['address'];
                                         $displayAddress = str_replace(',', '', $address);
->>>>>>> 2ce74c1ac0075dbe348f64f50d6bf279c87cf764
 
                                 ?>
                                         <tr>
                                             <td class="inline"><?php echo $row['title'] ?></td>
-                                            <td class="inline"><?php echo $date ?></td>
+                                            <td class="inline"><?php echo $row['date'] ?></td>
                                             <td class="inline"><?php echo htmlspecialchars($time) ?></td>
                                             <td class="inline"><?php echo $row['venue'] ?></td>
                                             <td class="inline"><?php $displayAddress ?></td>
@@ -411,7 +400,7 @@ if (isset($_GET['ide'])) {
                                             <td class="inline"><?php echo $row['going'] ?></td>
                                             <td class="inline"><?php echo $row['interested'] ?></td>
                                             <td class="inline"><?php echo $row['not_interested'] ?></td>
-                                            <td class="inline"><?php echo $dateCreated ?></td>
+                                            <td class="inline"><?php echo $row['date_created'] ?></td>
                                             <?php
                                             echo "
                                                 <td class='inline act'>

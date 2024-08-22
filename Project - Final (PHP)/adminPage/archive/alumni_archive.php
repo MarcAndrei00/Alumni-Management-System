@@ -435,13 +435,8 @@ if (isset($_GET['ide'])) {
                                             $fullname = $row["lname"] . ", " . $row["fname"];
                                         }
                                         $batch = $row["batch_startYear"] . " - " . $row["batch_endYear"];
-<<<<<<< HEAD
-                                        $lastLogin = ($row['last_login'] == '0000-00-00 00:00:00') ? '-- / -- / --' : date('F j, Y, g:i A', strtotime($row['last_login']));
-                                        $dateArchived = date('F j, Y, g:i A', strtotime($row['date_created']));
-=======
                                         $address = $row['address'];
                                         $displayAddress = str_replace(',', '', $address);
->>>>>>> 2ce74c1ac0075dbe348f64f50d6bf279c87cf764
                                 ?>
                                         <tr>
                                             <td class="inline"><?php echo $row['student_id'] ?></td>
@@ -452,9 +447,9 @@ if (isset($_GET['ide'])) {
                                             <td class="inline"><?php echo $row['contact'] ?></td>
                                             <td class="inline"><?php echo $displayAddress ?></td>
                                             <td class="inline"><?php echo $row['email'] ?></td>
-                                            <td class="inline"><?php echo $lastLogin ?></td>
+                                            <td class="inline"><?php echo ($row['last_login'] == '0000-00-00 00:00:00') ? '-- / -- / --' : $row['last_login']; ?></td>
                                             <td class="inline" style="color: <?php echo ($row['status'] == 'Verified') ? 'green' : 'red'; ?>"><?php echo $row['status']; ?></td>
-                                            <td class="inline"><?php echo $dateArchived ?></td>
+                                            <td class="inline"><?php echo $row['date_archived'] ?></td>
                                             <?php
                                             echo "
                                                 <td class='inline act'>

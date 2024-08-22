@@ -436,7 +436,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                                 <label class="col-sm-3 col-form-label" style="font-size: 20px;" for="name">Last Login:</label>
                             </div>
                             <div class="col">
-                                <input class="form-control" type="email" id="email" name="email" disabled value="<?php echo $row['last_login']; ?>">
+                                <input class="form-control" type="email" id="email" name="email" disabled value="<?php echo ($row['last_login'] == '0000-00-00 00:00:00') ? '-- / -- / --' : $row['last_login']; ?>">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="container">
+                        <div class="row align-items-end">
+                            <div class="col">
+                                <label class="col-sm-3 col-form-label" style="font-size: 20px;" for="name">Date Creation:</label>
+                            </div>
+                            <div class="col">
+                                <input class="form-control" type="email" id="email" name="email" disabled value="<?php echo $row['date_created']; ?>">
                             </div>
                         </div>
                     </div>

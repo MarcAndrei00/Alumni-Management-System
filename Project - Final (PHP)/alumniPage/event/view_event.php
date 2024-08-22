@@ -117,6 +117,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     $description = $row['description'];
     $image = $row['image'];
 
+    $address = $row['address'];
+    $displayAddress = str_replace(',', '', $address);
+
     // for alumni choice
     $sql2 = "SELECT * FROM event_choice WHERE event_id=$event_id_id AND alumni_id=$rowpic[alumni_id]";
     $result2 = $conn->query($sql2);
@@ -459,7 +462,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                                             </div>
                                             <div class="date">
                                                 <label for="">Address:</label>
-                                                <input type="text" class="form-control form-label mt-3" value="<?php echo $row['address'] ?>">
+                                                <input type="text" class="form-control form-label mt-3" value="<?php echo $displayAddress ?>">
                                             </div>
                                         </fieldset>
 

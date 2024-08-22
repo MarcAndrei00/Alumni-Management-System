@@ -389,8 +389,6 @@ if (isset($_GET['ide'])) {
                                     while ($row = $result->fetch_assoc()) {
                                         $fullname = $row["fname"] . " " . $row["mname"] . " " . $row["lname"];
                                         $batch = $row["batch_startYear"] . " - " . $row["batch_endYear"];
-
-                                        $dateArchived = date('F j, Y, g:i A', strtotime($row['date_created']));
                                 ?>
                                         <tr>
                                             <td class="inline"><?php echo $row['student_id'] ?></td>
@@ -401,7 +399,7 @@ if (isset($_GET['ide'])) {
                                             <td class="inline"><?php echo $row['contact'] ?></td>
                                             <td class="inline"><?php echo $row['address'] ?></td>
                                             <td class="inline"><?php echo $row['email'] ?></td>
-                                            <td class="inline"><?php echo $dateArchived ?></td>
+                                            <td class="inline"><?php echo $row['date_archived'] ?></td>
                                             <?php
                                             echo "
                                                 <td class='inline act'>
