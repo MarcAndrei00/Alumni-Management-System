@@ -89,8 +89,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $startTime = $_POST['startTime'];
     $endTime = $_POST['endTime'];
     $venue = $_POST['venue'];
-    $address = $_POST['address'];
     $description = ucwords($_POST['description']);
+
+    $house_no = ucwords($_POST['house_no']);
+    $brgy = ucwords($_POST['brgy']);
+    $city = ucwords($_POST['city']);
+    $province = ucwords($_POST['province']);
 
     // Get selected eventFor values from the form
     if (isset($_POST['eventFor'])) {
@@ -106,6 +110,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     } else {
         $eventForString = implode(',', $eventFor);
     }
+
+    $house_no = ucwords($_POST['house_no']);
+    $brgy = ucwords($_POST['brgy']);
+    $city = ucwords($_POST['city']);
+    $province = ucwords($_POST['province']);
+
+    $address = ucwords($_POST['house_no']) . ' ' . ucwords($_POST['brgy']) . ' ' . ucwords($_POST['city']) . ' ' . ucwords($_POST['province']);
 
     // for image
     if (isset($_FILES["image"]) && $_FILES["image"]["error"] == 0) {
@@ -355,8 +366,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 <input type="text" name="venue" class="form-control" id="formGroupExampleInput4" required placeholder="">
                             </div>
                             <div class="mb-3">
-                                <label for="formGroupExampleInput5" class="form-label">Address</label>
-                                <input type="text" name="address" class="form-control" id="formGroupExampleInput5" required placeholder="">
+                                <label for="formGroupExampleInput" class="form-label">ADDRESS</label>
+                                <br>
+                                <div class="row g-3">
+                                    <div class="col">
+                                        <label for="house_no" class="form-label">House No. | Street | Subdivision</label>
+                                        <input type="text" name="house_no" class="form-control" id="house_no" required >
+                                    </div>
+                                    <div class="col">
+                                        <label for="brgy" class="form-label">Barangay</label>
+                                        <input type="text" name="brgy" class="form-control" id="brgy" required >
+                                    </div>
+                                    <div class="col">
+                                        <label for="city" class="form-label">City</label>
+                                        <input type="text" name="city" class="form-control" id="city" required >
+                                    </div>
+                                    <div class="col">
+                                        <label for="province" class="form-label">Province</label>
+                                        <input type="text" name="province" class="form-control" id="province" required>
+                                    </div>
+                                </div>
                             </div>
                             <div class="mb-3">
                                 <label for="eventForDropdown">Event For:</label>
@@ -421,7 +450,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     <!-- Script to display preview of selected image -->
     <script>
-        
         function getImagePreview(event) {
             var file = event.target.files[0];
             if (file) {

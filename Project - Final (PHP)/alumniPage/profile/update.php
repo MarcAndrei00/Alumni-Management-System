@@ -278,20 +278,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                                     <div class="mb-3">
                                         <label for="formGroupExampleInput" class="form-label">ADDRESS</label>
                                         <br>
-                                        <label for="formGroupExampleInput" class="form-label">House No. | Street | Subdivision</label>
-                                        <input type="text" name="house_no" class="form-control" id="formGroupExampleInput" value="<?php echo htmlspecialchars("$house_no"); ?>">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="formGroupExampleInput" class="form-label">Barangay</label>
-                                        <input type="text" name="brgy" class="form-control" id="formGroupExampleInput" value="<?php echo htmlspecialchars("$brgy"); ?>">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="formGroupExampleInput" class="form-label">City</label>
-                                        <input type="text" name="city" class="form-control" id="formGroupExampleInput" value="<?php echo htmlspecialchars("$city"); ?>">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="formGroupExampleInput" class="form-label">Province</label>
-                                        <input type="text" name="province" class="form-control" id="formGroupExampleInput" value="<?php echo htmlspecialchars("$province"); ?>">
+                                        <div class="row g-3">
+                                            <div class="col">
+                                                <label for="house_no" class="form-label">House No. | Street | Subdivision</label>
+                                                <input type="text" name="house_no" class="form-control" id="house_no" required value="<?php echo htmlspecialchars($house_no); ?>">
+                                            </div>
+                                            <div class="col">
+                                                <label for="brgy" class="form-label">Barangay</label>
+                                                <input type="text" name="brgy" class="form-control" id="brgy" required value="<?php echo htmlspecialchars($brgy); ?>">
+                                            </div>
+                                            <div class="col">
+                                                <label for="city" class="form-label">City</label>
+                                                <input type="text" name="city" class="form-control" id="city" required value="<?php echo htmlspecialchars($city); ?>">
+                                            </div>
+                                            <div class="col">
+                                                <label for="province" class="form-label">Province</label>
+                                                <input type="text" name="province" class="form-control" id="province" required value="<?php echo htmlspecialchars($province); ?>">
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="buttons">
                                         <button type="submit" class="btn" id="button1" value="Update">UPDATE</button>

@@ -83,9 +83,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     $startTime = $row['start_time'];
     $endTime = $row['end_time'];
     $venue = $row['venue'];
-    $address = $row['address'];
     $description = $row['description'];
     $eventFor = explode(',', $row['event_for']); // Convert the comma-separated string to an array
+
+    $address_parts = explode(' ', $row['address']);
+
+    // Assign from the end of the array
+    $province = array_pop($address_parts); // Cavite
+    $city = array_pop($address_parts);     // Dasmarinas
+    $brgy = array_pop($address_parts);     // Sabang
+
+    // The remaining parts will be combined into the house_no
+    $house_no = implode(' ', $address_parts);
 
     // Check if 'ALL' is in $eventFor
     $isAllChecked = in_array('ALL', $eventFor);
@@ -107,8 +116,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $startTime = $_POST['startTime'];
         $endTime = $_POST['endTime'];
         $venue = $_POST['venue'];
-        $address = $_POST['address'];
         $description = ucwords($_POST['description']);
+
+        $contact = $_POST['contact'];
+        $house_no = ucwords($_POST['house_no']);
+        $brgy = ucwords($_POST['brgy']);
+        $city = ucwords($_POST['city']);
+        $province = ucwords($_POST['province']);
+
+        $address = ucwords($_POST['house_no']) . ' ' . ucwords($_POST['brgy']) . ' ' . ucwords($_POST['city']) . ' ' . ucwords($_POST['province']);
+
 
         // List of all possible course values
         $allCourses = ['BAJ', 'BECEd', 'BEEd', 'BSBM', 'BSOA', 'BSEntrep', 'BSHM', 'BSIT', 'BSCS', 'BSc(Psych)'];
@@ -230,7 +247,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             margin-right: 10px;
             /* Space between checkbox and label text */
         }
-
     </style>
 </head>
 
@@ -361,8 +377,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                                 <input type="text" name="venue" class="form-control" id="formGroupExampleInput4" required value="<?php echo $venue; ?>">
                             </div>
                             <div class="mb-3">
-                                <label for="formGroupExampleInput5" class="form-label">Address</label>
-                                <input type="text" name="address" class="form-control" id="formGroupExampleInput5" required value="<?php echo $address; ?>">
+                                <label for="formGroupExampleInput" class="form-label">ADDRESS</label>
+                                <br>
+                                <div class="row g-3">
+                                    <div class="col">
+                                        <label for="house_no" class="form-label">House No. | Street | Subdivision</label>
+                                        <input type="text" name="house_no" class="form-control" id="house_no" required value="<?php echo htmlspecialchars($house_no); ?>">
+                                    </div>
+                                    <div class="col">
+                                        <label for="brgy" class="form-label">Barangay</label>
+                                        <input type="text" name="brgy" class="form-control" id="brgy" required value="<?php echo htmlspecialchars($brgy); ?>">
+                                    </div>
+                                    <div class="col">
+                                        <label for="city" class="form-label">City</label>
+                                        <input type="text" name="city" class="form-control" id="city" required value="<?php echo htmlspecialchars($city); ?>">
+                                    </div>
+                                    <div class="col">
+                                        <label for="province" class="form-label">Province</label>
+                                        <input type="text" name="province" class="form-control" id="province" required value="<?php echo htmlspecialchars($province); ?>">
+                                    </div>
+                                </div>
                             </div>
                             <div class="mb-3">
                                 <label for="eventForDropdown">Event For:</label>
