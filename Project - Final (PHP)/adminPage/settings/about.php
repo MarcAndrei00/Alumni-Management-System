@@ -87,9 +87,17 @@ $data_result = $conn->query($data_sql);
 if ($data_result->num_rows > 0) {
     $data_row = $data_result->fetch_assoc();
     $data_title = $data_row['page_title'];
-    $data_address = $data_row['address'];
     $data_contact = $data_row['contact'];
     $data_email = $data_row['email'];
+    $address_parts = explode(', ', $data_row['address']);
+
+    // Assign from the end of the array
+    $province = array_pop($address_parts); // Cavite
+    $city = array_pop($address_parts);     // Dasmarinas
+    $brgy = array_pop($address_parts);     // Sabang
+
+    // The remaining parts will be combined into the house_no
+    $house_no = implode(' ', $address_parts);
 } else {
     header("Location: ./contact.php");
     exit;
@@ -97,9 +105,15 @@ if ($data_result->num_rows > 0) {
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $title = strtoupper($conn->real_escape_string($_POST['title']));
-    $address = ucwords($conn->real_escape_string($_POST['address']));
     $contact = $_POST['contact'];
     $email = strtolower($conn->real_escape_string($_POST['email']));
+
+    $house_no = ucwords($_POST['house_no']);
+    $brgy = ucwords($_POST['brgy']);
+    $city = ucwords($_POST['city']);
+    $province = ucwords($_POST['province']);
+
+    $address = ucwords($_POST['house_no']) . ', ' . ucwords($_POST['brgy']) . ', ' . ucwords($_POST['city']) . ', ' . ucwords($_POST['province']);
 
     $sql = "UPDATE contact_page SET page_title='$title', address='$address', contact='$contact', email='$email' WHERE contact_id=1";
 
@@ -230,9 +244,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 <label for="pageTitle" class="form-label">Page Title</label>
                                 <input name="title" type="text" class="form-control" id="pageTitle" value="<?php echo $data_title; ?>">
                             </div>
-                            <div class="mb-3">
-                                <label for="address" class="form-label">Address</label>
-                                <input name="address" type="text" class="form-control" id="address" value="<?php echo $data_address; ?>">
+                            <div class="row g-3">
+                                <div class="col">
+                                    <label for="house_no" class="form-label">House No. | Street | Subdivision</label>
+                                    <input type="text" name="house_no" class="form-control" id="house_no" required value="<?php echo htmlspecialchars($house_no); ?>">
+                                </div>
+                                <div class="col">
+                                    <label for="brgy" class="form-label">Barangay</label>
+                                    <input type="text" name="brgy" class="form-control" id="brgy" required value="<?php echo htmlspecialchars($brgy); ?>">
+                                </div>
+                                <div class="col">
+                                    <label for="city" class="form-label">City</label>
+                                    <input type="text" name="city" class="form-control" id="city" required value="<?php echo htmlspecialchars($city); ?>">
+                                </div>
+                                <div class="col">
+                                    <label for="province" class="form-label">Province</label>
+                                    <input type="text" name="province" class="form-control" id="province" required value="<?php echo htmlspecialchars($province); ?>">
+                                </div>
                             </div>
                             <div class="mb-3">
                                 <label for="contact" class="form-label">Contact</label>

@@ -102,10 +102,12 @@ if ($result->num_rows > 0) {
     $course = $row['course'];
     $batch = $row["batch_startYear"] . " - " . $row["batch_endYear"];
     $contact = $row['contact'];
-    $address = $row['address'];
     $email = $row['email'];
     $password = $row['password'];
     $recoveryEmail = $row['recovery_email'];
+
+    $address = $row['address'];
+    $displayAddress = str_replace(',', '', $address);
 
     // Add more fields as needed
 } else {
@@ -292,7 +294,7 @@ if (isset($_GET['id'])) {
                                             </div>
                                             <div class="mb-3">
                                                 <label for="disabledTextInput" class="form-label">ADDRESS</label>
-                                                <input address="address" id="disabledTextInput" class="form-control" value="<?php echo htmlspecialchars($address); ?>" />
+                                                <input address="address" id="disabledTextInput" class="form-control" value="<?php echo htmlspecialchars($displayAddress); ?>" />
                                             </div>
                                             <div class="mb-3">
                                                 <label for="disabledTextInput" class="form-label">EMAIL ADDRESS</label>

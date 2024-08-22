@@ -413,6 +413,8 @@ if (isset($_GET['ide'])) {
                                 if ($result->num_rows > 0) {
                                     while ($row = $result->fetch_assoc()) {
                                         $time = $row["start_time"] . " - " . $row["end_time"];
+                                        $address = $row['address'];
+                                        $displayAddress = str_replace(',', '', $address);
 
                                 ?>
                                         <tr>
@@ -420,7 +422,7 @@ if (isset($_GET['ide'])) {
                                             <td class="inline"><?php echo $row['date'] ?></td>
                                             <td class="inline"><?php echo htmlspecialchars($time) ?></td>
                                             <td class="inline"><?php echo $row['venue'] ?></td>
-                                            <td class="inline"><?php echo $row['address'] ?></td>
+                                            <td class="inline"><?php echo $displayAddress ?></td>
                                             <td class="inline"><?php echo $row['description'] ?></td>
                                             <td class="inline"><?php echo $row['event_for'] ?></td>
                                             <td class="inline"><?php echo $row['going'] ?></td>

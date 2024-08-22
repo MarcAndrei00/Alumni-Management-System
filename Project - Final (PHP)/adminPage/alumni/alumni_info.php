@@ -123,6 +123,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             $course = $row['course'];
             $contact = $row['contact'];
             $address = $row['address'];
+            $displayAddress = str_replace(',', '', $address);
             $email = $row['email'];
             $file = $row['picture'];
 
@@ -152,11 +153,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $gender = $row['gender'];
         $course = $row['course'];
         $contact = $row['contact'];
-        $address = $row['address'];
         $email = $row['email'];
         $file = $row['picture'];
+        $recoveryEmail = $row['recovery_email'];
 
         $batch = $row["batch_startYear"] . " - " . $row["batch_endYear"];
+        $address = $row['address'];
+        $displayAddress = str_replace(',', '', $address);
     }
 }
 
@@ -393,7 +396,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                                 <label class="col-sm-3 col-form-label" style="font-size: 20px;" for="address">Address:</label>
                             </div>
                             <div class="col">
-                                <input class="form-control" type="text" id="username" name="address" disabled value="<?php echo $address; ?>">
+                                <input class="form-control" type="text" id="username" name="address" disabled value="<?php echo $displayAddress ?>">
                             </div>
                         </div>
                     </div>
@@ -404,6 +407,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                             </div>
                             <div class="col">
                                 <input class="form-control" type="email" id="email" name="email" disabled value="<?php echo $email; ?>">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="container">
+                        <div class="row align-items-end">
+                            <div class="col">
+                                <label class="col-sm-3 col-form-label" style="font-size: 20px;" for="name">Recovery Email:</label>
+                            </div>
+                            <div class="col">
+                                <input class="form-control" type="email" id="email" name="email" disabled value="<?php echo $recoveryEmail; ?>">
                             </div>
                         </div>
                     </div>

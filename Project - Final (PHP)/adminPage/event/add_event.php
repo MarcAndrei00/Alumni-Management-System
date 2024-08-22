@@ -116,7 +116,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $city = ucwords($_POST['city']);
     $province = ucwords($_POST['province']);
 
-    $address = ucwords($_POST['house_no']) . ' ' . ucwords($_POST['brgy']) . ' ' . ucwords($_POST['city']) . ' ' . ucwords($_POST['province']);
+    $address = ucwords($_POST['house_no']) . ', ' . ucwords($_POST['brgy']) . ', ' . ucwords($_POST['city']) . ', ' . ucwords($_POST['province']);
 
     // for image
     if (isset($_FILES["image"]) && $_FILES["image"]["error"] == 0) {
