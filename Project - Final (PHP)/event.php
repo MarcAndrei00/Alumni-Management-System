@@ -127,6 +127,17 @@ if (isset($_POST['submit_btn'])) {
 
         // Redirect to a new page
         header('Location: redirect.php');
+        $icon = 'success';
+        $iconHtml = '<i class=\"fas fa-exclamation-circle\"></i>';
+        $title = 'Thank you for your donation.';
+        $text = 'Have a great day!';
+
+        echo "<script>
+                document.addEventListener('DOMContentLoaded', function() {
+                warningError('$title', '$text', '$icon', '$iconHtml');
+                });
+            </script>";
+        sleep(2);
         exit();
     }
 }

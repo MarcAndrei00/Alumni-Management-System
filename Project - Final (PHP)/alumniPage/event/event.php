@@ -126,21 +126,16 @@ $total_records = $total_records_row[0];
 $total_pages = ceil($total_records / $records_per_page);
 
 if (isset($_GET['ide'])) {
-    echo "
-        <script>
-        // Wait for the document to load
+    $icon = 'success';
+    $iconHtml = '<i class="fas fa-check-circle"></i>';
+    $title = 'Event archived successfully';
+
+    echo "<script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Use SweetAlert2 for the alert
-            Swal.fire({
-                title: 'Event Archived Successfully',
-                timer: 2000,
-                showConfirmButton: true, // Show the confirm button
-                confirmButtonColor: '#4CAF50', // Set the button color to green
-                confirmButtonText: 'OK' // Change the button text if needed
-            });
+            noTextMessage('$title', '$icon', '$iconHtml');
         });
-    </script>
-    ";
+    </script>";
+    sleep(2);
 }
 
 ?>
@@ -156,6 +151,9 @@ if (isset($_GET['ide'])) {
     <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <!-- FOR PAGINATION -->
     <style>
@@ -422,6 +420,22 @@ if (isset($_GET['ide'])) {
                 preview.src = image;
                 preview.style.width = '83px';
                 preview.style.height = '83px';
+            }
+
+            // FOR MESSAGEBOX WITHOUT TEXT AND REDIRECT
+            function noTextMessage(title, icon, iconHtml) {
+                Swal.fire({
+                    icon: icon,
+                    iconHtml: iconHtml, // Custom icon using Font Awesome
+                    title: title,
+                    customClass: {
+                        popup: 'swal-custom'
+                    },
+                    showConfirmButton: true,
+                    confirmButtonColor: '#4CAF50',
+                    confirmButtonText: 'OK',
+                    timer: 5000
+                });
             }
         </script>
 </body>

@@ -78,7 +78,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
         $archive_row = mysqli_fetch_assoc($archive_qry);
 
         if ($new_pass === $confirm_pass) {
-            if ($archive_row['status'] == "Inactive") {
+            if ($archive_row && $archive_row['status'] == "Inactive") {
                 $match_pass_qry = mysqli_query($conn, "UPDATE alumni_archive SET password = '$hashedpassword' WHERE email = '$email'");
 
                 // SUCCESS CHANGE PASS

@@ -67,7 +67,6 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
             sleep(2);
             header('Location: ../../loginPage/verification_code.php');
             exit();
-
         }
     }
 } else {
@@ -114,7 +113,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
     $event_id_id = $row['event_id'];
     $title = $row['title'];
-    $schedule = $row['schedule'];
+    $time = $row['start_time'] . ' TO ' . $row['end_time'];
     $description = $row['description'];
     $image = $row['image'];
 
@@ -234,47 +233,33 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $final_sql = "UPDATE event_choice SET event_choice = '$event_choice' WHERE event_id=$event_id_id AND alumni_id=$rowpic[alumni_id]";
         $final_result = $conn->query($final_sql);
 
-        echo "
-            <script>
-                // Wait for the document to load
+        $icon = 'success';
+        $iconHtml = '<i class="fas fa-check-circle"></i>';
+        $title = 'Status updated successfully.';
+        $redirectUrl = "./view_event.php?id=$event_id_id";
+
+        echo "<script>
                 document.addEventListener('DOMContentLoaded', function() {
-                    // Use SweetAlert2 for the alert
-                    Swal.fire({
-                            title: 'Status updated Successfully',
-                            timer: 2000,
-                            showConfirmButton: true, // Show the confirm button
-                            confirmButtonColor: '#4CAF50', // Set the button color to green
-                            confirmButtonText: 'OK' // Change the button text if needed
-                    }).then(function() {
-                        // Redirect after the alert closes
-                        window.location.href = './view_event.php?id=$event_id_id';
-                    });
+                    noTextRedirect('$redirectUrl', '$title', '$icon', '$iconHtml');
                 });
-            </script>
-            ";
+            </script>";
+        sleep(2);
     } else {
         // insert to event_choice table
         $final_sql = "INSERT INTO event_choice (event_id, alumni_id, event_choice, student_id, fullname, email) VALUES ($event_id, $alumni_id, '$event_choice', $student_id, '$fullname', '$email')";
         $final_result = $conn->query($final_sql);
 
-        echo "
-            <script>
-                // Wait for the document to load
+        $icon = 'success';
+        $iconHtml = '<i class="fas fa-check-circle"></i>';
+        $title = 'Status updated successfully.';
+        $redirectUrl = "./view_event.php?id=$event_id_id";
+
+        echo "<script>
                 document.addEventListener('DOMContentLoaded', function() {
-                    // Use SweetAlert2 for the alert
-                    Swal.fire({
-                            title: 'Status updated Successfully',
-                            timer: 2000,
-                            showConfirmButton: true, // Show the confirm button
-                            confirmButtonColor: '#4CAF50', // Set the button color to green
-                            confirmButtonText: 'OK' // Change the button text if needed
-                    }).then(function() {
-                        // Redirect after the alert closes
-                        window.location.href = './view_event.php?id=$event_id_id';
-                    });
+                    noTextRedirect('$redirectUrl', '$title', '$icon', '$iconHtml');
                 });
-            </script>
-            ";
+            </script>";
+        sleep(2);
     }
 }
 ?>
@@ -291,7 +276,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        .swal2-popup {
+            padding-bottom: 30px;
+            /* Adjust the padding as needed */
+        }
+
+        .confirm-button-class,
+        .cancel-button-class {
+            width: 150px;
+            /* Set the desired width */
+            height: 40px;
+            /* Set the desired height */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            /* Hide the overflow to prevent scroll bars */
+            white-space: nowrap;
+            /* Prevent text wrapping */
+        }
+
+        .confirm-button-class {
+            background-color: #e03444 !important;
+            color: white;
+        }
+
+        .cancel-button-class {
+            background-color: #ffc404 !important;
+            color: white;
+        }
+    </style>
 </head>
 
 <body>
@@ -423,14 +443,28 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                                     <div class="col">
 
                                         <fieldset disabled>
+                                            <div class="date d-flex">
+                                                <div class="me-3" style="width: 100%;">
+                                                    <label for="">Date:</label>
+                                                    <input type="date" class="form-control form-label mt-3" value="<?php echo $row['date'] ?>">
+                                                </div>
+                                                <div style="width: 100%;">
+                                                    <label for="">Time:</label>
+                                                    <input type="text" class="form-control form-label mt-3" value="<?php echo $row['start_time'] . ' To ' . $row['end_time'] ?>">
+                                                </div>
+                                            </div>
                                             <div class="date">
-                                                <label for="" class="form-label mt-3">Event Date & Time:</label>
-                                                <input type="datetime-local" class="form-control form-label mt-3" value="<?php echo $schedule ?>">
+                                                <label for="">Venue:</label>
+                                                <input type="text" class="form-control form-label mt-3" value="<?php echo $row['venue'] ?>">
+                                            </div>
+                                            <div class="date">
+                                                <label for="">Address:</label>
+                                                <input type="text" class="form-control form-label mt-3" value="<?php echo $row['address'] ?>">
                                             </div>
                                         </fieldset>
 
                                     </div>
-                                    <form method="POST" action="view_event.php" onsubmit="return submitForm(this);">
+                                    <form method="POST" action="view_event.php" class="addNew">
                                         <div class="col" id="dropdown">
                                             <input type="hidden" name="event_id" value="<?php echo $event_id; ?>">
                                             <input type="hidden" name="alumni_id" value="<?php echo $user['alumni_id']; ?>">
@@ -491,21 +525,61 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         }
 
 
-        function submitForm(form) {
-            Swal.fire({
-                    title: 'Do you want to continue?',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#e03444',
-                    cancelButtonColor: '#ffc404',
-                    confirmButtonText: 'Submit'
-                })
-                .then((result) => {
-                    if (result.isConfirmed) {
-                        form.submit(); // Submit the form
-                    }
+        // CONFIRM SUBMITION
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOM fully loaded and parsed");
+
+            const forms = document.querySelectorAll('.addNew');
+
+            forms.forEach(function(form) {
+                console.log("Attaching event listener to form:", form);
+
+                form.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    console.log("Form submit event triggered");
+
+                    Swal.fire({
+                        title: 'Are you sure you want to continue?',
+                        icon: 'warning',
+                        iconHtml: '<i class="fas fa-exclamation-triangle"></i>',
+                        text: 'Once you proceed, this action cannot be undone.',
+                        showCancelButton: true,
+                        confirmButtonColor: '#e03444',
+                        cancelButtonColor: '#ffc404',
+                        confirmButtonText: 'Ok',
+                        cancelButtonText: 'Cancel',
+                        customClass: {
+                            confirmButton: 'confirm-button-class',
+                            cancelButton: 'cancel-button-class'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            console.log("User confirmed action");
+                            form.submit(); // Submit the form if confirmed
+                        } else {
+                            console.log("User canceled action");
+                        }
+                    });
                 });
-            return false; // Prevent default form submission
+            });
+        });
+
+        // FOR MESSAGEBOX WITHOUT TEXT ONLY
+        function noTextRedirect(redirectUrl, title, icon, iconHtml) {
+            Swal.fire({
+                icon: icon,
+                iconHtml: iconHtml, // Custom icon using Font Awesome
+                title: title,
+                customClass: {
+                    popup: 'swal-custom'
+                },
+                showConfirmButton: true,
+                confirmButtonColor: '#4CAF50',
+                confirmButtonText: 'OK',
+                timer: 5000
+            }).then(() => {
+                window.location.href = redirectUrl; // Redirect to the desired page
+            });
         }
     </script>
 </body>

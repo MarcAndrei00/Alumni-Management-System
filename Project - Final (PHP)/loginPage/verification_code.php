@@ -71,22 +71,25 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
   $stmt->execute();
   $user_result = $stmt->get_result();
   
+  // Check if user is an alumni inactive
   $stmt = $conn->prepare("SELECT * FROM alumni_archive WHERE alumni_id = ? AND email = ?");
   $stmt->bind_param("ss", $account, $account_email);
   $stmt->execute();
-  $user_result = $stmt->get_result();
+  $user_resultt = $stmt->get_result();
 
   // TO VERIFIED ACCOUNT 
-  if ($user_result->num_rows > 0) {
+  if ($user_result->num_rows > 0 || $user_resultt->num_rows > 0) {
     $sql = "SELECT * FROM alumni WHERE alumni_id=$account";
     $result = $conn->query($sql);
     $row = $result->fetch_assoc();
 
+  //alumni inactive
     $sql = "SELECT * FROM alumni_archive WHERE alumni_id=$account";
     $result = $conn->query($sql);
     $roww = $result->fetch_assoc();
 
-    if ($row['status'] == "Verified") {
+    //condition to check if verified or active
+    if ($row && $row['status'] == "Verified" || $roww && $roww['status'] == "Active") {
       // User is a verified alumni
       header('Location: ../alumniPage/dashboard_user.php');
       exit();
@@ -102,7 +105,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
           $row = $result->fetch_assoc();
 
           if ($row['status'] == "Verified") {
-            // User is a verified alumni
+            // User is a verified alumni 
             header('Location: ../alumniPage/dashboard_user.php');
             exit();
           } else {

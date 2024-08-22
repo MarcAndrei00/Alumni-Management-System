@@ -107,13 +107,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         exit;
     }
 
-    // data from table alumni where student_id = $alumni_id = $_GET['id']; get from alumni list update
-    // data from table alumni where student_id = $alumni_id = $_GET['id']; get from alumni list update
     $contact = $row['contact'];
-    $address = $row['address'];
+    $address_parts = explode(' ', $row['address']);
+
+    // Assign from the end of the array
+    $province = array_pop($address_parts); // Cavite
+    $city = array_pop($address_parts);     // Dasmarinas
+    $brgy = array_pop($address_parts);     // Sabang
+
+    // The remaining parts will be combined into the house_no
+    $house_no = implode(' ', $address_parts);
 } else {
+
     $contact = $_POST['contact'];
-    $address = ucwords($_POST['address']);
+    $house_no = ucwords($_POST['house_no']);
+    $brgy = ucwords($_POST['brgy']);
+    $city = ucwords($_POST['city']);
+    $province = ucwords($_POST['province']);
+
+    $address = ucwords($_POST['house_no']) . ' ' . ucwords($_POST['brgy']) . ' ' . ucwords($_POST['city']) . ' ' . ucwords($_POST['province']);
 
     $sql = "UPDATE alumni SET contact='$contact', address='$address' WHERE alumni_id=$account";
     $result = $conn->query($sql);
@@ -265,7 +277,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                                     </div>
                                     <div class="mb-3">
                                         <label for="formGroupExampleInput" class="form-label">ADDRESS</label>
-                                        <input type="text" name="address" class="form-control" id="formGroupExampleInput" value="<?php echo htmlspecialchars("$address"); ?>">
+                                        <br>
+                                        <label for="formGroupExampleInput" class="form-label">House No. | Street | Subdivision</label>
+                                        <input type="text" name="house_no" class="form-control" id="formGroupExampleInput" value="<?php echo htmlspecialchars("$house_no"); ?>">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="formGroupExampleInput" class="form-label">Barangay</label>
+                                        <input type="text" name="brgy" class="form-control" id="formGroupExampleInput" value="<?php echo htmlspecialchars("$brgy"); ?>">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="formGroupExampleInput" class="form-label">City</label>
+                                        <input type="text" name="city" class="form-control" id="formGroupExampleInput" value="<?php echo htmlspecialchars("$city"); ?>">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="formGroupExampleInput" class="form-label">Province</label>
+                                        <input type="text" name="province" class="form-control" id="formGroupExampleInput" value="<?php echo htmlspecialchars("$province"); ?>">
                                     </div>
                                     <div class="buttons">
                                         <button type="submit" class="btn" id="button1" value="Update">UPDATE</button>
