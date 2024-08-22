@@ -84,7 +84,7 @@ $current_page = isset($_GET['page']) ? $_GET['page'] : 1; // Get current page nu
 $start_from = ($current_page - 1) * $records_per_page;
 
 // Initialize variables
-$sql = "SELECT * FROM alumni_archive ";
+$sql = "SELECT * FROM list_of_graduate ";
 
 // Check if search query is provided
 if (isset($_GET['query']) && !empty($_GET['query'])) {
@@ -100,7 +100,6 @@ if (isset($_GET['query']) && !empty($_GET['query'])) {
             OR batch_startYear LIKE '%$search_query%'
             OR batch_endYear LIKE '%$search_query%'
             OR CONCAT(batch_startYear, '-', batch_endYear) LIKE '%$search_query%'
-            OR (status LIKE '%$search_query%' AND ((status = 'Verified' AND '$search_query' != 'Unverified') OR (status = 'Unverified' AND '$search_query' != 'Verified')))
             OR (gender LIKE '%$search_query%' AND ((gender = 'male' AND '$search_query' != 'female') OR (gender = 'female' AND '$search_query' != 'male')))";
 }
 
@@ -110,7 +109,7 @@ $sql .= "LIMIT $start_from, $records_per_page";
 $result = $conn->query($sql);
 
 // Count total number of records
-$total_records_query = "SELECT COUNT(*) FROM alumni_archive";
+$total_records_query = "SELECT COUNT(*) FROM list_of_graduate";
 if (isset($_GET['query']) && !empty($_GET['query'])) {
     $total_records_query .= " WHERE alumni_id LIKE '%$search_query%' 
                               OR fname LIKE '%$search_query%' 
@@ -122,7 +121,6 @@ if (isset($_GET['query']) && !empty($_GET['query'])) {
                               OR batch_startYear LIKE '%$search_query%'
                               OR batch_endYear LIKE '%$search_query%'
                               OR CONCAT(batch_startYear, '-', batch_endYear) LIKE '%$search_query%'
-                              OR (status LIKE '%$search_query%' AND ((status = 'Verified' AND '$search_query' != 'Unverified') OR (status = 'Unverified' AND '$search_query' != 'Verified')))
                               OR (gender LIKE '%$search_query%' AND ((gender = 'male' AND '$search_query' != 'female') OR (gender = 'female' AND '$search_query' != 'male')))";
 }
 $total_records_result = mysqli_query($conn, $total_records_query);
@@ -132,17 +130,17 @@ $total_records = $total_records_row[0];
 $total_pages = ceil($total_records / $records_per_page);
 
 
+
 if (isset($_GET['ide'])) {
     $icon = 'success';
     $iconHtml = '<i class="fas fa-check-circle"></i>';
-    $title = 'Account restored successfully';
+    $title = 'Account added successfully';
 
     echo "<script>
         document.addEventListener('DOMContentLoaded', function() {
             noTextMessage('$title', '$icon', '$iconHtml');
         });
     </script>";
-    sleep(2);
 }
 ?>
 
@@ -153,8 +151,8 @@ if (isset($_GET['ide'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-    <title>Archive List</title>
-    <link rel="stylesheet" href="./css/alumni_arc.css">
+    <title>Alumni List</title>
+    <link rel="stylesheet" href="./css/alumni.css">
     <link rel="shortcut icon" href="../../assets/cvsu.png" type="image/svg+xml">
     <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
@@ -218,7 +216,7 @@ if (isset($_GET['ide'])) {
             /* Hide overflowing content */
             text-overflow: ellipsis;
             /* Display ellipsis for truncated text */
-            max-width: 130px;
+            max-width: 125px;
             /* Set a max-width to control truncation */
 
         }
@@ -273,7 +271,31 @@ if (isset($_GET['ide'])) {
             float: right;
             /* Float right for "Next" link */
         }
+
+        .dropdown-menu {
+            max-height: absolute;
+            /* Limit the height of the dropdown menu */
+            overflow-y: auto;
+            /* Add scroll if content exceeds height */
+            padding: 0;
+            /* Remove extra padding if needed */
+        }
+
+        .dropdown-menu label {
+            display: block;
+            /* Ensure each label takes up a full line */
+            margin-bottom: 5px;
+            /* Space between items */
+            white-space: nowrap;
+            /* Prevent text from wrapping */
+        }
+
+        .dropdown-menu input[type="checkbox"] {
+            margin-right: 10px;
+            /* Space between checkbox and label text */
+        }
     </style>
+
 </head>
 
 <body>
@@ -307,7 +329,7 @@ if (isset($_GET['ide'])) {
                         </a>
                     </li>
                     <li>
-                        <a href="../alumni/alumni.php">
+                        <a href="./alumni.php" class="active">
                             <span class="las la-th-list" style="color:#fff"></span>
                             <small>ALUMNI</small>
                         </a>
@@ -331,7 +353,7 @@ if (isset($_GET['ide'])) {
                         </a>
                     </li>
                     <li>
-                        <a href="./alumni_archive.php" class="active">
+                        <a href="../archive/alumni_archive.php">
                             <span class="las la-archive" style="color:#fff"></span>
                             <small>ARCHIVE</small>
                         </a>
@@ -369,32 +391,50 @@ if (isset($_GET['ide'])) {
 
         <main>
             <div class="page-header">
-                <h1><strong>Archive</strong></h1>
+                <h1><strong>Alumni</strong></h1>
             </div>
-
             <div class="container-fluid" id="main-container">
                 <div class="container-fluid" id="content-container">
                     <div class="container-title">
-                        <h4>Alumni Accounts</h4>
+                        <span>Records</span>
                     </div>
                     <div class="congainer-fluid" id="column-header">
-                        <div class="row">
-                            <div class="col">
-                                <div class="search">
 
-                                    <form class="d-flex" role="search">
-                                        <div class="container-fluid" id="search">
-                                            <input class="form-control me-2" type="search" name="query" placeholder="Search Records..." aria-label="Search" value="<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>">
-                                            <button class="btn btn-outline-success" type="submit" style="padding-left: 30px; padding-right: 39px;">Search</button>
-                                        </div>
+
+                        <div class="row">
+                            <!-- Left side: Search bar and dropdown (col-8) -->
+                            <div class="col-7 d-flex align-items-center">
+                                <div class="d-flex align-items-center" style="flex: 1;">
+                                    <!-- Search Form -->
+                                    <form class="d-flex" role="search" style="flex: 1;">
+                                        <input class="form-control me-2" type="search" name="query" placeholder="Search Records..." aria-label="Search" value="<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>">
+                                        <button class="btn btn-outline-success" type="submit" style="padding-left: 30px; padding-right: 30px;">Search</button>
                                     </form>
 
+                                    <!-- Dropdown Button -->
+                                    <!-- <div class="dropdown ms-2">
+                                        <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="eventForDropdown" onclick="toggleDropdown()" style="height: 100%; width: 430px;">Select Courses</button>
+                                        <div id="eventForMenu" class="dropdown-menu" style="display:none; position: absolute; background-color: white; border: 1px solid #ccc; padding: 10px;">
+                                            <label><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)" checked> All Courses</label><br>
+                                            <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BAJ" checked> Batchelor of Arts in Journalism</label><br>
+                                            <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BECEd" checked> Bachelor Of Secondary Education</label><br>
+                                            <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BEEd" checked> Bachelor Of Elementary Education</label><br>
+                                            <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSBM" checked> Bachelor Of Science In Business Management</label><br>
+                                            <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSOA" checked> Bachelor of Science in Office Administration</label><br>
+                                            <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSEntrep" checked> Bachelor Of Science In Entrepreneurship</label><br>
+                                            <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSHM" checked> Bachelor Of Science In Hospitality Management</label><br>
+                                            <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSIT" checked> Bachelor of Science in Information Technology</label><br>
+                                            <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSCS" checked> Bachelor of Science in Computer Science</label><br>
+                                            <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSc(Psych)" checked> Bachelor Of Science In Psychology</label>
+                                        </div>
+                                    </div> -->
                                 </div>
                             </div>
-                            <div class="col" style="text-align: end;">
+
+                            <!-- Right side: Unregister Account button (col-4) -->
+                            <div class="col-5 d-flex align-items-center justify-content-end">
                                 <div class="add-button">
-                                    <a class='btn btn-secondary border border-dark' href='./alumni_archive.php' style="padding-left: 48px; padding-right: 48px; margin-right: 1%;">Alumni</a>
-                                    <a class='btn btn-light border border-dark' href='./event_archive.php' style="padding-left: 52px; padding-right: 52px;">Event</a>
+                                    <a class='btn btn-secondary border border-dark' href='./alumni.php' style="margin-left: 1%; padding-left: 4.1px; padding-right: 5.4px; white-space: nowrap;">Alumni Account</a>
                                 </div>
                             </div>
                         </div>
@@ -409,12 +449,7 @@ if (isset($_GET['ide'])) {
                                     <th scope="col" class="inline">GENDER</th>
                                     <th scope="col" class="inline">COURSE</th>
                                     <th scope="col" class="inline">BATCH</th>
-                                    <th scope="col" class="inline">CONTACT</th>
-                                    <th scope="col" class="inline">ADDRESS</th>
                                     <th scope="col" class="inline">EMAIL</th>
-                                    <th scope="col" class="inline">LAST LOGIN</th>
-                                    <th scope="col" class="inline">STATUS</th>
-                                    <th scope="col" class="inline">DATE ARCHIVE</th>
                                     <th scope="col" class="inline">ACTION</th>
                                 </tr>
                             </thead>
@@ -427,26 +462,19 @@ if (isset($_GET['ide'])) {
                                         } else {
                                             $fullname = $row["lname"] . ", " . $row["fname"];
                                         }
-                                        $batch = $row["batch_startYear"] . " - " . $row["batch_endYear"];
-                                        $address = $row['address'];
-                                        $displayAddress = str_replace(',', '', $address);
                                 ?>
                                         <tr>
                                             <td class="inline"><?php echo $row['student_id'] ?></td>
                                             <td class="inline"><?php echo htmlspecialchars($fullname) ?></td>
                                             <td class="inline"><?php echo $row['gender'] ?></td>
                                             <td class="inline"><?php echo $row['course'] ?></td>
-                                            <td class="inline"><?php echo htmlspecialchars($batch) ?></td>
-                                            <td class="inline"><?php echo $row['contact'] ?></td>
-                                            <td class="inline"><?php echo $displayAddress ?></td>
+                                            <td class="inline"><?php echo $row["batch"] ?></td>
                                             <td class="inline"><?php echo $row['email'] ?></td>
-                                            <td class="inline"><?php echo ($row['last_login'] == '0000-00-00 00:00:00') ? '-- / -- / --' : $row['last_login']; ?></td>
-                                            <td class="inline" style="color: <?php echo ($row['status'] == 'Verified') ? 'green' : 'red'; ?>"><?php echo $row['status']; ?></td>
-                                            <td class="inline"><?php echo $row['date_archived'] ?></td>
                                             <?php
                                             echo "
                                                 <td class='inline act'>
-                                                    <a class='btn btn-success btn-sm archive' href='./restore_alumni.php?id=$row[alumni_id]' style='font-size: 11.8px;'>Restore</a>
+                                                    <a class='btn btn-success btn-sm addAlumni' href='./register_alumni.php?id=$row[alumni_id]' style='font-size: 11.8px; padding: 5px 10px; width: 80px; text-align: center;'>Add</a>
+                                                    <a class='btn btn-info btn-sm' href='./graduate_info.php?id=$row[alumni_id]' style='font-size: 11.8px; padding: 5px 10px; width: 80px; text-align: center;'>More Info</a>
                                                 </td>
                                             "; ?>
                                         </tr>
@@ -462,12 +490,10 @@ if (isset($_GET['ide'])) {
 
                     </div>
 
-                    <div>
-                        <!-- Pagination links -->
-                        <div class="pagination" id="content" style="float:right; margin-right:1.5%">
-                            <!-- next and previous -->
-                            <?php
-                            if ($current_page > 1) : ?>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding-right: 1.5%; padding-left: 1.5%;">
+                        <p style="margin: 0;">Page <?= $current_page ?> out of <?= $total_pages ?></p>
+                        <div class="pagination" id="content">
+                            <?php if ($current_page > 1) : ?>
                                 <a href="?page=<?= ($current_page - 1); ?>&query=<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>" class="prev" style="border-radius:4px;background-color:#368DB8;color:white;margin-bottom:13px;">&laquo; Previous</a>
                             <?php endif; ?>
 
@@ -475,7 +501,6 @@ if (isset($_GET['ide'])) {
                                 <a href="?page=<?= ($current_page + 1); ?>&query=<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>" class="next" style="border-radius:4px;background-color:#368DB8;color:white;margin-bottom:13px;">Next &raquo;</a>
                             <?php endif; ?>
                         </div>
-                        <p style="margin-left:2%;margin-top:2.3%;">Page <?= $current_page ?> out of <?= $total_pages ?></p>
                     </div>
                 </div>
             </div>
@@ -486,6 +511,34 @@ if (isset($_GET['ide'])) {
             </div> -->
         </main>
         <script>
+            function toggleDropdown() {
+                var dropdown = document.getElementById('eventForMenu');
+                dropdown.style.display = (dropdown.style.display === 'none' || dropdown.style.display === '') ? 'block' : 'none';
+            }
+            // Toggle select all checkboxes
+            function toggleSelectAll(selectAllCheckbox) {
+                var checkboxes = document.querySelectorAll('.eventForCheckbox');
+                checkboxes.forEach(function(checkbox) {
+                    checkbox.checked = selectAllCheckbox.checked;
+                });
+            }
+
+            // Uncheck 'ALL' when any individual checkbox is unchecked
+            document.querySelectorAll('.eventForCheckbox').forEach(function(checkbox) {
+                checkbox.addEventListener('change', function() {
+                    if (!this.checked) {
+                        document.getElementById('selectAll').checked = false;
+                    }
+                });
+            });
+
+            // Set initial state of the dropdown to have all checkboxes checked
+            window.onload = function() {
+                document.querySelectorAll('.eventForCheckbox').forEach(function(checkbox) {
+                    checkbox.checked = true;
+                });
+                document.getElementById('selectAll').checked = true;
+            };
             document.addEventListener('DOMContentLoaded', (event) => {
                 let currentPage = 1;
 
@@ -512,11 +565,10 @@ if (isset($_GET['ide'])) {
                 loadPage(currentPage);
             });
 
-
             // forsweetalert confirm
             // Debugging: Ensure SweetAlert2 is loaded
             document.addEventListener('DOMContentLoaded', function() {
-                const archiveButtons = document.querySelectorAll('.archive');
+                const archiveButtons = document.querySelectorAll('.addAlumni');
 
                 archiveButtons.forEach(function(button) {
                     button.addEventListener('click', function(event) {

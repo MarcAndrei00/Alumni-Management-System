@@ -75,55 +75,61 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     exit();
 }
 
-$title = "";
-$description = "";
 
-// Read data from the table 'about'
-$data_sql = "SELECT * FROM about_page WHERE about_id=1";
+$title = "";
+$address = "";
+$contact = "";
+$email = "";
+
+// Read data from the table 'about_page'
+$data_sql = "SELECT * FROM contact_page WHERE contact_id=1";
 $data_result = $conn->query($data_sql);
 
 if ($data_result->num_rows > 0) {
     $data_row = $data_result->fetch_assoc();
-    $data_about_id = $data_row['about_id'];
     $data_title = $data_row['page_title'];
-    $data_description = $data_row['description'];
+    $data_contact = $data_row['contact'];
+    $data_email = $data_row['email'];
+    $address_parts = explode(', ', $data_row['address']);
+
+    // Assign from the end of the array
+    $province = array_pop($address_parts); // Cavite
+    $city = array_pop($address_parts);     // Dasmarinas
+    $brgy = array_pop($address_parts);     // Sabang
+
+    // The remaining parts will be combined into the house_no
+    $house_no = implode(' ', $address_parts);
 } else {
-    header("Location: ./about.php");
+    header("Location: ./contact.php");
     exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $about_id = $_POST['about_id'];
-    $title = ucwords($conn->real_escape_string($_POST['title']));
-    $description = ucwords($conn->real_escape_string($_POST['description']));
+    $title = strtoupper($conn->real_escape_string($_POST['title']));
+    $contact = $_POST['contact'];
+    $email = strtolower($conn->real_escape_string($_POST['email']));
 
-    // For image
-    if (isset($_FILES["image"]) && $_FILES["image"]["error"] == 0) {
-        $file = addslashes(file_get_contents($_FILES["image"]["tmp_name"]));
-        $sql = "UPDATE about_page SET page_title='$title', description='$description', image='$file' WHERE about_id='$about_id'";
-    } else {
-        $sql = "UPDATE about_page SET page_title='$title', description='$description' WHERE about_id='$about_id'";
-    }
+    $house_no = ucwords($_POST['house_no']);
+    $brgy = ucwords($_POST['brgy']);
+    $city = ucwords($_POST['city']);
+    $province = ucwords($_POST['province']);
+
+    $address = ucwords($_POST['house_no']) . ', ' . ucwords($_POST['brgy']) . ', ' . ucwords($_POST['city']) . ', ' . ucwords($_POST['province']);
+
+    $sql = "UPDATE contact_page SET page_title='$title', address='$address', contact='$contact', email='$email' WHERE contact_id=1";
 
     if ($conn->query($sql) === TRUE) {
-        echo "
-            <script>
-                // Wait for the document to load
+        $icon = 'success';
+        $iconHtml = '<i class="fas fa-check-circle"></i>';
+        $title = 'Info updated successfully.';
+        $redirectUrl = './about.php';
+
+        echo "<script>
                 document.addEventListener('DOMContentLoaded', function() {
-                    // Use SweetAlert2 for the alert
-                    Swal.fire({
-                            title: 'Info Updated Successfully',
-                            timer: 2000,
-                            showConfirmButton: true, // Show the confirm button
-                            confirmButtonColor: '#4CAF50', // Set the button color to green
-                            confirmButtonText: 'OK' // Change the button text if needed
-                    }).then(function() {
-                        // Redirect after the alert closes
-                        window.location.href = './about.php';
-                    });
+                    noTextRedirect('$redirectUrl', '$title', '$icon', '$iconHtml');
                 });
-            </script>
-            ";
+            </script>";
+        sleep(2);
     } else {
         echo "Error updating record: " . $conn->error;
     }
@@ -136,19 +142,52 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-    <title>Update About</title>
+    <title>Contact Info</title>
     <link rel="shortcut icon" href="../../assets/cvsu.png" type="image/svg+xml">
     <link rel="stylesheet" href="./css/contact.css">
     <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         #preview {
-            max-width: 700px;
-            max-height: 700px;
+            max-width: 100%;
+            max-height: 100%;
             object-fit: contain;
+        }
+
+        .swal2-popup {
+            padding-bottom: 30px;
+            /* Adjust the padding as needed */
+        }
+
+        .confirm-button-class,
+        .cancel-button-class {
+            width: 150px;
+            /* Set the desired width */
+            height: 40px;
+            /* Set the desired height */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            /* Hide the overflow to prevent scroll bars */
+            white-space: nowrap;
+            /* Prevent text wrapping */
+        }
+
+        .confirm-button-class {
+            background-color: #e03444 !important;
+            color: white;
+        }
+
+        .cancel-button-class {
+            background-color: #ffc404 !important;
+            color: white;
         }
     </style>
 </head>
@@ -171,7 +210,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <li><a href="../profile/profile.php"><span class="las la-user-alt" style="color:#fff"></span><small>PROFILE</small></a></li>
                     <li><a href="../alumni/alumni.php"><span class="las la-th-list" style="color:#fff"></span><small>ALUMNI</small></a></li>
                     <li><a href="../event/event.php"><span class="las la-calendar" style="color:#fff"></span><small>EVENT</small></a></li>
-                    <li><a href="./about.php" class="active"><span class="las la-cog" style="color:#fff"></span><small>SETTINGS</small></a></li>
+                    <li><a href="./contat.php" class="active"><span class="las la-cog" style="color:#fff"></span><small>SETTINGS</small></a></li>
                     <li><a href="../report/report.php"><span class="las la-clipboard-check" style="color:#fff"></span><small>REPORT</small></a></li>
                     <li><a href="../archive/alumni_archive.php"><span class="las la-archive" style="color:#fff"></span><small>ARCHIVE</small></a></li>
                 </ul>
@@ -198,39 +237,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <h1><strong>Settings</strong></h1>
             </div>
             <div class="form-style">
-                <div class="d-flex justify-content-end my-3">
-                    <ul class="nav nav-pills custom-nav-pills" id="myTab" role="tablist">
-                        <li class="nav-item mx-4">
-                            <button class="btn btn-secondary border border-dark" id="about-tab" type="button" role="tab" aria-controls="contact" aria-selected="true" onclick="location.href='about.php'" style="padding-left: 55px; padding-right: 55px;">About</button>
-                        </li>
-                        <li class="nav-item mx-4">
-                            <button class="btn btn-light border border-dark" id="contact-tab" type="button" role="tab" aria-controls="contact" aria-selected="false" onclick="location.href='contact.php'" style="padding-left: 48px; padding-right: 48px;">Contact</button>
-                        </li>
-                    </ul>
-                </div>
-
                 <div class="tab-content" id="myTabContent">
-                    <div class="tab-pane fade show active" id="about" role="tabpanel" aria-labelledby="about-tab">
-                        <form method="POST" enctype="multipart/form-data" onsubmit="return submitForm(this);">
+                    <div class="tab-pane fade show active" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+                        <form method="POST" enctype="multipart/form-data" class="addNew">
                             <div class="mb-3">
-                                <input type="hidden" name="about_id" class="form-control" id="formGroupExampleInput" value="<?php echo $data_about_id; ?>">
-                                <label for="pageTitle">Page Title</label>
-                                <input type="text" name="title" class="form-control" id="pageTitle" required value="<?php echo $data_title; ?>">
+                                <label for="pageTitle" class="form-label">Page Title</label>
+                                <input name="title" type="text" class="form-control" id="pageTitle" value="<?php echo $data_title; ?>">
                             </div>
-                            <div class="mb-3">
-                                <label for="pageDescription">Page Description</label>
-                                <textarea class="form-control" name="description" id="pageDescription" rows="5" required><?php echo $data_description; ?></textarea>
-                            </div>
-                            <div class="mb-3">
-                                <label for="upload" class="form-label">Upload</label>
-                                <input class="form-control" type="file" name="image" onchange="getImagePreview(event)">
-                                <!-- <div class="mt-3">
-                                    <img src="/mnt/data/image.png" alt="Upload Image" class="img-thumbnail">
-                                </div> -->
-                                <div class="mt-3 col-md-12 mb-md-0 p-md-12" style="text-align: center;">
-                                    <!-- for display image -->
-                                    <img id="preview" src="data:image/jpeg;base64,<?php echo base64_encode($data_row['image']); ?>" alt="EVENT IMAGE">
+                            <div class="row g-3">
+                                <div class="col">
+                                    <label for="house_no" class="form-label">House No. | Street | Subdivision</label>
+                                    <input type="text" name="house_no" class="form-control" id="house_no" required value="<?php echo htmlspecialchars($house_no); ?>">
                                 </div>
+                                <div class="col">
+                                    <label for="brgy" class="form-label">Barangay</label>
+                                    <input type="text" name="brgy" class="form-control" id="brgy" required value="<?php echo htmlspecialchars($brgy); ?>">
+                                </div>
+                                <div class="col">
+                                    <label for="city" class="form-label">City</label>
+                                    <input type="text" name="city" class="form-control" id="city" required value="<?php echo htmlspecialchars($city); ?>">
+                                </div>
+                                <div class="col">
+                                    <label for="province" class="form-label">Province</label>
+                                    <input type="text" name="province" class="form-control" id="province" required value="<?php echo htmlspecialchars($province); ?>">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="contact" class="form-label">Contact</label>
+                                <input name="contact" id="student_id" type="text" class="form-control" id="contact" value="<?php echo $data_contact; ?>">
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input name="email" type="email" class="form-control" id="email" value="<?php echo $data_email; ?>">
                             </div>
                             <button type="submit" class="btn btn-warning" style="padding-left: 50px; padding-right: 50px;">Update</button>
                         </form>
@@ -243,59 +281,73 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script>
-        function getImagePreview(event) {
-            var file = event.target.files[0];
-            var reader = new FileReader();
-            reader.onload = function(e) {
-                var img = new Image();
-                img.onload = function() {
-                    var canvas = document.createElement('canvas');
-                    var ctx = canvas.getContext('2d');
-                    canvas.width = img.width;
-                    canvas.height = img.height;
-                    ctx.drawImage(img, 0, 0, img.width, img.height);
-                    var preview = document.getElementById('preview');
-                    preview.src = canvas.toDataURL('image/jpeg'); // Adjust format if needed
-                };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
+        // FOR NO NIGGATIVE NUMBERS
+        document.addEventListener("DOMContentLoaded", function() {
+            const studentIdInput = document.getElementById("student_id");
 
-        // script to insert image to database
-        $(document).ready(function() {
-            $('#insert').click(function() {
-                var image_name = $('#image').val();
-                if (image_name == '') {
-                    alert("please Select Profile")
-                    return false;
-                } else {
-                    var extension = $('#image').val().split('.').pop().toLowerCase();
-                    if (jquery.inArray(extenssion, ['gif', 'png', 'jpg', 'jpeg']) == -1) {
-                        alert("Invalid Image File")
-                        $('#image').val('');
-                        return false;
-                    }
-                }
-            })
+            studentIdInput.addEventListener("input", function(event) {
+                let value = studentIdInput.value;
+                // Replace all non-numeric characters
+                value = value.replace(/[^0-9]/g, '');
+                studentIdInput.value = value;
+            });
         });
 
+        // CONFIRM SUBMITION
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOM fully loaded and parsed");
 
-        function submitForm(form) {
-            Swal.fire({
-                    title: 'Do you want to continue?',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#e03444',
-                    cancelButtonColor: '#ffc404',
-                    confirmButtonText: 'Submit'
-                })
-                .then((result) => {
-                    if (result.isConfirmed) {
-                        form.submit(); // Submit the form
-                    }
+            const forms = document.querySelectorAll('.addNew');
+
+            forms.forEach(function(form) {
+                console.log("Attaching event listener to form:", form);
+
+                form.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    console.log("Form submit event triggered");
+
+                    Swal.fire({
+                        title: 'Are you sure you want to continue?',
+                        icon: 'warning',
+                        iconHtml: '<i class="fas fa-exclamation-triangle"></i>',
+                        text: 'Once you proceed, this action cannot be undone.',
+                        showCancelButton: true,
+                        confirmButtonColor: '#e03444',
+                        cancelButtonColor: '#ffc404',
+                        confirmButtonText: 'Ok',
+                        cancelButtonText: 'Cancel',
+                        customClass: {
+                            confirmButton: 'confirm-button-class',
+                            cancelButton: 'cancel-button-class'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            console.log("User confirmed action");
+                            form.submit(); // Submit the form if confirmed
+                        } else {
+                            console.log("User canceled action");
+                        }
+                    });
                 });
-            return false; // Prevent default form submission
+            });
+        });
+
+        // FOR MESSAGEBOX WITHOUT TEXT ONLY
+        function noTextRedirect(redirectUrl, title, icon, iconHtml) {
+            Swal.fire({
+                icon: icon,
+                iconHtml: iconHtml, // Custom icon using Font Awesome
+                title: title,
+                customClass: {
+                    popup: 'swal-custom'
+                },
+                showConfirmButton: true,
+                confirmButtonColor: '#4CAF50',
+                confirmButtonText: 'OK',
+                timer: 5000
+            }).then(() => {
+                window.location.href = redirectUrl; // Redirect to the desired page
+            });
         }
     </script>
 </body>

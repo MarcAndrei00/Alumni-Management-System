@@ -106,25 +106,46 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $temp_password = $_POST['temp_pass'];
 
 
-    // email and user existing check
+    // // email and user existing check
     $alumni_idCheck = mysqli_query($conn, "SELECT * FROM list_of_graduate WHERE student_id='$stud_id'");
 
     if (mysqli_num_rows($alumni_idCheck) > 0) {
 
-        // email and user existing check
+        // Check if email or student ID exists in both the active and archive tables
         $emailCheck = mysqli_query($conn, "SELECT * FROM alumni WHERE email='$email'");
         $emailCheck_archive = mysqli_query($conn, "SELECT * FROM alumni_archive WHERE email='$email'");
         $idCheck = mysqli_query($conn, "SELECT * FROM alumni WHERE student_id='$stud_id'");
         $idCheck_archive = mysqli_query($conn, "SELECT * FROM alumni_archive WHERE student_id='$stud_id'");
 
-        if (mysqli_num_rows($emailCheck) > 0) {
-            $errorMessage = "Email Already Exists";
-        } else if (mysqli_num_rows($emailCheck_archive) > 0) {
-            $errorMessage = "Email Already Exists";
-        } else if (mysqli_num_rows($idCheck) > 0) {
-            $errorMessage = "Student ID Already Exists";
-        } else if (mysqli_num_rows($idCheck_archive) > 0) {
-            $errorMessage = "Student ID Already Exists";
+        // Email and student ID validation
+        if (mysqli_num_rows($emailCheck) > 0 || mysqli_num_rows($emailCheck_archive) > 0) {
+
+            // WARNING EXISTING ACCOUNT
+            $icon = 'warning';
+            $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
+            $title = 'Email Already Exists!';
+            $text = 'Please try again.';
+
+            echo "<script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        warningError('$title', '$text', '$icon', '$iconHtml');
+                    });
+                </script>";
+            sleep(2);
+        } elseif (mysqli_num_rows($idCheck) > 0 || mysqli_num_rows($idCheck_archive) > 0) {
+
+            // WARNING EXISTING ACCOUNT
+            $icon = 'warning';
+            $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
+            $title = 'Student ID Already Exists!';
+            $text = 'Please try again.';
+
+            echo "<script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        warningError('$title', '$text', '$icon', '$iconHtml');
+                    });
+                </script>";
+            sleep(2);
         } else {
             $filePath = '../../assets/profile_icon.jpg';
             $imageData = file_get_contents($filePath);
@@ -137,39 +158,33 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $sql_delete = "DELETE FROM list_of_graduate WHERE student_id=$stud_id";
             $conn->query($sql_delete);
 
-            echo "
-            <script>
-                // Wait for the document to load
-                document.addEventListener('DOMContentLoaded', function() {
-                    // Use SweetAlert2 for the alert
-                    Swal.fire({
-                            title: 'Alumni Added Successfully',
-                            timer: 2000,
-                            showConfirmButton: true, // Show the confirm button
-                            confirmButtonColor: '#4CAF50', // Set the button color to green
-                            confirmButtonText: 'OK' // Change the button text if needed
-                    }).then(function() {
-                        // Redirect after the alert closes
-                        window.location.href = './alumni.php';
+            // SUCCESS LOGIN ADMIN
+            $icon = 'success';
+            $iconHtml = '<i class="fas fa-check-circle"></i>';
+            $title = 'Alumni Added Successfully';
+            $text = 'You will be redirected shortly to the Alumni List.';
+            $redirectUrl = './alumni.php';
+
+            echo "<script>
+                    document.addEventListener('DOMContentLoaded', function() {
+                        alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
                     });
-                });
-            </script>
-            ";
+                </script>";
+            sleep(2);
         }
     } else {
+        // WARNING NO ALUMNI
+        $icon = 'error';
+        $iconHtml = '<i class=\"fas fa-exclamation-circle\"></i>';
+        $title = 'There is no alumni with student ID ' . $stud_id;
+        $text = 'Please try again.';
+
         echo "<script>
-            // Wait for the document to load
-            document.addEventListener('DOMContentLoaded', function() {
-                // Use SweetAlert2 for the alert
-                Swal.fire({
-                    title: 'No Alumni Student with student Id of $stud_id; ',
-                    timer: 4000,
-                    showConfirmButton: true, // Show the confirm button
-                    confirmButtonColor: '#4CAF50', // Set the button color to green
-                    confirmButtonText: 'OK' // Change the button text if needed
-                });
-            });
-        </script>";
+                 document.addEventListener('DOMContentLoaded', function() {
+                     warningError('$title', '$text', '$icon', '$iconHtml');
+                 });
+             </script>";
+        sleep(2);
     }
 }
 ?>
@@ -188,7 +203,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <link rel="stylesheet" href="	https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <script src='https://cdn.jsdelivr.net/npm/sweetalert2@11'></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
 </head>
 
 <body>
@@ -275,7 +292,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         <main>
             <div class="page-header">
-                <h1 style="overflow-y: hidden;"><strong>Alumni</strong></h1>
+                <h1><strong>Alumni</strong></h1>
             </div>
         </main>
         <div class="container" id="container-full">
@@ -283,21 +300,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <div class="container-title">
                     <span>Add New Account</span>
                 </div>
-
-                <?php
-                if (!empty($errorMessage)) {
-                    echo "<script>";
-                    echo "Swal.fire({";
-                    echo "  icon: 'error',";
-                    echo "  title: 'Oops...',";
-                    echo "  text: '$errorMessage',";
-                    echo "  timer: 2000,";
-                    echo "})";
-                    echo "</script>";
-                }
-                ?>
-
-
                 <div class="container" id="content">
                     <form action="" method="POST">
                         <div class="container">
@@ -468,7 +470,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <div class="row" style="margin-top:20px;">
                                 <div class="col" id="buttons">
                                     <div class="button">
-                                        <button type="submit" class="btn btn-warning" name="submit" id="insert" value="submit">Add new</button>
+                                        <button type="submit" class="btn btn-warning" name="submit" id="insert">Add new</button>
                                         <a class="btn btn-danger" href="./alumni.php">Cancel</a>
                                     </div>
                                 </div>
@@ -520,6 +522,43 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 }
             }
         });
+
+        // FOR MESSAGEBOX
+        function alertMessage(redirectUrl, title, text, icon, iconHtml) {
+            Swal.fire({
+                icon: icon,
+                iconHtml: iconHtml, // Custom icon using Font Awesome
+                title: title,
+                text: text,
+                customClass: {
+                    popup: 'swal-custom'
+                },
+                showConfirmButton: true,
+                confirmButtonColor: '#4CAF50',
+                confirmButtonText: 'OK',
+                timer: 5000
+            }).then(() => {
+                window.location.href = redirectUrl; // Redirect to the desired page
+            });
+        }
+
+        // WARNING FOR DUPE ACCOUNT
+        function warningError(title, text, icon, iconHtml) {
+            Swal.fire({
+                icon: icon,
+                iconHtml: iconHtml, // Custom icon using Font Awesome
+                title: title,
+                text: text,
+                customClass: {
+                    popup: 'swal-custom'
+                },
+                showConfirmButton: true,
+                confirmButtonColor: '#4CAF50',
+                confirmButtonText: 'OK',
+                timer: 5000,
+            });
+        }
+    </script>
     </script>
 </body>
 

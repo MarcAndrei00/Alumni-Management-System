@@ -26,7 +26,8 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 
   if ($user_result->num_rows > 0) {
     // User is an admin
-    $user = $user_result->fetch_assoc();
+    header('Location: ../../adminPage/dashboard_admin.php');
+    exit();
   }
   $stmt->close();
 
@@ -38,8 +39,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 
   if ($user_result->num_rows > 0) {
     // User is a coordinator
-    header('Location: ../../coordinatorPage/dashboard_coor.php');
-    exit();
+    $user = $user_result->fetch_assoc();
   }
   $stmt->close();
 
@@ -70,7 +70,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
   $stmt->close();
 
   // Check if user is an alumni_archive
-  $stmt = $conn->prepare("SELECT * FROM admin WHERE admin_id = ? AND email = ?");
+  $stmt = $conn->prepare("SELECT * FROM coordinator WHERE coor_id = ? AND email = ?");
   $stmt->bind_param("ss", $account, $account_email);
   $stmt->execute();
   $user_result = $stmt->get_result();
@@ -83,7 +83,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 
       if (mysqli_num_rows($check_verifcode_qry) > 0) {
 
-        $sql_archive = "UPDATE admin SET email = '$inputEmail' WHERE admin_id=$account";
+        $sql_archive = "UPDATE admin SET email = '$inputEmail' WHERE coor_id=$account";
         $conn->query($sql_archive);
 
         $_SESSION['user_email'] = $inputEmail;

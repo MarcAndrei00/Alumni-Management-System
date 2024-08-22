@@ -24,7 +24,8 @@ if (isset($_GET['id'])) {
 
         if ($user_result->num_rows > 0) {
             // User is an admin
-            $user = $user_result->fetch_assoc();
+            header('Location: ../../adminPage/dashboard_admin.php');
+            exit();
         }
         $stmt->close();
 
@@ -36,8 +37,7 @@ if (isset($_GET['id'])) {
 
         if ($user_result->num_rows > 0) {
             // User is a coordinator
-            header('Location: ../../coordinatorPage/dashboard_coor.php');
-            exit();
+            $user = $user_result->fetch_assoc();
         }
         $stmt->close();
 

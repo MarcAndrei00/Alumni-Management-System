@@ -77,7 +77,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 
 $title = "";
 $description = "";
-$schedule = "";
+$date = "";
 
 // get the data from form
 
@@ -89,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     }
     $event_id = $_GET['id'];
 
-    //read data from table alumni
+    // Fetch the event details
     $sql = "SELECT * FROM event WHERE event_id=$event_id";
     $result = $conn->query($sql);
     $row = $result->fetch_assoc();
@@ -98,45 +98,91 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         header("location: ./event.php");
         exit;
     }
+
     $event_id = $row['event_id'];
     $title = $row['title'];
-    $schedule = $row['schedule'];
+    $date = $row['date'];
+    $startTime = $row['start_time'];
+    $endTime = $row['end_time'];
+    $venue = $row['venue'];
     $description = $row['description'];
+
+    $address_parts = explode(', ', $row['address']);
+
+    // Assign from the end of the array
+    $province = array_pop($address_parts); // Cavite
+    $city = array_pop($address_parts);     // Dasmarinas
+    $brgy = array_pop($address_parts);     // Sabang
+
+    // The remaining parts will be combined into the house_no
+    $house_no = implode(' ', $address_parts);
+
+    // Check if 'ALL' is in $eventFor
+    $eventFor = explode(', ', $row['event_for']); // Convert the comma-separated string to an array
+    $isAllChecked = in_array('ALL', $eventFor);
 } else {
+
+    if (!isset($_GET['id'])) {
+        header("location: ./event.php");
+        exit;
+    }
+    $event_id = $_GET['id'];
+    $sql = "SELECT * FROM event WHERE event_id=$event_id";
+    $result = $conn->query($sql);
+    $row = $result->fetch_assoc();
 
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $event_id = $_POST['event_id'];
         $title = ucwords($_POST['title']);
-        $schedule = $_POST['schedule'];
+        $date = $_POST['date'];
+        $startTime = $_POST['startTime'];
+        $endTime = $_POST['endTime'];
+        $venue = $_POST['venue'];
         $description = ucwords($_POST['description']);
 
-        // for image
+        $contact = $_POST['contact'];
+        $house_no = ucwords($_POST['house_no']);
+        $brgy = ucwords($_POST['brgy']);
+        $city = ucwords($_POST['city']);
+        $province = ucwords($_POST['province']);
+
+        $address = ucwords($_POST['house_no']) . ', ' . ucwords($_POST['brgy']) . ', ' . ucwords($_POST['city']) . ', ' . ucwords($_POST['province']);
+
+
+        // List of all possible course values
+        $allCourses = ['BAJ', 'BECEd', 'BEEd', 'BSBM', 'BSOA', 'BSEntrep', 'BSHM', 'BSIT', 'BSCS', 'BSc(Psych)'];
+
+        // Get selected courses
+        $eventFor = isset($_POST['eventFor']) ? $_POST['eventFor'] : [];
+
+        // Check if $eventFor contains all courses
+        if (array_diff($allCourses, $eventFor) === []) {
+            $eventForString = "ALL";
+        } else {
+            $eventForString = implode(', ', $eventFor);
+        }
+
+        // For image
         if (isset($_FILES["image"]) && $_FILES["image"]["error"] == 0) {
             $file = addslashes(file_get_contents($_FILES["image"]["tmp_name"]));
-            $sql = "UPDATE event SET title='$title', schedule='$schedule', description='$description', image='$file' WHERE event_id='$event_id'";
+            $sql = "UPDATE event SET title='$title', date='$date', start_time='$startTime', end_time='$endTime', venue='$venue', address='$address', event_for='$eventForString', description='$description', image='$file' WHERE event_id='$event_id'";
         } else {
-            $sql = "UPDATE event SET title='$title', schedule='$schedule', description='$description' WHERE event_id='$event_id'";
+            $sql = "UPDATE event SET title='$title', date='$date', start_time='$startTime', end_time='$endTime', venue='$venue', address='$address', event_for='$eventForString', description='$description' WHERE event_id='$event_id'";
         }
 
         $result = $conn->query($sql);
-        echo "
-            <script>
-                // Wait for the document to load
+
+        $icon = 'success';
+        $iconHtml = '<i class="fas fa-check-circle"></i>';
+        $title = 'Event updated successfully.';
+        $redirectUrl = './event.php';
+
+        echo "<script>
                 document.addEventListener('DOMContentLoaded', function() {
-                    // Use SweetAlert2 for the alert
-                    Swal.fire({
-                            title: 'Event Updated Successfully',
-                            timer: 2000,
-                            showConfirmButton: true, // Show the confirm button
-                            confirmButtonColor: '#4CAF50', // Set the button color to green
-                            confirmButtonText: 'OK' // Change the button text if needed
-                    }).then(function() {
-                        // Redirect after the alert closes
-                        window.location.href = './event.php';
-                    });
+                    noTextRedirect('$redirectUrl', '$title', '$icon', '$iconHtml');
                 });
-            </script>
-            ";
+            </script>";
+        sleep(2);
     }
 }
 
@@ -156,12 +202,72 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
+        /* FOR SWEETALERT */
+        .swal2-popup {
+            padding-bottom: 30px;
+            /* Adjust the padding as needed */
+        }
+
+        .confirm-button-class,
+        .cancel-button-class {
+            width: 150px;
+            /* Set the desired width */
+            height: 40px;
+            /* Set the desired height */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .confirm-button-class {
+            background-color: #e03444 !important;
+            color: white;
+        }
+
+        .cancel-button-class {
+            background-color: #ffc404 !important;
+            color: white;
+        }
+
+
         #preview {
             max-width: 700px;
             max-height: 700px;
             object-fit: contain;
+        }
+
+        .input-container {
+            display: flex;
+            gap: 10px;
+            /* Adjust the gap as needed */
+        }
+
+        .dropdown-menu {
+            max-height: absolute;
+            /* Limit the height of the dropdown menu */
+            overflow-y: auto;
+            /* Add scroll if content exceeds height */
+            padding: 0;
+            /* Remove extra padding if needed */
+        }
+
+        .dropdown-menu label {
+            display: block;
+            /* Ensure each label takes up a full line */
+            margin-bottom: 5px;
+            /* Space between items */
+            white-space: nowrap;
+            /* Prevent text from wrapping */
+        }
+
+        .dropdown-menu input[type="checkbox"] {
+            margin-right: 10px;
+            /* Space between checkbox and label text */
         }
     </style>
 </head>
@@ -253,71 +359,119 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             </div>
         </header>
 
-
         <main>
-
             <div class="page-header">
                 <h1><strong>Event</strong></h1>
             </div>
-            </main>
-            <form method="POST" enctype="multipart/form-data" onsubmit="return submitForm(this);">
-                <div class="container-fluid" id="page-content">
-                    <div class="row">
-                        <div class="container-fluid" id="main-container">
-                            <div class="container-fluid" id="content-container">
-                                <h3 style="margin-bottom: 2%;">Add New Event</h3>
-                                <div class="mb-3">
-                                    <input type="hidden" name="event_id" class="form-control" id="formGroupExampleInput" value="<?php echo $event_id; ?>">
-                                    <label for="formGroupExampleInput" class="form-label">Event Title</label>
-                                    <input type="text" name="title" class="form-control" id="formGroupExampleInput" required value="<?php echo $title; ?>">
+        </main>
+        <form method="POST" enctype="multipart/form-data" class="addNew">
+            <div class="container-fluid" id="page-content">
+                <div class="row">
+                    <div class="container-fluid" id="main-container">
+                        <div class="container-fluid" id="content-container">
+                            <h3 style="margin-bottom: 2%;">Update Event</h3>
+                            <div class="mb-3">
+                                <input type="hidden" name="event_id" class="form-control" id="formGroupExampleInput" value="<?php echo $event_id; ?>">
+                                <label for="formGroupExampleInput" class="form-label">Event Title</label>
+                                <input type="text" name="title" class="form-control" id="formGroupExampleInput" required value="<?php echo $title; ?>">
+                            </div>
+                            <div class="mb-3">
+                                <label for="formGroupExampleInput2" class="form-label">Date</label>
+                                <input type="date" name="date" class="form-control" id="formGroupExampleInput2" required value="<?php echo $date; ?>">
+                            </div>
+                            <div class="mb-3">
+                                <label for="formGroupExampleInput3" class="form-label">Time</label>
+                                <div class="input-container">
+                                    <input type="time" name="startTime" class="form-control" id="formGroupExampleInput3" required value="<?php echo $startTime; ?>">
+                                    <span class="time-separator" style="margin-top:7px;">To</span>
+                                    <input type="time" name="endTime" class="form-control" id="formGroupExampleInput4" required value="<?php echo $endTime; ?>">
                                 </div>
-                                <div class="mb-3">
-                                    <label for="formGroupExampleInput2" class="form-label">Schedule</label>
-                                    <input type="datetime-local" name="schedule" class="form-control" id="formGroupExampleInput2" required value="<?php echo $schedule; ?>">
+                            </div>
+                            <div class="mb-3">
+                                <label for="formGroupExampleInput4" class="form-label">Venue</label>
+                                <input type="text" name="venue" class="form-control" id="formGroupExampleInput4" required value="<?php echo $venue; ?>">
+                            </div>
+                            <div class="mb-3">
+                                <label for="formGroupExampleInput" class="form-label">ADDRESS</label>
+                                <br>
+                                <div class="row g-3">
+                                    <div class="col">
+                                        <label for="house_no" class="form-label">House No. | Street | Subdivision</label>
+                                        <input type="text" name="house_no" class="form-control" id="house_no" required value="<?php echo htmlspecialchars($house_no); ?>">
+                                    </div>
+                                    <div class="col">
+                                        <label for="brgy" class="form-label">Barangay</label>
+                                        <input type="text" name="brgy" class="form-control" id="brgy" required value="<?php echo htmlspecialchars($brgy); ?>">
+                                    </div>
+                                    <div class="col">
+                                        <label for="city" class="form-label">City</label>
+                                        <input type="text" name="city" class="form-control" id="city" required value="<?php echo htmlspecialchars($city); ?>">
+                                    </div>
+                                    <div class="col">
+                                        <label for="province" class="form-label">Province</label>
+                                        <input type="text" name="province" class="form-control" id="province" required value="<?php echo htmlspecialchars($province); ?>">
+                                    </div>
                                 </div>
-                                <div class="row">
-                                    <div class="container-fluid">
+                            </div>
+                            <div class="mb-3">
+                                <label for="eventForDropdown">Event For:</label>
+                                <div class="dropdown">
+                                    <button class="form-control" type="button" id="eventForDropdown" onclick="toggleDropdown()" style="height: 100%; width: 430px;">Select Courses</button>
+                                    <div id="eventForMenu" class="dropdown-menu" style="display:none; position: absolute; background-color: white; border: 1px solid #ccc; padding: 10px;">
+                                        <label><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)" <?php echo $isAllChecked ? 'checked' : ''; ?>> All Courses</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BAJ" <?php echo $isAllChecked || in_array('BAJ', $eventFor) ? 'checked' : ''; ?>> Bachelor of Arts in Journalism</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BECEd" <?php echo $isAllChecked || in_array('BECEd', $eventFor) ? 'checked' : ''; ?>> Bachelor of Secondary Education</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BEEd" <?php echo $isAllChecked || in_array('BEEd', $eventFor) ? 'checked' : ''; ?>> Bachelor of Elementary Education</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSBM" <?php echo $isAllChecked || in_array('BSBM', $eventFor) ? 'checked' : ''; ?>> Bachelor of Science in Business Management</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSOA" <?php echo $isAllChecked || in_array('BSOA', $eventFor) ? 'checked' : ''; ?>> Bachelor of Science in Office Administration</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSEntrep" <?php echo $isAllChecked || in_array('BSEntrep', $eventFor) ? 'checked' : ''; ?>> Bachelor of Science in Entrepreneurship</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSHM" <?php echo $isAllChecked || in_array('BSHM', $eventFor) ? 'checked' : ''; ?>> Bachelor of Science in Hospitality Management</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSIT" <?php echo $isAllChecked || in_array('BSIT', $eventFor) ? 'checked' : ''; ?>> Bachelor of Science in Information Technology</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSCS" <?php echo $isAllChecked || in_array('BSCS', $eventFor) ? 'checked' : ''; ?>> Bachelor of Science in Computer Science</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSc(Psych)" <?php echo $isAllChecked || in_array('BSc(Psych)', $eventFor) ? 'checked' : ''; ?>> Bachelor of Science in Psychology</label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Hidden checkbox for validation -->
+                            <input type="checkbox" id="hiddenRequiredCheckbox" style="display:none;" required>
+
+                            <div class="row">
+                                <div class="container-fluid">
+                                    <div class="mb-3">
+                                        <label for="exampleFormControlTextarea1" class="form-label">Enter Description</label>
+                                        <textarea name="description" class="form-control" id="exampleFormControlTextarea1" rows="5" required><?php echo $row['description'] ?></textarea>
+                                    </div>
+                                </div>
+                                <div class="container-fluid">
+                                    <div class="row">
                                         <div class="mb-3">
-                                            <label for="exampleFormControlTextarea1" class="form-label">Enter Description</label>
-                                            <textarea name="description" class="form-control" id="exampleFormControlTextarea1" rows="5" required><?php echo $row['description'] ?></textarea>
+                                            <input class="form-control" type="file" name="image" onchange="getImagePreview(event)">
                                         </div>
-                                    </div>
-                                    <div class="container-fluid">
-                                        <div class="row">
-                                            <div class="mb-3">
-                                                <input class="form-control" type="file" name="image" onchange="getImagePreview(event)">
-                                            </div>
-                                            <div class="col-md-12 mb-md-0 p-md-12" style="text-align: center;">
-                                                <!-- for display image -->
-                                                <img id="preview" src="data:image/jpeg;base64,<?php echo base64_encode($row['image']); ?>" alt="EVENT IMAGE">
-                                            </div>
+                                        <div class="col-md-12 mb-md-0 p-md-12" style="text-align: center;">
+                                            <!-- for display image -->
+                                            <img id="preview" src="data:image/jpeg;base64,<?php echo base64_encode($row['image']); ?>" alt="EVENT IMAGE">
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="container-fluid" id="button-response">
-                        <div class="row">
-                            <div class="d-grid col-4 mx-auto">
-                                <button type="submit" class="btn btn-warning">Update</button>
-                            </div>
-                            <div class="d-grid col-4 mx-auto">
-                                <a class="btn btn-danger" href="./event.php">Cancel</a>
                             </div>
                         </div>
                     </div>
                 </div>
-            </form>
+                <div class="container-fluid" id="button-response">
+                    <div class="row">
+                        <div class="d-grid col-4 mx-auto">
+                            <button type="submit" class="btn btn-warning">Update</button>
+                        </div>
+                        <div class="d-grid col-4 mx-auto">
+                            <a class="btn btn-danger" href="./event.php">Cancel</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
     </div>
-    <!-- <script>
-        let eventPic = document.getElementById("event-pic");
-        let formFile = document.getElementById("formFile");
 
-        formFile.onchange = function() {
-            eventPic.src = URL.createObjectURL(formFile.files[0]);
-        }
-    </script> -->
     <script>
         function getImagePreview(event) {
             var file = event.target.files[0];
@@ -339,6 +493,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         }
 
         // script to insert image to database
+
         $(document).ready(function() {
             $('#insert').click(function() {
                 var image_name = $('#image').val();
@@ -356,22 +511,105 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             })
         });
 
+        // FOR DROPDOWN CHECKLIST
+        function toggleDropdown() {
+            var dropdown = document.getElementById('eventForMenu');
+            dropdown.style.display = (dropdown.style.display === 'none' || dropdown.style.display === '') ? 'block' : 'none';
+            updateHiddenCheckbox();
+        }
 
-        function submitForm(form) {
-            Swal.fire({
-                    title: 'Do you want to continue?',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonColor: '#e03444',
-                    cancelButtonColor: '#ffc404',
-                    confirmButtonText: 'Submit'
-                })
-                .then((result) => {
-                    if (result.isConfirmed) {
-                        form.submit(); // Submit the form
-                    }
+        function toggleSelectAll(selectAllCheckbox) {
+            var checkboxes = document.querySelectorAll('.eventForCheckbox');
+            checkboxes.forEach(function(checkbox) {
+                checkbox.checked = selectAllCheckbox.checked;
+            });
+            updateHiddenCheckbox();
+        }
+
+        document.querySelectorAll('.eventForCheckbox').forEach(function(checkbox) {
+            checkbox.addEventListener('change', function() {
+                if (!this.checked) {
+                    document.getElementById('selectAll').checked = false;
+                }
+                updateHiddenCheckbox();
+            });
+        });
+
+        window.onload = function() {
+            updateHiddenCheckbox();
+        };
+
+        function updateHiddenCheckbox() {
+            var checkedBoxes = document.querySelectorAll('.eventForCheckbox:checked');
+            var hiddenCheckbox = document.getElementById('hiddenRequiredCheckbox');
+            var dropdownButton = document.getElementById('eventForDropdown');
+
+            if (checkedBoxes.length > 0) {
+                hiddenCheckbox.checked = true;
+                dropdownButton.textContent = 'Courses Selected';
+                dropdownButton.style.border = '1px solid #ccc';
+            } else {
+                hiddenCheckbox.checked = false;
+                dropdownButton.textContent = 'Select Courses (Required)';
+                dropdownButton.style.border = '1px solid red';
+            }
+        }
+
+        // CONFIRM SUBMITION
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOM fully loaded and parsed");
+
+            const forms = document.querySelectorAll('.addNew');
+
+            forms.forEach(function(form) {
+                console.log("Attaching event listener to form:", form);
+
+                form.addEventListener('submit', function(event) {
+                    event.preventDefault();
+                    console.log("Form submit event triggered");
+
+                    Swal.fire({
+                        title: 'Are you sure you want to continue?',
+                        icon: 'warning',
+                        iconHtml: '<i class="fas fa-exclamation-triangle"></i>',
+                        text: 'Once you proceed, this action cannot be undone.',
+                        showCancelButton: true,
+                        confirmButtonColor: '#e03444',
+                        cancelButtonColor: '#ffc404',
+                        confirmButtonText: 'Ok',
+                        cancelButtonText: 'Cancel',
+                        customClass: {
+                            confirmButton: 'confirm-button-class',
+                            cancelButton: 'cancel-button-class'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            console.log("User confirmed action");
+                            form.submit(); // Submit the form if confirmed
+                        } else {
+                            console.log("User canceled action");
+                        }
+                    });
                 });
-            return false; // Prevent default form submission
+            });
+        });
+
+        // FOR MESSAGEBOX WITHOUT TEXT ONLY
+        function noTextRedirect(redirectUrl, title, icon, iconHtml) {
+            Swal.fire({
+                icon: icon,
+                iconHtml: iconHtml, // Custom icon using Font Awesome
+                title: title,
+                customClass: {
+                    popup: 'swal-custom'
+                },
+                showConfirmButton: true,
+                confirmButtonColor: '#4CAF50',
+                confirmButtonText: 'OK',
+                timer: 5000
+            }).then(() => {
+                window.location.href = redirectUrl; // Redirect to the desired page
+            });
         }
     </script>
 </body>

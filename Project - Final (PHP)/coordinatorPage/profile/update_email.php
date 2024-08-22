@@ -2,6 +2,10 @@
 session_start();
 $conn = new mysqli("localhost", "root", "", "alumni_management_system");
 
+use PHPMailer\PHPMailer\PHPMailer;
+
+require '../../vendor/autoload.php';
+
 // SESSION
 if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     $account = $_SESSION['user_id'];
@@ -95,20 +99,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     }
     // data from table alumni where student_id = $alumni_id = $_GET['id']; get from alumni list update
     $coor_id = $row['coor_id'];
-    $fname = $row['fname'];
-    $mname = $row['mname'];
-    $lname = $row['lname'];
-    $contact = $row['contact'];
+    $inputEmail = $row['email'];
 } else {
     // get the data from form
-    $coor_id = $_POST['coor_id'];
-    $fname = ucwords($_POST['fname']);
-    $mname = ucwords($_POST['mname']);
-    $lname = ucwords($_POST['lname']);
-    $contact = $_POST['contact'];
+    $sql = "SELECT * FROM coordinator WHERE coor_id=$account";
+    $result = $conn->query($sql);
+    $row = $result->fetch_assoc();
+
+    $coor_id = $row['coor_id'];
+    $inputEmail = $_POST['email'];
 
     // email and user existing check
-    $emailCheck = mysqli_query($conn, "SELECT * FROM coordinator WHERE email = '$email' AND coor_id != $coor_id");
+    $emailCheck = mysqli_query($conn, "SELECT * FROM coordinator WHERE email = '$inputEmail' AND coor_id != $coor_id");
 
     if (mysqli_num_rows($emailCheck) > 0) {
         $icon = 'warning';
@@ -124,20 +126,71 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         sleep(2);
     } else {
 
-        $sql = "UPDATE coordinator SET fname='$fname', mname='$mname', lname='$lname', contact='$contact' WHERE coor_id = $coor_id";
-        $result = $conn->query($sql);
+        $sql_delete = "DELETE FROM recovery_code WHERE email=?";
+        $stmt = $conn->prepare($sql_delete);
+        $stmt->bind_param("s", $inputEmail);
+        $stmt->execute();
+        $stmt->close();
+
+        // Generate new verification code
+        $verification_code = sprintf("%06d", mt_rand(1, 999999));
+
+        // Insert new verification code into the database
+        $stmt = $conn->prepare("INSERT INTO recovery_code (email, verification_code) VALUES (?, ?)");
+        $stmt->bind_param("ss", $inputEmail, $verification_code);
+        $stmt->execute();
+        $stmt->close();
+
+        // Send verification code via email
+        $mail = new PHPMailer(true);
+
+        $mail->isSMTP();
+        $mail->Host       = 'smtp.gmail.com';
+        $mail->SMTPAuth   = true;
+        $mail->Username   = 'alumni.management07@gmail.com';
+        $mail->Password   = 'kcio bmde ffvc sfar';  // Ensure this is securely stored and not hardcoded
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port       = 587;
+
+        $mail->setFrom('alumni.management07@gmail.com', 'Alumni Management');
+        $mail->addAddress($inputEmail);
+
+        $mail->isHTML(true);
+        $mail->Subject = 'Verification Code';
+        $mail->Body    = 'Your verification code is <b>' . $verification_code . '</b>
+                        <br>to change your email ';
+        $mail->AltBody = 'Your verification code is ' . $verification_code;
+
+        $mail->send();
+
+        $_SESSION['inputEmail'] = $inputEmail;
 
         $icon = 'success';
         $iconHtml = '<i class="fas fa-check-circle"></i>';
-        $title = 'Info updated successfully';
-        $redirectUrl = './profile.php';
+        $title = 'Verification code successfully send';
+        $text = 'You will be redirected shortly to verify the email.';
+        $redirectUrl = './emailVerification.php';
 
         echo "<script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    noTextRedirect('$redirectUrl', '$title', '$icon', '$iconHtml');
-                });
-            </script>";
-        sleep(2);
+              document.addEventListener('DOMContentLoaded', function() {
+                  alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
+              });
+          </script>";
+
+        // $sql = "UPDATE coordinator SET email='$inputEmail' WHERE coor_id = $coor_id";
+        // $result = $conn->query($sql);
+
+        // $icon = 'success';
+        // $iconHtml = '<i class="fas fa-check-circle"></i>';
+        // $title = 'Info updated successfully';
+        // $redirectUrl = './profile.php';
+
+        // echo "<script>
+        //         document.addEventListener('DOMContentLoaded', function() {
+        //             noTextRedirect('$redirectUrl', '$title', '$icon', '$iconHtml');
+        //         });
+        //     </script>";
+        // sleep(2);
     }
 }
 ?>
@@ -295,23 +348,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                     <div class="container-fluid" id="main-container">
                         <div class="container-fluid" id="content-container">
                             <div class="information">
-                                <form action="update.php" method="POST" class="addNew">
+                                <form action="update_email.php" method="POST" class="addNew">
                                     <div class="mb-3">
-                                        <input type="hidden" name="coor_id" class="form-control" id="formGroupExampleInput" placeholder="Coordinator Id" value="<?php echo $coor_id; ?>">
-                                        <label for="formGroupExampleInput" class="form-label">FIRST NAME</label>
-                                        <input type="text" name="fname" class="form-control" id="formGroupExampleInput" placeholder="Enter First Name" required value="<?php echo htmlspecialchars("$fname"); ?>">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="formGroupExampleInput" class="form-label">MIDDLE NAME</label>
-                                        <input type="text" name="mname" class="form-control" id="formGroupExampleInput" placeholder="Enter Middle Name" value="<?php echo htmlspecialchars("$mname"); ?>">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="formGroupExampleInput" class="form-label">LAST NAME</label>
-                                        <input type="text" name="lname" class="form-control" id="formGroupExampleInput" placeholder="Enter Last Name" required value="<?php echo htmlspecialchars("$lname"); ?>">
-                                    </div>
-                                    <div class="mb-3">
-                                        <label for="formGroupExampleInput" class="form-label">CONTACT NUMBER</label>
-                                        <input type="number" name="contact" class="form-control" id="formGroupExampleInput" placeholder="Enter Contact Number" required value="<?php echo htmlspecialchars("$contact"); ?>">
+                                        <label for="formGroupExampleInput" class="form-label">RECOVERY EMAIL</label>
+                                        <input type="email" name="email" class="form-control" id="formGroupExampleInput" placeholder="Enter Contact Number" required value="<?php echo htmlspecialchars("$inputEmail"); ?>">
                                     </div>
                                     <div class="buttons">
                                         <button type="submit" class="btn" id="button1" value="Update">UPDATE</button>
@@ -382,6 +422,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                     });
                 }
 
+
                 function warningError(title, text, icon, iconHtml) {
                     Swal.fire({
                         icon: icon,
@@ -395,6 +436,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                         confirmButtonColor: '#4CAF50',
                         confirmButtonText: 'OK',
                         timer: 5000,
+                    });
+                }
+
+                // FOR MESSAGEBOX
+                function alertMessage(redirectUrl, title, text, icon, iconHtml) {
+                    Swal.fire({
+                        icon: icon,
+                        iconHtml: iconHtml, // Custom icon using Font Awesome
+                        title: title,
+                        text: text,
+                        customClass: {
+                            popup: 'swal-custom'
+                        },
+                        showConfirmButton: true,
+                        confirmButtonColor: '#4CAF50',
+                        confirmButtonText: 'OK',
+                        timer: 5000
+                    }).then(() => {
+                        window.location.href = redirectUrl; // Redirect to the desired page
                     });
                 }
             </script>

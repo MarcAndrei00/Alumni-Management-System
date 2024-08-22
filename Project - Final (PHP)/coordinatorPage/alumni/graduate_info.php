@@ -104,10 +104,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                     });
                 </script>";
             sleep(2);
+
             $alumni_id = $_GET['ide'];
 
             //read data from table alumni
-            $sql = "SELECT * FROM alumni WHERE alumni_id=$alumni_id";
+            $sql = "SELECT * FROM list_of_graduate WHERE alumni_id=$alumni_id";
             $result = $conn->query($sql);
             $row = $result->fetch_assoc();
 
@@ -123,13 +124,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             $lname = $row['lname'];
             $gender = $row['gender'];
             $course = $row['course'];
+            $batch = $row["batch"];
             $contact = $row['contact'];
             $address = $row['address'];
             $displayAddress = str_replace(',', '', $address);
             $email = $row['email'];
+            $uploadDate = $row['date_created'];
             $file = $row['picture'];
-
-            $batch = $row["batch_startYear"] . " - " . $row["batch_endYear"];
         } else {
             header("location: ./alumni.php");
             exit;
@@ -138,7 +139,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $alumni_id = $_GET['id'];
 
         //read data from table alumni
-        $sql = "SELECT * FROM alumni WHERE alumni_id=$alumni_id";
+        $sql = "SELECT * FROM list_of_graduate WHERE alumni_id=$alumni_id";
         $result = $conn->query($sql);
         $row = $result->fetch_assoc();
 
@@ -155,13 +156,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $gender = $row['gender'];
         $course = $row['course'];
         $contact = $row['contact'];
-        $email = $row['email'];
-        $file = $row['picture'];
-        $recoveryEmail = $row['recovery_email'];
-
-        $batch = $row["batch_startYear"] . " - " . $row["batch_endYear"];
         $address = $row['address'];
         $displayAddress = str_replace(',', '', $address);
+        $email = $row['email'];
+        $file = $row['picture'];
+        $uploadDate = $row['date_created'];
+        $batch = $row["batch"];
     }
 }
 
@@ -276,7 +276,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
         <main>
             <div class="page-header">
-                <h1 style="overflow-y: hidden;"><strong>Alumni</strong></h1>
+                <h1><strong>Alumni</strong></h1>
             </div>
         </main>
         <div class="container" id="container-full">
@@ -292,7 +292,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                             <div class="col">
                                 <!-- Preview image -->
                                 <div class="form-control" style="width:225px;height:215px; border-radius: 100%;">
-                                    <img id="preview" src="data:image/jpeg;base64,<?php echo base64_encode($row['picture']); ?>" style="width:200px;height:200px; border-radius: 100%;">
+                                    <img id="preview" src="../../assets/profile_icon.jpg" style="width:200px;height:200px; border-radius: 100%;">
                                 </div>
                             </div>
                         </div>
@@ -371,7 +371,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                             </div>
 
                             <div class="col" id="batch">
-                                <input class="form-control" type="text" id="name" name="batch" disabled value="<?php echo htmlspecialchars($batch) ?>">
+                                <input class="form-control" type="text" id="name" name="batch" disabled value="<?php echo $batch; ?>">
                             </div>
                         </div>
                     </div>
@@ -391,7 +391,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                                 <label class="col-sm-3 col-form-label" style="font-size: 20px;" for="address">Address:</label>
                             </div>
                             <div class="col">
-                                <input class="form-control" type="text" id="username" name="address" disabled value="<?php echo $displayAddress ?>">
+                                <input class="form-control" type="text" id="username" name="address" disabled value="<?php echo $displayAddress; ?>">
                             </div>
                         </div>
                     </div>
@@ -408,40 +408,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                     <div class="container">
                         <div class="row align-items-end">
                             <div class="col">
-                                <label class="col-sm-3 col-form-label" style="font-size: 20px;" for="name">Recovery Email:</label>
+                                <label class="col-sm-3 col-form-label" style="font-size: 20px;" for="name">Date Uploaded:</label>
                             </div>
                             <div class="col">
-                                <input class="form-control" type="email" id="email" name="email" disabled value="<?php echo $recoveryEmail; ?>">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="container">
-                        <div class="row align-items-end">
-                            <div class="col">
-                                <label class="col-sm-3 col-form-label" style="font-size: 20px;" for="name">Status:</label>
-                            </div>
-                            <div class="col">
-                                <input class="form-control" type="email" id="email" name="email" style="color: <?php echo ($row['status'] == 'Verified') ? 'green' : 'red'; ?>" disabled value="<?php echo $row['status']; ?>">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="container">
-                        <div class="row align-items-end">
-                            <div class="col">
-                                <label class="col-sm-3 col-form-label" style="font-size: 20px;" for="name">Last Login:</label>
-                            </div>
-                            <div class="col">
-                                <input class="form-control" type="email" id="email" name="email" disabled value="<?php echo ($row['last_login'] == '0000-00-00 00:00:00') ? '-- / -- / --' : $row['last_login']; ?>">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="container">
-                        <div class="row align-items-end">
-                            <div class="col">
-                                <label class="col-sm-3 col-form-label" style="font-size: 20px;" for="name">Date Creation:</label>
-                            </div>
-                            <div class="col">
-                                <input class="form-control" type="email" id="email" name="email" disabled value="<?php echo $row['date_created']; ?>">
+                                <input class="form-control" type="email" id="email" name="email" disabled value="<?php echo $uploadDate; ?>">
                             </div>
                         </div>
                     </div>
@@ -452,8 +422,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
                                     <?php
                                     echo "
-                                        <a class='btn btn-danger btn-size' href='./del_alumni.php?id=$row[alumni_id]'>Archive</a>
-                                        <a class='btn btn-warning btn-size' href='./alumni.php'>Back</a>
+                                        <a class='btn btn-warning btn-size' href='./list_of_graduate.php'>Back</a>
                                     "; ?>
                                 </div>
                             </div>
@@ -472,42 +441,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             preview.src = image;
             preview.style.width = '200px';
             preview.style.height = '200px';
-        }
-
-        // FOR MESSAGEBOX
-        function alertMessage(redirectUrl, title, text, icon, iconHtml) {
-            Swal.fire({
-                icon: icon,
-                iconHtml: iconHtml, // Custom icon using Font Awesome
-                title: title,
-                text: text,
-                customClass: {
-                    popup: 'swal-custom'
-                },
-                showConfirmButton: true,
-                confirmButtonColor: '#4CAF50',
-                confirmButtonText: 'OK',
-                timer: 5000
-            }).then(() => {
-                window.location.href = redirectUrl; // Redirect to the desired page
-            });
-        }
-
-        // WARNING FOR DUPE ACCOUNT
-        function warningError(title, text, icon, iconHtml) {
-            Swal.fire({
-                icon: icon,
-                iconHtml: iconHtml, // Custom icon using Font Awesome
-                title: title,
-                text: text,
-                customClass: {
-                    popup: 'swal-custom'
-                },
-                showConfirmButton: true,
-                confirmButtonColor: '#4CAF50',
-                confirmButtonText: 'OK',
-                timer: 5000,
-            });
         }
 
         // FOR MESSAGEBOX WITHOUT TEXT AND REDIRECT

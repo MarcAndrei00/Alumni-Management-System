@@ -80,8 +80,6 @@ if (isset($_GET['id'])) {
     }
     // Close the database connection if needed
     // $conn->close();
-
-
     //insert data into table alumni_archive from alumni
     $sql_archive = "INSERT INTO event (event_id, title, date, start_time, end_time, venue, address, description, image, going, interested, not_interested, date_created)" .
         "SELECT event_id, title, date, start_time, end_time, venue, address, description, image, going, interested, not_interested, date_created FROM event_archive WHERE event_id=$event_id";
