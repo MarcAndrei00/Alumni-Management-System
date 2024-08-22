@@ -490,9 +490,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                                                     <option value="Going">Going</option>
                                                 <?php endif; ?>
                                             </select>
-                                            <div class="submit">
-                                                <button type="submit" class="btn btn-success" style="padding-left: 58.9px; padding-right: 58.9px;">Submit</button>
-                                                <a class="btn btn-light border border-dark" href='./event.php' style="margin-left: 1%; padding-left: 65.9px; padding-right: 65.9px;">Back</a>
+                                            <div class="submit text-center" style="display: flex; justify-content: space-between; align-items: center;">
+                                                <button type="submit" class="btn btn-success" style="flex: 1; margin-right: 10px;">Submit</button>
+                                                <a class="btn btn-light border border-dark" href='./event.php' style="flex: 1; margin-right: 10px;">Back</a>
+                                                <button type="button" class="btn btn-success" style="flex: 1; background-color: #28a745; border-color: #28a745;">Donate</button>
+
                                             </div>
                                         </div>
                                     </form>

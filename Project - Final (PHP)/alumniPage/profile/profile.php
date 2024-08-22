@@ -99,6 +99,7 @@ if ($result->num_rows > 0) {
     $mname = $row['mname'];
     $lname = $row['lname'];
     $gender = $row['gender'];
+    $course = $row['course'];
     $batch = $row["batch_startYear"] . " - " . $row["batch_endYear"];
     $contact = $row['contact'];
     $address = $row['address'];
@@ -276,6 +277,10 @@ if (isset($_GET['id'])) {
                                             <div class="mb-3">
                                                 <label for="disabledTextInput" class="form-label">GENDER</label>
                                                 <input gender="gender" id="disabledTextInput" class="form-control" value="<?php echo htmlspecialchars($gender); ?>" />
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="disabledTextInput" class="form-label">COURSE</label>
+                                                <input gender="gender" id="disabledTextInput" class="form-control" value="<?php echo htmlspecialchars($course); ?>" />
                                             </div>
                                             <div class="mb-3">
                                                 <label for="disabledTextInput" class="form-label">BATCH</label>

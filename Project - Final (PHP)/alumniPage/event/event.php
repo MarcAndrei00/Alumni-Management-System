@@ -81,7 +81,6 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 $sql = "SELECT * FROM alumni WHERE alumni_id=$account";
 $result = $conn->query($sql);
 $row = $result->fetch_assoc();
-
 $file = $row['picture'];
 
 
@@ -92,8 +91,46 @@ $current_page = isset($_GET['page']) ? $_GET['page'] : 1; // Get current page nu
 // Calculate the limit clause for SQL query
 $start_from = ($current_page - 1) * $records_per_page;
 
+$course = $row['course'];
+
+// Set $event_result based on the course
+switch ($course) {
+    case 'Bachelor of Arts in Journalism':
+        $event_result = 'BAJ';
+        break;
+    case 'Bachelor Of Secondary Education':
+        $event_result = 'BECEd';
+        break;
+    case 'Bachelor Of Elementary Education':
+        $event_result = 'BEEd';
+        break;
+    case 'Bachelor Of Science In Business Management':
+        $event_result = 'BSBM';
+        break;
+    case 'Bachelor of Science in Office Administration':
+        $event_result = 'BSOA';
+        break;
+    case 'Bachelor Of Science In Entrepreneurship':
+        $event_result = 'BSEntrep';
+        break;
+    case 'Bachelor Of Science In Hospitality Management':
+        $event_result = 'BSHM';
+        break;
+    case 'Bachelor of Science in Information Technology':
+        $event_result = 'BSIT';
+        break;
+    case 'Bachelor of Science in Computer Science':
+        $event_result = 'BSCS';
+        break;
+    case 'Bachelor Of Science In Psychology':
+        $event_result = 'BSc(Psych)';
+        break;
+    default:
+        $event_result = 'ALL';
+}
 // Initialize variables
-$sql = "SELECT * FROM event ";
+
+$sql = "SELECT * FROM event WHERE event_for LIKE '%$event_result%' OR event_for = 'ALL'";
 
 // Check if search query is provided
 if (isset($_GET['query']) && !empty($_GET['query'])) {
