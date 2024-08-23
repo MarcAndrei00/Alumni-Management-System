@@ -476,8 +476,6 @@ if (isset($_GET['ide'])) {
                                         $batch = $row["batch_startYear"] . " - " . $row["batch_endYear"];
                                         $address = $row['address'];
                                         $displayAddress = str_replace(',', '', $address);
-                                        
-                                        $lastLogin = ($row['last_login'] == '0000-00-00 00:00:00') ? '-- / -- / --' : date('F j, Y, g:i A', strtotime($row['last_login']));
                                 ?>
                                         <tr>
                                             <td class="inline"><?php echo $row['student_id'] ?></td>
@@ -486,7 +484,7 @@ if (isset($_GET['ide'])) {
                                             <td class="inline"><?php echo $row['course'] ?></td>
                                             <td class="inline"><?php echo htmlspecialchars($batch) ?></td>
                                             <td class="inline"><?php echo $row['email'] ?></td>
-                                            <td class="inline"><?php echo $lastLogin ?></td>
+                                            <td class="inline"><?php echo ($row['last_login'] == '0000-00-00 00:00:00') ? '-- / -- / --' : $row['last_login']; ?></td>
                                             <td class="inline" style="color: <?php echo ($row['status'] == 'Verified') ? 'green' : 'red'; ?>"><?php echo $row['status']; ?></td>
                                             <?php
                                             echo "

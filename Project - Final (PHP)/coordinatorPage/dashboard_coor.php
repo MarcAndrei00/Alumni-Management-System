@@ -205,7 +205,7 @@ $event_count = $row_event['events_count'];
         <main>
 
             <div class="page-header">
-                <h1><strong>Dashboard</strong></h1>
+                <h1>Dashboard</h1>
             </div>
 
             <div class="page-content">

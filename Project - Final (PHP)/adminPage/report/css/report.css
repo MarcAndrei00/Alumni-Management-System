@@ -1,5 +1,4 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-
 * {
     margin: 0;
     padding: 0;
@@ -54,8 +53,7 @@
     width: 40px;
 }
 
-.side-header h3,
-side-head span {
+.side-header h3, side-head span {
     color: #fff;
     font-weight: 400;
 }
@@ -85,7 +83,7 @@ side-head span {
 /* Handle on hover */
 .sidebar ul li a:hover {
     color: #2a9134;
-    background: rgba(0, 0, 0, 0.1);
+    background: rgba(0,0,0,0.1);
 }
 
 .profile {
@@ -141,8 +139,7 @@ side-head span {
     background: #32af3f;
 }
 
-.side-menu a.active span,
-.side-menu a.active small {
+.side-menu a.active span, .side-menu a.active small {
     color: #fff;
 }
 
@@ -152,34 +149,33 @@ side-head span {
     font-size: 1.7rem;
 }
 
-.side-menu a span,
-.side-menu a small {
+.side-menu a span, .side-menu a small {
     color: #899DC1;
 }
 
-#menu-toggle:checked~.sidebar {
+#menu-toggle:checked ~ .sidebar {
     width: 60px;
 }
 
-#menu-toggle:checked~.sidebar .side-header span {
+#menu-toggle:checked ~ .sidebar .side-header span {
     display: none;
 }
 
-#menu-toggle:checked~.main-content {
+#menu-toggle:checked ~ .main-content {
     margin-left: 60px;
     width: calc(100% - 60px);
 }
 
-#menu-toggle:checked~.main-content header {
+#menu-toggle:checked ~ .main-content header {
     left: 60px;
 }
 
-#menu-toggle:checked~.sidebar .profile,
-#menu-toggle:checked~.sidebar .side-menu a small {
+#menu-toggle:checked ~ .sidebar .profile,
+#menu-toggle:checked ~ .sidebar .side-menu a small {
     display: none;
 }
 
-#menu-toggle:checked~.sidebar .side-menu a span {
+#menu-toggle:checked ~ .sidebar .side-menu a span {
     font-size: 1.3rem;
 }
 
@@ -208,8 +204,7 @@ header {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
 }
 
-.header-content,
-.header-menu {
+.header-content, .header-menu {
     display: flex;
     align-items: center;
 }
@@ -238,8 +233,7 @@ main {
     border-bottom: 1px solid #dee2e8;
 }
 
-.page-header h1,
-.page-header small {
+.page-header h1, .page-header small {
     color: #74767d;
     margin-left: 20px;
 }
@@ -280,17 +274,5 @@ main {
 
     .chart-container {
         max-width: 100%;
-    }
-}
-
-@media screen {
-    #header-image {
-        display: none;
-    }
-}
-
-@media print {
-    #header-image {
-        display: block;
     }
 }

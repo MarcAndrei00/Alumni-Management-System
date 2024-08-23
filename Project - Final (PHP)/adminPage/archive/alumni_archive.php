@@ -426,7 +426,8 @@ if (isset($_GET['ide'])) {
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php if ($result->num_rows > 0) {
+                                <?php
+                                if ($result->num_rows > 0) {
                                     while ($row = $result->fetch_assoc()) {
                                         if (!empty($row["mname"])) {
                                             $fullname = $row["lname"] . ", " . $row["fname"] . ", " . $row["mname"] . ".";
@@ -434,9 +435,9 @@ if (isset($_GET['ide'])) {
                                             $fullname = $row["lname"] . ", " . $row["fname"];
                                         }
                                         $batch = $row["batch_startYear"] . " - " . $row["batch_endYear"];
-                                        $lastLogin = ($row['last_login'] == '0000-00-00 00:00:00') ? '-- / -- / --' : date('F j, Y, g:i A', strtotime($row['last_login']));
-                                        $dateArchived = date('F j, Y, g:i A', strtotime($row['date_archived'])); 
-                                        ?>
+                                        $address = $row['address'];
+                                        $displayAddress = str_replace(',', '', $address);
+                                ?>
                                         <tr>
                                             <td class="inline"><?php echo $row['student_id'] ?></td>
                                             <td class="inline"><?php echo htmlspecialchars($fullname) ?></td>
@@ -444,11 +445,11 @@ if (isset($_GET['ide'])) {
                                             <td class="inline"><?php echo $row['course'] ?></td>
                                             <td class="inline"><?php echo htmlspecialchars($batch) ?></td>
                                             <td class="inline"><?php echo $row['contact'] ?></td>
-                                            <td class="inline"><?php echo $row['address'] ?></td>
+                                            <td class="inline"><?php echo $displayAddress ?></td>
                                             <td class="inline"><?php echo $row['email'] ?></td>
                                             <td class="inline"><?php echo ($row['last_login'] == '0000-00-00 00:00:00') ? '-- / -- / --' : $row['last_login']; ?></td>
                                             <td class="inline" style="color: <?php echo ($row['status'] == 'Verified') ? 'green' : 'red'; ?>"><?php echo $row['status']; ?></td>
-                                            <td class="inline"><?php echo $dateArchived ?></td>
+                                            <td class="inline"><?php echo $row['date_archived'] ?></td>
                                             <?php
                                             echo "
                                                 <td class='inline act'>

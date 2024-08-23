@@ -4,6 +4,7 @@ $conn = new mysqli("localhost", "root", "", "alumni_management_system");
 
 // IMPORTANT CODE ---------------
 use PHPMailer\PHPMailer\PHPMailer;
+
 require '../../vendor/autoload.php';
 
 // SESSION

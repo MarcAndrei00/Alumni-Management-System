@@ -3,6 +3,7 @@ session_start();
 
 // IMPORTANT CODE ---------------
 use PHPMailer\PHPMailer\PHPMailer;
+
 require '../../vendor/autoload.php';
 
 if (isset($_GET['id'])) {
@@ -122,7 +123,7 @@ if (isset($_GET['id'])) {
 
     $tempPass = sprintf("%06d", mt_rand(1, 999999));
     $hashedpassword = password_hash($tempPass, PASSWORD_BCRYPT);
-    
+
     $stmt = $conn->prepare("UPDATE alumni SET password = '$hashedpassword' WHERE student_id = ?");
     $stmt->bind_param("s", $stud_id);
     $stmt->execute();
@@ -143,9 +144,9 @@ if (isset($_GET['id'])) {
     $mail->isHTML(true);
     $mail->Subject = 'Account Update'; // eto ung mga laman ng email na isesend
     $mail->Body    = 'Your account has been registered by alumni administrator.
-                    <br>Your Student Id:<b>'.$stud_id.'</b>.
-                    <br>Your Email:<b>'.$email.'</b>.
-                    <br>Your Temporary password:<b>'. $tempPass.'</b>.
+                    <br>Your Student Id:<b>' . $stud_id . '</b>.
+                    <br>Your Email:<b>' . $email . '</b>.
+                    <br>Your Temporary password:<b>' . $tempPass . '</b>.
                     <br><br>Do not forget to change password once you login.
                     <br>Thank you and have a nice day. 
                     <br><br>This is an automated message please do not reply.';

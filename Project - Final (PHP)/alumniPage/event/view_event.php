@@ -1,6 +1,11 @@
 <?php
+require_once('vendor/autoload.php');
+
 session_start();
 $conn = new mysqli("localhost", "root", "", "alumni_management_system");
+
+$client = new \GuzzleHttp\Client();
+
 
 // SESSION
 if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
@@ -117,6 +122,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     $description = $row['description'];
     $image = $row['image'];
 
+    $address = $row['address'];
+    $displayAddress = str_replace(',', '', $address);
+
     // for alumni choice
     $sql2 = "SELECT * FROM event_choice WHERE event_id=$event_id_id AND alumni_id=$rowpic[alumni_id]";
     $result2 = $conn->query($sql2);
@@ -128,7 +136,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $event_choice = $row2['event_choice'];
         $event_alumni_id = $row2['alumni_id'];
     }
-} else if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+} else if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_GET['event_id'])) {
     // Get the data from form
     $event_id = $_POST['event_id'];
 
@@ -263,13 +271,80 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     }
 }
 
-// Convert start_time and end_time to 12-hour format with AM/PM
-$startTime = date('g:i A', strtotime($row["start_time"]));
-$endTime = date('g:i A', strtotime($row["end_time"]));
-$time = $startTime . " - " . $endTime;
+if (isset($_POST['submit_btn'])) {
+    $name = $_POST['name'];
+    $email = $_POST['email'];
+    $contact_number = $_POST['contact_number'];
+    $donation = $_POST['donation_amount'];
+    $donationInCents = $donation * 100;
 
-// Date and time formatting combined in a single column
-$date = date('F j, Y, g:i A', strtotime($row['date']));
+
+    if ($donationInCents <= 0) {
+        $icon = 'error';
+        $iconHtml = '<i class=\"fas fa-exclamation-circle\"></i>';
+        $title = 'You input a negative value.';
+        $text = 'Please input an appropriate donation.';
+
+        echo "<script>
+                document.addEventListener('DOMContentLoaded', function() {
+                warningError('$title', '$text', '$icon', '$iconHtml');
+                });
+            </script>";
+        sleep(2);
+    } else {
+        // Multiply the payment by 100 to convert it to cents
+        $donationInCents = $donation * 100;
+
+        $donation_qry = mysqli_query($conn, "INSERT INTO donation_table (name, email, contact_number, donation_amount)
+        VALUES('$name','$email','$contact_number','$donation')");
+
+
+
+        // Define the request body with the required description
+        $requestBody = [
+            'data' => [
+                'attributes' => [
+                    'amount' => $donationInCents,
+                    'description' => 'Payment for your donation',  // Add a description here
+                ]
+            ]
+        ];
+
+        // Send the request to the PayMongo API
+        $response = $client->request('POST', 'https://api.paymongo.com/v1/links', [
+            'body' => json_encode($requestBody),  // Convert the request body to JSON
+            'headers' => [
+                'accept' => 'application/json',
+                'authorization' => 'Basic c2tfdGVzdF9QSEUyUTNlQ3luc1lOcWNhYW03ejRFenk6',
+                'content-type' => 'application/json',
+            ],
+        ]);
+
+        // Decode the JSON response
+        $responseData = json_decode($response->getBody(), true);
+
+        // Extract the checkout URL
+        $checkoutUrl = $responseData['data']['attributes']['checkout_url'];
+
+        // Store the URL in the session
+        $_SESSION['checkout_url'] = $checkoutUrl;
+
+        // Redirect to a new page
+        header('Location: redirect.php');
+        $icon = 'success';
+        $iconHtml = '<i class=\"fas fa-exclamation-circle\"></i>';
+        $title = 'Thank you for your donation.';
+        $text = 'Have a great day!';
+
+        echo "<script>
+                document.addEventListener('DOMContentLoaded', function() {
+                warningError('$title', '$text', '$icon', '$iconHtml');
+                });
+            </script>";
+        sleep(2);
+        exit();
+    }
+}
 ?>
 
 <!DOCTYPE html>
@@ -281,15 +356,24 @@ $date = date('F j, Y, g:i A', strtotime($row['date']));
     <title>Event List</title>
     <link rel="shortcut icon" href="../../assets/cvsu.png" type="image/svg+xml">
     <link rel="stylesheet" href="css/view_event.css">
-    <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Playfair+Display:wght@700&family=Dancing+Script:wght@400&family=Cinzel:wght@700&family=Oswald:wght@700&family=Raleway:wght@600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            text-decoration: none;
+            list-style-type: none;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
         .swal2-popup {
             padding-bottom: 30px;
             /* Adjust the padding as needed */
@@ -318,6 +402,27 @@ $date = date('F j, Y, g:i A', strtotime($row['date']));
         .cancel-button-class {
             background-color: #ffc404 !important;
             color: white;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            border: 1px solid #f5c6cb;
+            text-align: center;
+            font-family: Arial, sans-serif;
+        }
+
+        .error-message {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        #real-time-errors {
+            display: none;
+            /* Hidden by default */
         }
     </style>
 </head>
@@ -454,11 +559,11 @@ $date = date('F j, Y, g:i A', strtotime($row['date']));
                                             <div class="date d-flex">
                                                 <div class="me-3" style="width: 100%;">
                                                     <label for="">Date:</label>
-                                                    <input type="text" class="form-control form-label mt-3" value="<?php echo $date; ?>">
+                                                    <input type="date" class="form-control form-label mt-3" value="<?php echo $row['date'] ?>">
                                                 </div>
                                                 <div style="width: 100%;">
                                                     <label for="">Time:</label>
-                                                    <input type="text" class="form-control form-label mt-3" value="<?php echo $startTime . ' To ' . $endTime ?>">
+                                                    <input type="text" class="form-control form-label mt-3" value="<?php echo $row['start_time'] . ' To ' . $row['end_time'] ?>">
                                                 </div>
                                             </div>
                                             <div class="date">
@@ -467,7 +572,7 @@ $date = date('F j, Y, g:i A', strtotime($row['date']));
                                             </div>
                                             <div class="date">
                                                 <label for="">Address:</label>
-                                                <input type="text" class="form-control form-label mt-3" value="<?php echo $row['address'] ?>">
+                                                <input type="text" class="form-control form-label mt-3" value="<?php echo $displayAddress ?>">
                                             </div>
                                         </fieldset>
 
@@ -501,11 +606,48 @@ $date = date('F j, Y, g:i A', strtotime($row['date']));
                                             <div class="submit text-center" style="display: flex; justify-content: space-between; align-items: center;">
                                                 <button type="submit" class="btn btn-success" style="flex: 1; margin-right: 10px;">Submit</button>
                                                 <a class="btn btn-light border border-dark" href='./event.php' style="flex: 1; margin-right: 10px;">Back</a>
-                                                <button type="button" class="btn btn-success" style="flex: 1; background-color: #28a745; border-color: #28a745;">Donate</button>
+                                                <button type="button" class="btn btn-success btnTWO" style="flex: 1; background-color: #28a745; border-color: #28a745;" data-toggle="modal" data-target="#donateModal">Donate</button>
 
                                             </div>
                                         </div>
                                     </form>
+                                    <div class="modal fade" id="donateModal" tabindex="-1" aria-labelledby="donateModalLabel" aria-hidden="true">
+                                        <div class="modal-dialog">
+                                            <div class="modal-content">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title" id="donateModalLabel">Donate</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                    </button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <form method="POST">
+                                                        <div class="form-group">
+                                                            <label for="donorName">Name</label>
+                                                            <input type="text" name="name" class="form-control" id="donorName" placeholder="Enter your name" required>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="donorEmail">Email</label>
+                                                            <input type="email" name="email" class="form-control" id="donorEmail" placeholder="Enter your email" required>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="donorEmail">Contact Number</label>
+                                                            <input type="number" name="contact_number" class="form-control" id="donorNumber" placeholder="Enter your contact number" required>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label for="donationAmount">Donation Amount</label>
+                                                            <input type="number" name="donation_amount" class="form-control" id="donationAmount" onkeyup="donationValue()" placeholder="Enter amount" required>
+                                                            <div class="alert alert-danger text-center error-list" id="real-time-errors"></div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                                                            <button type="submit" name="submit_btn" class="btn btn-success">Donate</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -527,6 +669,11 @@ $date = date('F j, Y, g:i A', strtotime($row['date']));
         }
     </script> -->
     <!-- Script to display preview of selected image -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         function getImagePreview(event) {
             var image = URL.createObjectURL(event.target.files[0]);
@@ -590,6 +737,38 @@ $date = date('F j, Y, g:i A', strtotime($row['date']));
             }).then(() => {
                 window.location.href = redirectUrl; // Redirect to the desired page
             });
+        }
+
+        function donationValue() {
+            var donation = document.getElementById("donationAmount").value;
+            var errorMessages = [];
+            var errorContainer = document.getElementById("real-time-errors");
+
+            // Clear previous error messages
+            errorContainer.innerHTML = "";
+
+            // Validation rules
+            if (donation >= 0) {
+                errorContainer.style.display = 'none';
+                return;
+            } else {
+                errorMessages.push("Please enter a positive donation amount. Negative values are not allowed.");
+            }
+
+            // Display error messages
+            if (errorMessages.length > 0) {
+                errorMessages.forEach(function(error) {
+                    var p = document.createElement("p");
+                    p.innerText = error;
+                    p.className = "error-message";
+                    errorContainer.appendChild(p);
+                });
+                // Ensure the error container is visible
+                errorContainer.style.display = 'block';
+            } else {
+                // Hide the error container if there are no errors
+                errorContainer.style.display = 'none';
+            }
         }
     </script>
 </body>

@@ -91,7 +91,7 @@ if (isset($_GET['query']) && !empty($_GET['query'])) {
     // Modify SQL query to include search filter
     $sql .= "WHERE event_id LIKE '%$search_query%' 
             OR title LIKE '%$search_query%' 
-            OR schedule LIKE '%$search_query%' 
+            OR date LIKE '%$search_query%'
             OR description LIKE '%$search_query%'";
 }
 
@@ -104,7 +104,7 @@ $total_records_query = "SELECT COUNT(*) FROM event";
 if (isset($_GET['query']) && !empty($_GET['query'])) {
     $total_records_query .= " WHERE event_id LIKE '%$search_query%' 
                               OR title LIKE '%$search_query%' 
-                              OR schedule LIKE '%$search_query%' 
+                              OR date LIKE '%$search_query%'
                               OR description LIKE '%$search_query%'";
 }
 $total_records_result = mysqli_query($conn, $total_records_query);
@@ -115,21 +115,16 @@ $total_pages = ceil($total_records / $records_per_page);
 
 
 if (isset($_GET['ide'])) {
-    echo "
-        <script>
-        // Wait for the document to load
-        document.addEventListener('DOMContentLoaded', function() {
-            // Use SweetAlert2 for the alert
-            Swal.fire({
-                title: 'Event Archived Successfully',
-                timer: 2000,
-                showConfirmButton: true, // Show the confirm button
-                confirmButtonColor: '#4CAF50', // Set the button color to green
-                confirmButtonText: 'OK' // Change the button text if needed
+    $icon = 'success';
+    $iconHtml = '<i class="fas fa-check-circle"></i>';
+    $title = 'Event archived successfully';
+
+    echo "<script>
+            document.addEventListener('DOMContentLoaded', function() {
+                noTextMessage('$title', '$icon', '$iconHtml');
             });
-        });
-    </script>
-    ";
+        </script>";
+    sleep(2);
 }
 ?>
 
@@ -151,7 +146,6 @@ if (isset($_GET['ide'])) {
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 
     <!-- FOR PAGINATION -->
     <style>
@@ -365,13 +359,13 @@ if (isset($_GET['ide'])) {
                             <thead>
 
                                 <tr>
-                                    <th scope="col" class="inline">ID</th>
                                     <th scope="col" class="inline">TITLE</th>
                                     <th scope="col" class="inline">DATE</th>
                                     <th scope="col" class="inline">TIME</th>
                                     <th scope="col" class="inline">VENUE</th>
                                     <th scope="col" class="inline">ADDRESS</th>
                                     <th scope="col" class="inline">DESCRIPTION</th>
+                                    <th scope="col" class="inline">EVENT FOR</th>
                                     <th scope="col" class="inline">GOING</th>
                                     <th scope="col" class="inline">INTERESTED</th>
                                     <th scope="col" class="inline">NOT INTERESTED</th>
@@ -383,28 +377,23 @@ if (isset($_GET['ide'])) {
                                 <?php
                                 if ($result->num_rows > 0) {
                                     while ($row = $result->fetch_assoc()) {
-                                        // Convert start_time and end_time to 12-hour format with AM/PM
-                                        $startTime = date('g:i A', strtotime($row["start_time"]));
-                                        $endTime = date('g:i A', strtotime($row["end_time"]));
-                                        $time = $startTime . " - " . $endTime;
-
-                                        // Date and time formatting combined in a single column
-                                        $date = date('F j, Y, g:i A', strtotime($row['date_created']));
-                                        $dateCreated = date('F j, Y, g:i A', strtotime($row['date_created']));
+                                        $time = $row["start_time"] . " - " . $row["end_time"];
+                                        $address = $row['address'];
+                                        $displayAddress = str_replace(',', '', $address);
 
                                 ?>
                                         <tr>
                                             <td class="inline"><?php echo $row['title'] ?></td>
-                                            <td class="inline"><?php echo $date ?></td>
+                                            <td class="inline"><?php echo $row['date'] ?></td>
                                             <td class="inline"><?php echo htmlspecialchars($time) ?></td>
                                             <td class="inline"><?php echo $row['venue'] ?></td>
-                                            <td class="inline"><?php echo $row['address'] ?></td>
+                                            <td class="inline"><?php $displayAddress ?></td>
                                             <td class="inline"><?php echo $row['description'] ?></td>
                                             <td class="inline"><?php echo $row['event_for'] ?></td>
                                             <td class="inline"><?php echo $row['going'] ?></td>
                                             <td class="inline"><?php echo $row['interested'] ?></td>
                                             <td class="inline"><?php echo $row['not_interested'] ?></td>
-                                            <td class="inline"><?php echo $dateCreated?></td>
+                                            <td class="inline"><?php echo $row['date_created'] ?></td>
                                             <?php
                                             echo "
                                                 <td class='inline act'>
@@ -504,6 +493,24 @@ if (isset($_GET['ide'])) {
                     });
                 });
             });
+
+            // FOR MESSAGEBOX WITHOUT TEXT ONLY
+            function noTextRedirect(redirectUrl, title, icon, iconHtml) {
+                Swal.fire({
+                    icon: icon,
+                    iconHtml: iconHtml, // Custom icon using Font Awesome
+                    title: title,
+                    customClass: {
+                        popup: 'swal-custom'
+                    },
+                    showConfirmButton: true,
+                    confirmButtonColor: '#4CAF50',
+                    confirmButtonText: 'OK',
+                    timer: 5000
+                }).then(() => {
+                    window.location.href = redirectUrl; // Redirect to the desired page
+                });
+            }
         </script>
 </body>
 

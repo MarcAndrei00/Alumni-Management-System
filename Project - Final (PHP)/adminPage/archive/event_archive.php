@@ -268,7 +268,7 @@ if (isset($_GET['ide'])) {
 
         <div class="side-content">
             <div class="profile">
-                <i class="bi bi-person-circle"></i>
+            <i class="bi bi-person-circle"></i>
                 <h4><?php echo $user['fname']; ?></h4>
                 <small style="color: white;"><?php echo $user['email']; ?></small>
                 <!-- <h4>ADMIN</h4>
@@ -412,22 +412,14 @@ if (isset($_GET['ide'])) {
                                 <?php
                                 if ($result->num_rows > 0) {
                                     while ($row = $result->fetch_assoc()) {
-                                        // Convert start_time and end_time to 12-hour format with AM/PM
-                                        $startTime = date('g:i A', strtotime($row["start_time"]));
-                                        $endTime = date('g:i A', strtotime($row["end_time"]));
-                                        $time = $startTime . " - " . $endTime;
+                                        $time = $row["start_time"] . " - " . $row["end_time"];
                                         $address = $row['address'];
                                         $displayAddress = str_replace(',', '', $address);
-
-                                        // Date and time formatting combined in a single column
-                                        $date = date('F j, Y, g:i A', strtotime($row['date_created']));
-                                        $dateArchived = date('F j, Y, g:i A', strtotime($row['date_created']));
-
 
                                 ?>
                                         <tr>
                                             <td class="inline"><?php echo $row['title'] ?></td>
-                                            <td class="inline"><?php echo $date ?></td>
+                                            <td class="inline"><?php echo $row['date'] ?></td>
                                             <td class="inline"><?php echo htmlspecialchars($time) ?></td>
                                             <td class="inline"><?php echo $row['venue'] ?></td>
                                             <td class="inline"><?php echo $displayAddress ?></td>
@@ -436,7 +428,7 @@ if (isset($_GET['ide'])) {
                                             <td class="inline"><?php echo $row['going'] ?></td>
                                             <td class="inline"><?php echo $row['interested'] ?></td>
                                             <td class="inline"><?php echo $row['not_interested'] ?></td>
-                                            <td class="inline"><?php echo $dateArchived ?></td>
+                                            <td class="inline"><?php echo $row['date_archived'] ?></td>
                                             <?php
                                             echo "
                                                 <td class='inline act'>

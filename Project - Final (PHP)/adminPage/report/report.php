@@ -83,11 +83,6 @@ $result_alumni = $conn->query($sql_alumni);
 $row_alumni = $result_alumni->fetch_assoc();
 $count_alumni = $row_alumni['alumni_count'];
 
-//query for alumni count
-$sql_coordinator = "SELECT COUNT(coor_id) AS coordinators_count FROM coordinator";
-$result_coordinator = $conn->query($sql_coordinator);
-$row_coordinator = $result_coordinator->fetch_assoc();
-$coordinator_count = $row_coordinator['coordinators_count'];
 
 //query for events count
 $sql_event = "SELECT COUNT(event_id) AS events_count FROM event";
@@ -140,6 +135,68 @@ $data_alumniCount = array_fill(0, 12, 0);
 if ($res_alumniCount->num_rows > 0) {
     while ($row_alumniCount = $res_alumniCount->fetch_assoc()) {
         $data_alumniCount[$row_alumniCount['month'] - 1] = $row_alumniCount['count'];
+    }
+}
+
+
+
+// ALUMNI FOR EVERY COURSES
+$alumni_list = "SELECT * FROM alumni";
+$result = $conn->query($alumni_list);
+
+// Initialize course counts
+$course_counts = [
+    'BAJ' => 0,
+    'BECEd' => 0,
+    'BEEd' => 0,
+    'BSBM' => 0,
+    'BSOA' => 0,
+    'BSEntrep' => 0,
+    'BSHM' => 0,
+    'BSIT' => 0,
+    'BSCS' => 0,
+    'BSc(Psych)' => 0
+];
+
+while ($row = $result->fetch_assoc()) {
+    $courseCode = '';
+
+    switch ($row['course']) {
+        case 'Bachelor of Arts in Journalism':
+            $courseCode = 'BAJ';
+            break;
+        case 'Bachelor of Secondary Education':
+            $courseCode = 'BECEd';
+            break;
+        case 'Bachelor of Elementary Education':
+            $courseCode = 'BEEd';
+            break;
+        case 'Bachelor of Science in Business Management':
+            $courseCode = 'BSBM';
+            break;
+        case 'Bachelor of Science in Office Administration':
+            $courseCode = 'BSOA';
+            break;
+        case 'Bachelor of Science in Entrepreneurship':
+            $courseCode = 'BSEntrep';
+            break;
+        case 'Bachelor of Science in Hospitality Management':
+            $courseCode = 'BSHM';
+            break;
+        case 'Bachelor of Science in Information Technology':
+            $courseCode = 'BSIT';
+            break;
+        case 'Bachelor of Science in Computer Science':
+            $courseCode = 'BSCS';
+            break;
+        case 'Bachelor of Science in Psychology':
+            $courseCode = 'BSc(Psych)';
+            break;
+    }
+
+    // Increment the course count
+    if (!empty($courseCode)) {
+        $course_counts[$courseCode]++;
     }
 }
 ?>
@@ -269,9 +326,6 @@ if ($res_alumniCount->num_rows > 0) {
             <div class="container mt-4 p-3 shadow bg-white rounded">
                 <form id="report-form">
                     <div class="summary-boxes">
-                        <div id="hidden-content" style="display:none;">
-                            <img src="../../assets/head.jpg" id="header-image" style="width:100%; height:auto;">
-                        </div>
                         <div class="summary-box" id="alumni">
                             <h2>Total Alumni Registered</h2>
                             <p><?php echo $count_alumni; ?></p>
@@ -338,10 +392,21 @@ if ($res_alumniCount->num_rows > 0) {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha512-JPcRR8yFa8mmCsfrw4TNte1ZvF1e3+1SdGMslZvmrzDYxS69J7J49vkFL8u6u8PlPJK+H3voElBtUCzaXj+6ig==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
         const data = {
-            labels: ['BSIT', 'BSCS', 'BSOA', 'BAJ', 'BECED', 'BEED', 'BSBM', 'BSENTREP', 'BSHM', 'BSPsych'], // Updated labels
+            labels: ['BSIT', 'BSCS', 'BSOA', 'BAJ', 'BECEd', 'BEEd', 'BSBM', 'BSEntrep', 'BSHM', 'BSPsych'],
             datasets: [{
                 label: 'Alumni Registered',
-                data: [18, 12, 16, 19, 12, 10, 15, 11, 13, 17], // Ensure data corresponds to each course
+                data: [
+                    <?= $course_counts['BSIT']; ?>,
+                    <?= $course_counts['BSCS']; ?>,
+                    <?= $course_counts['BSOA']; ?>,
+                    <?= $course_counts['BAJ']; ?>,
+                    <?= $course_counts['BECEd']; ?>,
+                    <?= $course_counts['BEEd']; ?>,
+                    <?= $course_counts['BSBM']; ?>,
+                    <?= $course_counts['BSEntrep']; ?>,
+                    <?= $course_counts['BSHM']; ?>,
+                    <?= $course_counts['BSc(Psych)']; ?>
+                ],
                 backgroundColor: [
                     'rgba(255, 26, 104, 0.5)',
                     'rgba(54, 162, 235, 0.5)',
@@ -370,13 +435,10 @@ if ($res_alumniCount->num_rows > 0) {
             }]
         };
 
-        // Use the same course names for datalabels
-        const courseNames = ['BSIT', 'BSCS', 'BSOA', 'BAJ', 'BECED', 'BEED', 'BSBM', 'BSENTREP', 'BSHM', 'BSPsych'];
-
         // config 
         const config = {
             type: 'pie',
-            data,
+            data: data,
             options: {
                 plugins: {
                     tooltip: {
@@ -392,8 +454,10 @@ if ($res_alumniCount->num_rows > 0) {
                     }
                 }
             },
-            plugins: [ChartDataLabels],
+            plugins: [ChartDataLabels]
         };
+
+
         // Common Colors for Consistency
         const colors = {
             background: [
@@ -549,46 +613,30 @@ if ($res_alumniCount->num_rows > 0) {
 
         document.getElementById('download-pdf').addEventListener('click', () => {
             const element = document.querySelector('form');
-            const hiddenContent = document.getElementById('hidden-content').innerHTML;
-
-            
-            
-
-            // Create a temporary container to hold both the form and hidden content
-            const tempContainer = document.createElement('div');
-            tempContainer.innerHTML = hiddenContent + element.innerHTML;
 
             // Get the current date
             const currentDate = new Date();
             const formattedDate = currentDate.toISOString().slice(0, 10);
 
             const opt = {
-                margin: 0.50,
+                margin: 1,
                 filename: `alumni-report-${formattedDate}.pdf`,
                 image: {
                     type: 'jpeg',
                     quality: 0.98
                 },
                 html2canvas: {
-                    scale: 1
+                    scale: 2
                 },
                 jsPDF: {
                     unit: 'in',
                     format: 'legal',
-                    orientation: 'portrait'
+                    orientation: 'landscape'
                 }
             };
 
-            // Generate the PDF from the temporary container
-            html2pdf().from(tempContainer).set(opt).save();
+            html2pdf().from(element).set(opt).save();
         });
-
-
-        html2pdf().from(element).set(opt).save().then(() => {
-        // Remove the temporary image after generating the PDF
-        tempImg.remove();
-        });
-
 
         document.getElementById('refresh-page').addEventListener('click', () => {
             location.reload();

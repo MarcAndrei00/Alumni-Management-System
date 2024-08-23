@@ -115,6 +115,23 @@ if ($result->num_rows > 0) {
     <link rel="stylesheet" href="	https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
+    <style>
+        .btn {
+            width: 210px;
+            /* Adjust width as needed */
+            height: 40px;
+            /* Adjust height as needed */
+            font-size: 16px;
+            /* Adjust font size as needed */
+            text-align: center;
+            border: none;
+            border-radius: 5px;
+            /* Optional: for rounded corners */
+            cursor: pointer;
+            margin: 5px;
+            /* Optional: to add space between buttons */
+        }
+    </style>
 </head>
 
 <body>
@@ -211,13 +228,14 @@ if ($result->num_rows > 0) {
             <div class="page-header" style="color: #74767d;">
                 <h1><strong>Profile</strong></h1>
             </div>
+
             <div class="page-content">
                 <div class="container-fluid" id="container-main">
                     <div class="row">
                         <div class="container-fluid">
                             <div class="container-fluid" id="content-container">
                                 <div class="information">
-                                    <form>
+                                    <form enctype="multipart/form-data">
                                         <fieldset disabled>
                                             <div class="mb-3">
                                                 <label for="disabledTextInput" class="form-label">COORDINATOR FULL NAME</label>
@@ -239,9 +257,16 @@ if ($result->num_rows > 0) {
                             <div class="container-fluid">
                                 <div class="buttons">
                                     <?php echo "
-                                    <a href='./update.php?id=$row[coor_id]'><button type='button' class='btn' id='button1'>UPDATE INFO</button></a>
-                                    <a href='./change_pass.php?id=$row[coor_id]'><button type='button' class='btn' id='button2'>CHANGE PASSWORD</button></a>
-                                    "; ?>
+                                            <a href='./update.php?id=$row[coor_id]'>
+                                                <button type='button' class='btn' id='button1'>UPDATE INFO</button>
+                                            </a>
+                                            <a href='./update_email.php?id=$row[coor_id]'>
+                                                <button type='button' class='btn' id='button1'>CHANGE EMAIL</button>
+                                            </a>
+                                            <a href='./change_pass.php?id=$row[coor_id]'>
+                                                <button type='button' class='btn' id='button2'>CHANGE PASSWORD</button>
+                                            </a>
+                                            "; ?>
                                 </div>
                             </div>
                         </div>
@@ -263,6 +288,19 @@ if ($result->num_rows > 0) {
                 toggleButton.textContent = 'Show';
             }
         });
+    </script>
+    <script>
+        function togglePasswordVisibility() {
+            var passwordField = document.getElementById('password');
+            var toggleIcon = document.getElementById('togglePassword');
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                toggleIcon.src = 'eye-open.png';
+            } else {
+                passwordField.type = 'password';
+                toggleIcon.src = 'eye-close.png';
+            }
+        }
     </script>
 </body>
 

@@ -99,62 +99,44 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 
         $check_verifcode_qry = mysqli_query($conn, "SELECT verification_code FROM recovery_code WHERE verification_code = '$verif_code'");
 
-        if ($user_result->num_rows > 0) {
-          $sql = "SELECT * FROM alumni WHERE alumni_id=$account";
-          $result = $conn->query($sql);
-          $row = $result->fetch_assoc();
+        if (mysqli_num_rows($check_verifcode_qry) > 0) {
+          $stmt = $conn->prepare("UPDATE alumni SET status = 'Verified' WHERE alumni_id = ?");
+          $stmt->bind_param("s", $account);
+          $stmt->execute();
 
-          if ($row['status'] == "Verified") {
-            // User is a verified alumni 
-            header('Location: ../alumniPage/dashboard_user.php');
-            exit();
-          } else {
-            if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['verif_code']) && isset($_POST['submit_code'])) {
-              $verif_code = $_POST['verif_code'];
+          $delete_qry = mysqli_query($conn, "DELETE FROM recovery_code WHERE email='$account_email'");
 
-              $check_verifcode_qry = mysqli_query($conn, "SELECT verification_code FROM recovery_code WHERE verification_code = '$verif_code'");
+          // Update the last_login time
+          $current_time = date("Y-m-d H:i:s"); // Format: 2024-08-15 14:35:00
+          $sql = "UPDATE alumni SET last_login = '$current_time' WHERE alumni_id = $account";
+          $conn->query($sql);
 
-              if (mysqli_num_rows($check_verifcode_qry) > 0) {
-                $stmt = $conn->prepare("UPDATE alumni SET status = 'Verified' WHERE alumni_id = ?");
-                $stmt->bind_param("s", $account);
-                $stmt->execute();
+          // SUCCESS VERIFICATION MATCH
+          $icon = 'success';
+          $iconHtml = '<i class="fas fa-check-circle"></i>';
+          $title = 'Verification code match!';
+          $text = 'You will be redirected shortly to the Dashboard.';
+          $redirectUrl = '../alumniPage/dashboard_user.php';
 
-                $delete_qry = mysqli_query($conn, "DELETE FROM recovery_code WHERE email='$account_email'");
+          echo "<script>
+                  document.addEventListener('DOMContentLoaded', function() {
+                    alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
+                  });
+                </script>";
+          sleep(2);
+        } else {
+          // SUCCESS RESEND
+          $icon = 'error';
+          $iconHtml = '<i class=\"fas fa-exclamation-circle\"></i>';
+          $title = 'Verification code does not match!';
+          $text = 'Please try again.';
 
-                // Update the last_login time
-                $current_time = date("Y-m-d H:i:s"); // Format: 2024-08-15 14:35:00
-                $sql = "UPDATE alumni SET last_login = '$current_time' WHERE alumni_id = $account";
-                $conn->query($sql);
-
-                // SUCCESS VERIFICATION MATCH
-                $icon = 'success';
-                $iconHtml = '<i class="fas fa-check-circle"></i>';
-                $title = 'Verification code match!';
-                $text = 'You will be redirected shortly to the Dashboard.';
-                $redirectUrl = '../alumniPage/dashboard_user.php';
-
-                echo "<script>
-                        document.addEventListener('DOMContentLoaded', function() {
-                          alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
-                        });
-                      </script>";
-                sleep(2);
-              } else {
-                // SUCCESS RESEND
-                $icon = 'error';
-                $iconHtml = '<i class=\"fas fa-exclamation-circle\"></i>';
-                $title = 'Verification code does not match!';
-                $text = 'Please try again.';
-
-                echo "<script>
-                        document.addEventListener('DOMContentLoaded', function() {
-                          warningError('$title', '$text', '$icon', '$iconHtml');
-                        });
-                      </script>";
-                sleep(2);
-              }
-            }
-          }
+          echo "<script>
+                  document.addEventListener('DOMContentLoaded', function() {
+                    warningError('$title', '$text', '$icon', '$iconHtml');
+                  });
+                </script>";
+          sleep(2);
         }
       }
       // BACK BUTTON
@@ -223,42 +205,6 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
   }
   // FOR CHANGE PASSWORD
 } else if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['verif_code']) && isset($_POST['submit_code'])) {
-  $verif_code = $_POST['verif_code'];
-
-  $check_verifcode_qry = mysqli_query($conn, "SELECT verification_code FROM recovery_code WHERE verification_code = '$verif_code'");
-
-  if (mysqli_num_rows($check_verifcode_qry) > 0) {
-    $delete_qry = mysqli_query($conn, "DELETE FROM recovery_code WHERE verification_code = '$verif_code'");
-
-    // SUCCESS CODE MATCH
-    $icon = 'success';
-    $iconHtml = '<i class="fas fa-check-circle"></i>';
-    $title = 'Verification code match!';
-    $text = 'You will be redirected shortly to change your password';
-    $redirectUrl = './newpassword.php';
-
-    echo "<script>
-            document.addEventListener('DOMContentLoaded', function() {
-              alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
-            });
-          </script>";
-    sleep(2);
-  } else {
-
-    // ERROR VERIF NOT MATCH
-    $icon = 'error';
-    $iconHtml = '<i class=\"fas fa-exclamation-circle\"></i>';
-    $title = 'Verification code does not match!';
-    $text = 'Please try again.';
-
-    echo "<script>
-            document.addEventListener('DOMContentLoaded', function() {
-              warningError('$title', '$text', '$icon', '$iconHtml');
-            });
-          </script>";
-    sleep(2);
-  }
-}else if($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['verif_code']) && isset($_POST['submit_code']) && $roww['status'] == "Inactive") {
   $verif_code = $_POST['verif_code'];
 
   $check_verifcode_qry = mysqli_query($conn, "SELECT verification_code FROM recovery_code WHERE verification_code = '$verif_code'");
