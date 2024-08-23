@@ -1,0 +1,690 @@
+@import url('https://fonts.googleapis.com/css2?family=Merriweather+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+    --main-color: #2a9134;
+    --color-dark: #34425A;
+    --text-grey: #B0B0B0;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    text-decoration: none;
+    list-style-type: none;
+    box-sizing: border-box;
+    font-family: 'Merriweather', sans-serif;
+}
+
+#menu-toggle {
+    display: none;
+}
+
+.sidebar {
+    position: fixed;
+    height: 100%;
+    width: 165px;
+    left: 0;
+    bottom: 0;
+    top: 0;
+    z-index: 100;
+    background: #2a9134;
+    box-shadow: 0px 5px 5px 5px rgb(0 0 0 0.2);
+    transition: left 300ms;
+}
+
+.side-header span {
+    font-weight: bold;
+    color: white;
+}
+
+.header-content label {
+    cursor: pointer;
+}
+
+
+
+.side-header {
+    box-shadow: 0px 5px 5px -5px rgb(0 0 0 /10%);
+    background: var(--main-color);
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.side-header img {
+    width: 40px;
+}
+
+.side-header h3,
+side-head span {
+    color: #fff;
+    font-weight: 400;
+}
+
+.side-content {
+    height: calc(100vh - 60px);
+    overflow: auto;
+}
+
+/* width */
+.side-content::-webkit-scrollbar {
+    width: 5px;
+}
+
+/* Track */
+.side-content::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px grey;
+    border-radius: 10px;
+}
+
+/* Handle */
+.side-content::-webkit-scrollbar-thumb {
+    background: #b0b0b0;
+    border-radius: 10px;
+}
+
+/* Handle on hover */
+
+
+.sidebar ul li a:hover {
+    color: #2a9134;
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.profile {
+    text-align: center;
+    padding: 2rem 0rem;
+}
+
+.bg-img {
+    background-repeat: no-repeat;
+    background-size: cover;
+    border-radius: 50%;
+    background-size: cover;
+}
+
+.profile-img {
+    height: 80px;
+    width: 80px;
+    display: inline-block;
+    margin: 0 auto .5rem auto;
+    border: 3px solid #fff;
+}
+
+.profile h4 {
+    color: #fff;
+    font-weight: 500;
+}
+
+.profile small {
+    color: #899DC1;
+    font-weight: 600;
+}
+
+.sidebar {
+    overflow-y: auto;
+}
+
+.side-menu ul {
+    text-align: center;
+    padding: 0px;
+}
+
+.side-menu ul li small {
+    color: white;
+    ;
+}
+
+.side-menu a {
+    display: block;
+    padding: 1.2rem 0rem;
+    text-decoration: none !important;
+
+}
+
+.side-menu a.active {
+    background: #32af3f;
+}
+
+.side-menu a.active span,
+.side-menu a.active small {
+    color: #fff;
+}
+
+.card-body i.las.la-calendar-alt {
+    font-size: 4rem;
+}
+
+.side-menu a span {
+    display: block;
+    text-align: center;
+    font-size: 1.7rem;
+}
+
+.side-menu a span,
+.side-menu a small {
+    color: #899DC1;
+}
+
+#menu-toggle:checked~.sidebar {
+    width: 60px;
+}
+
+#menu-toggle:checked~.sidebar .side-header span {
+    display: none;
+}
+
+#menu-toggle:checked~.main-content {
+    margin-left: 60px;
+    width: calc(100% - 60px);
+}
+
+#menu-toggle:checked~.main-content header {
+    left: 60px;
+}
+
+#menu-toggle:checked~.sidebar .profile,
+#menu-toggle:checked~.sidebar .side-menu a small {
+    display: none;
+}
+
+#menu-toggle:checked~.sidebar .side-menu a span {
+    font-size: 1.3rem;
+}
+
+
+.main-content {
+    margin-left: 165px;
+    width: calc(100% - 165px);
+    transition: margin-left 300ms;
+}
+
+header {
+    position: fixed;
+    right: 0;
+    top: 0;
+    left: 165px;
+    z-index: 100;
+    height: 60px;
+    box-shadow: 0px 5px 5px -5px rgb(0 0 0 /10%);
+    background: #2a9134;
+    transition: left 300ms;
+}
+
+.header-content .header-title {
+    color: #2a9134;
+    font-size: x-large;
+    font-weight: 800;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+}
+
+.header-content,
+.header-menu {
+    display: flex;
+    align-items: center;
+}
+
+.header-content {
+    justify-content: space-between;
+    padding: 0rem 1rem;
+}
+
+
+.header-menu {
+    justify-content: flex-end;
+    padding-top: .5rem;
+}
+
+.user {
+    display: flex;
+    align-items: center;
+}
+
+
+main {
+    margin-top: 60px;
+}
+
+.page-header {
+    padding: 1.3rem 1rem;
+    /* background: #E9edf2; */
+    border-bottom: 1px solid #dee2e8;
+}
+
+.page-header h1,
+.page-header small {
+    color: #74767d;
+    margin-left: 20px;
+}
+
+.page-content {
+    padding: 1.3rem 1rem;
+}
+
+.quick-links h5 {
+    font-weight: bold;
+    color: #343a40;
+    display: flex;
+    align-items: center;
+}
+
+.quick-links h5 i {
+    margin-right: 0.5rem;
+}
+
+.quick-link-item {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.quick-link-item i {
+    color: #28a745;
+    margin-bottom: 0.5rem;
+}
+
+.quick-link-item a {
+    color: #28a745;
+    text-decoration: none;
+}
+
+.quick-link-item a:hover {
+    text-decoration: underline;
+}
+
+.quick-links {
+    position: absolute;
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 1rem;
+    margin-top: 1rem;
+    float: left;
+    width: 27.3%;
+    margin-right: 20px;
+}
+
+.notice-box {
+    background-color: #d4edda;
+    border-left: 4px solid #28a745;
+    padding: 1rem;
+    margin-top: 1rem;
+    border-radius: 5px;
+    margin-left: 50px;
+}
+
+@media only screen and (max-width: 768px) {
+    .notice-box {
+        width: 100%;
+    }
+}
+
+@media only screen and (max-width: 768px) {
+    .notice-box {
+        width: 100%;
+    }
+}
+
+/*media queries  */
+
+
+@media only screen and (max-width: 1200px) {
+    .analytics {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media only screen and (max-width: 768px) {
+    .analytics {
+        grid-template-columns: 100%;
+    }
+
+    .sidebar {
+        left: -165px;
+        z-index: 90;
+    }
+
+    header {
+        left: 0;
+        width: 100%;
+    }
+
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+    }
+
+    #menu-toggle:checked~.sidebar {
+        left: 0;
+    }
+
+    #menu-toggle:checked~.sidebar {
+        width: 165px;
+    }
+
+    #menu-toggle:checked~.sidebar .side-header span {
+        display: inline-block;
+    }
+
+    #menu-toggle:checked~.sidebar .profile,
+    #menu-toggle:checked~.sidebar .side-menu a small {
+        display: block;
+    }
+
+    #menu-toggle:checked~.sidebar .side-menu a span {
+        font-size: 1.7rem;
+    }
+
+    #menu-toggle:checked~.main-content header {
+        left: 0px;
+    }
+
+    table {
+        width: 900px;
+    }
+}
+
+.side-content .profile i {
+    color: #fff;
+    font-size: 80px;
+    font-weight: lighter;
+}
+
+.notice-title {
+    font-weight: bold;
+    color: #155724;
+}
+
+.notice-text {
+    color: #155724;
+}
+
+.news-updates {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border: 1px solid #ddd;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+
+.side-content .profile i {
+    color: #fff;
+    font-size: 80px;
+    font-weight: lighter;
+}
+
+.user a span {
+    font-size: 30px;
+    border-left: 1px solid #fff;
+    padding-left: 10px;
+    color: #fff;
+}
+
+
+
+
+
+.calendar-container {
+    flex: 1;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    margin-left: 70px;
+    width: 470px;
+    margin-bottom: 50px;
+}
+
+
+/* Calendar Styles */
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    background-color: #1e90ff;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.calendar-header button {
+    background-color: transparent;
+    border: none;
+    color: white;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.calendar-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-weight: bold;
+    padding: 10px 0;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+}
+
+.calendar-dates {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 5px;
+    margin-top: 10px;
+}
+
+.calendar-dates div {
+    text-align: center;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: #f9f9f9;
+}
+
+.calendar-dates div:hover {
+    background-color: #ddd;
+}
+
+.calendar-dates .today {
+    background-color: #1e90ff;
+    color: white;
+}
+
+.announcement1 {
+    background-color: rgb(219, 218, 218);
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-left: 600px;
+    width: 670px;
+    margin-top: -710px;
+    height: 630px;
+}
+
+/* Announcement Styles */
+.announcement-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.announcement-header h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #333;
+}
+
+.announcement-list {
+    max-height: 550px;
+    overflow-y: auto;
+    padding-right: 10px;
+    /* Add some padding to avoid cutting off the scrollbar */
+}
+
+.announcement-item {
+    background-color: #f9f9f9;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    /* Increased margin for better separation */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.announcement-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.announcement-item h3 {
+    margin: 0;
+    font-size: 1.23rem;
+    font-weight: bold;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 65%;
+}
+
+.announcement-item p {
+    margin: 10px 0 0;
+    font-size: 1rem;
+    color: #555;
+    line-height: 1.5;
+}
+
+.announcement-date {
+    display: block;
+    font-size: 0.800rem;
+    color: #888;
+    margin-left: 330px;
+}
+
+/* Adjusted announcement actions for future use */
+.announcement-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+
+
+
+.popup-content {
+    background-color: #fff;
+    margin-left: 50px;
+    margin-top: 20px;
+    padding: 20px;
+    border: 5px solid #3a3a3a;
+    width: 85%;
+    max-width: 800px;
+    /* Maximum width */
+    height: 70%;
+    /* Adjusts to content */
+    position: relative;
+    transition: transform 0.5s ease-in-out;
+
+}
+
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute;
+    right: 10px;
+    top: 10px;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.update-button {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.update-button:hover {
+    background-color: #45a049;
+}
+
+
+.inline {
+    font-size: 15px;
+    white-space: nowrap;
+    /* Prevent text from wrapping */
+    overflow: hidden;
+    /* Hide overflowing content */
+    text-overflow: ellipsis;
+    /* Display ellipsis for truncated text */
+    max-width: 700px;
+    /* Set a max-width to control truncation */
+
+}
+
+
+/* Fade-in animation */
+@keyframes fadeIn {
+    from {
+        opacity: 10;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+/* Slide-in animation */
+@keyframes slideIn {
+    from {
+        transform: translateY(-50px);
+    }
+
+    to {
+        transform: translateY(0);
+    }
+}
+
+/* Fade-out and slide-out animation */
+.popup.fade-out {
+    animation: fadeOut 0.8s ease-in-out;
+}
+
+.popup-content.slide-out {
+    animation: slideOut 0.8s ease-in-out;
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 10;
+    }
+
+    to {
+        opacity: 0;
+    }
+}
+
+@keyframes slideOut {
+    from {
+        transform: translateY(0);
+    }
+
+    to {
+        transform: translateY(-50px);
+    }
+}
