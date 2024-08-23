@@ -271,9 +271,9 @@ main {
 
 .summary-boxes {
     display: flex;
-    justify-content: space-between;
-    gap: 20px;
-    flex-wrap: wrap;
+    justify-content: center; /* Center the boxes horizontally */
+    gap: 20px; /* Space between the boxes */
+    flex-wrap: nowrap; /* Prevent the boxes from wrapping to a new line */
 }
 
 .summary-box {
@@ -282,14 +282,14 @@ main {
     padding: 20px;
     text-align: center;
     border-radius: 10px;
-    flex: 1 1 calc(33.33% - 20px); /* Flex to fit 3 boxes per row */
-    max-width: calc(33.33% - 20px);
-    min-width: 600px;
-    height: 200px;
+    flex: 1 1 45%; /* Adjust the width of the boxes */
+    max-width: 45%; /* Ensure the boxes don’t grow too large */
+    min-width: 300px;
+    height: 150px; /* Adjust height to match the style */
     display: flex;
     flex-direction: column;
     justify-content: center;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add box shadow here */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .summary-box h2 {
@@ -302,6 +302,7 @@ main {
     font-size: 2rem;
     font-weight: bold;
 }
+
 
 @media (max-width: 768px) {
     .main-content {

@@ -108,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (array_diff($allCourses, $eventFor) === []) {
         $eventForString = "ALL";
     } else {
-        $eventForString = implode(', ', $eventFor);
+        $eventForString = implode(',', $eventFor);
     }
 
     $house_no = ucwords($_POST['house_no']);
@@ -371,15 +371,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 <div class="row g-3">
                                     <div class="col">
                                         <label for="house_no" class="form-label">House No. | Street | Subdivision</label>
-                                        <input type="text" name="house_no" class="form-control" id="house_no" required>
+                                        <input type="text" name="house_no" class="form-control" id="house_no" required >
                                     </div>
                                     <div class="col">
                                         <label for="brgy" class="form-label">Barangay</label>
-                                        <input type="text" name="brgy" class="form-control" id="brgy" required>
+                                        <input type="text" name="brgy" class="form-control" id="brgy" required >
                                     </div>
                                     <div class="col">
                                         <label for="city" class="form-label">City</label>
-                                        <input type="text" name="city" class="form-control" id="city" required>
+                                        <input type="text" name="city" class="form-control" id="city" required >
                                     </div>
                                     <div class="col">
                                         <label for="province" class="form-label">Province</label>
@@ -393,20 +393,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     <button class="form-control" type="button" id="eventForDropdown" onclick="toggleDropdown()" style="height: 100%; width: 430px;">Select Courses</button>
                                     <div id="eventForMenu" class="dropdown-menu" style="display:none; position: absolute; background-color: white; border: 1px solid #ccc; padding: 10px;">
                                         <label><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)" checked> All Courses</label><br>
-                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BAJ" checked> Bachelor of Arts in Journalism</label><br>
-                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BECEd" checked> Bachelor of Secondary Education</label><br>
-                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BEEd" checked> Bachelor of Elementary Education</label><br>
-                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSBM" checked> Bachelor of Science in Business Management</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BAJ" checked> Batchelor of Arts in Journalism</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BECEd" checked> Bachelor Of Secondary Education</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BEEd" checked> Bachelor Of Elementary Education</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSBM" checked> Bachelor Of Science In Business Management</label><br>
                                         <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSOA" checked> Bachelor of Science in Office Administration</label><br>
-                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSEntrep" checked> Bachelor of Science in Entrepreneurship</label><br>
-                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSHM" checked> Bachelor of Science in Hospitality Management</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSEntrep" checked> Bachelor Of Science In Entrepreneurship</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSHM" checked> Bachelor Of Science In Hospitality Management</label><br>
                                         <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSIT" checked> Bachelor of Science in Information Technology</label><br>
                                         <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSCS" checked> Bachelor of Science in Computer Science</label><br>
-                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSc(Psych)" checked> Bachelor of Science in Psychology</label>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSc(Psych)" checked> Bachelor Of Science In Psychology</label>
                                     </div>
                                 </div>
-                                <!-- Hidden required checkbox -->
-                                <input type="checkbox" id="hiddenCheckbox" style="display:none;" required>
+
                             </div>
                             <div class="row">
                                 <div class="container-fluid">
@@ -495,7 +494,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             checkboxes.forEach(function(checkbox) {
                 checkbox.checked = selectAllCheckbox.checked;
             });
-            updateHiddenCheckbox();
         }
 
         // Uncheck 'ALL' when any individual checkbox is unchecked
@@ -504,7 +502,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 if (!this.checked) {
                     document.getElementById('selectAll').checked = false;
                 }
-                updateHiddenCheckbox();
             });
         });
 
@@ -514,25 +511,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 checkbox.checked = true;
             });
             document.getElementById('selectAll').checked = true;
-            updateHiddenCheckbox();
         };
 
-        // Update the hidden checkbox based on the user's selections
-        function updateHiddenCheckbox() {
-            var checkedBoxes = document.querySelectorAll('.eventForCheckbox:checked');
-            var hiddenCheckbox = document.getElementById('hiddenCheckbox');
-            var dropdownButton = document.getElementById('eventForDropdown');
-
-            if (checkedBoxes.length > 0) {
-                hiddenCheckbox.checked = true; // Check hidden checkbox if any checkbox is selected
-                dropdownButton.textContent = 'Courses Selected'; // Update button text
-                dropdownButton.style.border = '1px solid #ccc'; // Reset border if previously marked as required
-            } else {
-                hiddenCheckbox.checked = false; // Uncheck hidden checkbox
-                dropdownButton.textContent = 'Select Courses (Required)'; // Show required message on button
-                dropdownButton.style.border = '1px solid red'; // Highlight the button as required
-            }
-        }
         // FOR MESSAGEBOX WITHOUT TEXT ONLY
         function noTextRedirect(redirectUrl, title, icon, iconHtml) {
             Swal.fire({

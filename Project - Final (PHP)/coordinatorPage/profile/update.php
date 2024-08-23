@@ -99,6 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     $mname = $row['mname'];
     $lname = $row['lname'];
     $contact = $row['contact'];
+    $email = $row['email'];
 } else {
     // get the data from form
     $coor_id = $_POST['coor_id'];
@@ -106,38 +107,38 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     $mname = ucwords($_POST['mname']);
     $lname = ucwords($_POST['lname']);
     $contact = $_POST['contact'];
+    $email = strtolower($_POST['email']);
 
     // email and user existing check
-    $emailCheck = mysqli_query($conn, "SELECT * FROM coordinator WHERE email = '$email' AND coor_id != $coor_id");
+    $emailCheck = mysqli_query($conn, "SELECT * FROM coordinator WHERE email='$email' AND coor_id != $coor_id");
+    $emailCheck_archive = mysqli_query($conn, "SELECT * FROM coordinator_archive WHERE email='$email' AND coor_id != $coor_id");
 
     if (mysqli_num_rows($emailCheck) > 0) {
-        $icon = 'warning';
-        $iconHtml = '<i class="fas fa-exclamation-triangle"></i>';
-        $title = 'Email Already Exists!';
-        $text = 'Please try again.';
-
-        echo "<script>
-            document.addEventListener('DOMContentLoaded', function() {
-                warningError('$title', '$text', '$icon', '$iconHtml');
-            });
-        </script>";
-        sleep(2);
+        $errorMessage = "Email Already Exists";
+    } else if (mysqli_num_rows($emailCheck_archive) > 0) {
+        $errorMessage = "Email Already Exists";
     } else {
 
-        $sql = "UPDATE coordinator SET fname='$fname', mname='$mname', lname='$lname', contact='$contact' WHERE coor_id = $coor_id";
+        $sql = "UPDATE coordinator SET fname='$fname', mname='$mname', lname='$lname', contact='$contact', email='$email' WHERE coor_id = $coor_id";
         $result = $conn->query($sql);
-
-        $icon = 'success';
-        $iconHtml = '<i class="fas fa-check-circle"></i>';
-        $title = 'Info updated successfully';
-        $redirectUrl = './profile.php';
-
-        echo "<script>
+        echo "
+            <script>
+                // Wait for the document to load
                 document.addEventListener('DOMContentLoaded', function() {
-                    noTextRedirect('$redirectUrl', '$title', '$icon', '$iconHtml');
+                    // Use SweetAlert2 for the alert
+                    Swal.fire({
+                            title: 'Info Updated Successfully',
+                            timer: 2000,
+                            showConfirmButton: true, // Show the confirm button
+                            confirmButtonColor: '#4CAF50', // Set the button color to green
+                            confirmButtonText: 'OK' // Change the button text if needed
+                    }).then(function() {
+                        // Redirect after the alert closes
+                        window.location.href = './profile.php';
+                    });
                 });
-            </script>";
-        sleep(2);
+            </script>
+            ";
     }
 }
 ?>
@@ -157,42 +158,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     <link rel="stylesheet" href="	https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-    <style>
-        .swal2-popup {
-            padding-bottom: 30px;
-            /* Adjust the padding as needed */
-        }
-
-        .confirm-button-class,
-        .cancel-button-class {
-            width: 150px;
-            /* Set the desired width */
-            height: 40px;
-            /* Set the desired height */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            /* Hide the overflow to prevent scroll bars */
-            white-space: nowrap;
-            /* Prevent text wrapping */
-        }
-
-        .confirm-button-class {
-            background-color: #e03444 !important;
-            color: white;
-        }
-
-        .cancel-button-class {
-            background-color: #ffc404 !important;
-            color: white;
-        }
-    </style>
 </head>
 
 <body>
@@ -291,11 +257,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             </div>
 
             <div class="page-content">
+                <?php
+                if (!empty($errorMessage)) {
+                    echo "<script>";
+                    echo "Swal.fire({";
+                    echo "  icon: 'error',";
+                    echo "  title: 'Oops...',";
+                    echo "  text: '$errorMessage',";
+                    echo "  timer: 2000,";
+                    echo "})";
+                    echo "</script>";
+                }
+                ?>
                 <div class="row">
                     <div class="container-fluid" id="main-container">
                         <div class="container-fluid" id="content-container">
                             <div class="information">
-                                <form action="update.php" method="POST" class="addNew">
+                                <form action="update.php" method="POST" onsubmit="return submitForm(this);">
                                     <div class="mb-3">
                                         <input type="hidden" name="coor_id" class="form-control" id="formGroupExampleInput" placeholder="Coordinator Id" value="<?php echo $coor_id; ?>">
                                         <label for="formGroupExampleInput" class="form-label">FIRST NAME</label>
@@ -313,6 +291,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                                         <label for="formGroupExampleInput" class="form-label">CONTACT NUMBER</label>
                                         <input type="number" name="contact" class="form-control" id="formGroupExampleInput" placeholder="Enter Contact Number" required value="<?php echo htmlspecialchars("$contact"); ?>">
                                     </div>
+                                    <div class="mb-3">
+                                        <label for="formGroupExampleInput" class="form-label">EMAIL ADDRESS</label>
+                                        <input type="email" name="email" class="form-control" id="formGroupExampleInput" placeholder="Enter Email Address" required value="<?php echo htmlspecialchars("$email"); ?>">
+                                    </div>
                                     <div class="buttons">
                                         <button type="submit" class="btn" id="button1" value="Update">UPDATE</button>
                                         <a href="./profile.php"><button type="button" class="btn" id="button1">CANCEL</button></a>
@@ -324,78 +306,31 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
                 </div>
             </div>
+
+            <!-- <script>
+    let profilePic = document.getElementById("profile-pic");
+    let inputFile = document.getElementById("input-file");
+
+    inputFile.onchange = function(){
+        profilePic.src = URL.createObjectURL(inputFile.files[0]);
+    }
+</script> -->
             <script>
-                // CONFIRM SUBMITION
-                document.addEventListener('DOMContentLoaded', function() {
-                    console.log("DOM fully loaded and parsed");
-
-                    const forms = document.querySelectorAll('.addNew');
-
-                    forms.forEach(function(form) {
-                        console.log("Attaching event listener to form:", form);
-
-                        form.addEventListener('submit', function(event) {
-                            event.preventDefault();
-                            console.log("Form submit event triggered");
-
-                            Swal.fire({
-                                title: 'Are you sure you want to continue?',
-                                icon: 'warning',
-                                iconHtml: '<i class="fas fa-exclamation-triangle"></i>',
-                                text: 'Once you proceed, this action cannot be undone.',
-                                showCancelButton: true,
-                                confirmButtonColor: '#e03444',
-                                cancelButtonColor: '#ffc404',
-                                confirmButtonText: 'Ok',
-                                cancelButtonText: 'Cancel',
-                                customClass: {
-                                    confirmButton: 'confirm-button-class',
-                                    cancelButton: 'cancel-button-class'
-                                }
-                            }).then((result) => {
-                                if (result.isConfirmed) {
-                                    console.log("User confirmed action");
-                                    form.submit(); // Submit the form if confirmed
-                                } else {
-                                    console.log("User canceled action");
-                                }
-                            });
+                function submitForm(form) {
+                    Swal.fire({
+                            title: 'Do you want to continue?',
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#e03444',
+                            cancelButtonColor: '#ffc404',
+                            confirmButtonText: 'Submit'
+                        })
+                        .then((result) => {
+                            if (result.isConfirmed) {
+                                form.submit(); // Submit the form
+                            }
                         });
-                    });
-                });
-
-                // FOR MESSAGEBOX WITHOUT TEXT ONLY
-                function noTextRedirect(redirectUrl, title, icon, iconHtml) {
-                    Swal.fire({
-                        icon: icon,
-                        iconHtml: iconHtml, // Custom icon using Font Awesome
-                        title: title,
-                        customClass: {
-                            popup: 'swal-custom'
-                        },
-                        showConfirmButton: true,
-                        confirmButtonColor: '#4CAF50',
-                        confirmButtonText: 'OK',
-                        timer: 5000
-                    }).then(() => {
-                        window.location.href = redirectUrl; // Redirect to the desired page
-                    });
-                }
-
-                function warningError(title, text, icon, iconHtml) {
-                    Swal.fire({
-                        icon: icon,
-                        iconHtml: iconHtml, // Custom icon using Font Awesome
-                        title: title,
-                        text: text,
-                        customClass: {
-                            popup: 'swal-custom'
-                        },
-                        showConfirmButton: true,
-                        confirmButtonColor: '#4CAF50',
-                        confirmButtonText: 'OK',
-                        timer: 5000,
-                    });
+                    return false; // Prevent default form submission
                 }
             </script>
 </body>

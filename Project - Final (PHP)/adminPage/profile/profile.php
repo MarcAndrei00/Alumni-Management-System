@@ -115,22 +115,17 @@ if ($result->num_rows > 0) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <style>
-        .btn {
-            width: 210px;
-            /* Adjust width as needed */
-            height: 40px;
-            /* Adjust height as needed */
-            font-size: 16px;
-            /* Adjust font size as needed */
-            text-align: center;
-            border: none;
-            border-radius: 5px;
-            /* Optional: for rounded corners */
-            cursor: pointer;
-            margin: 5px;
-            /* Optional: to add space between buttons */
-        }
-    </style>
+    .btn {
+        width: 210px; /* Adjust width as needed */
+        height: 40px; /* Adjust height as needed */
+        font-size: 16px; /* Adjust font size as needed */
+        text-align: center;
+        border: none;
+        border-radius: 5px; /* Optional: for rounded corners */
+        cursor: pointer;
+        margin: 5px; /* Optional: to add space between buttons */
+    }
+</style>
 </head>
 
 <body>

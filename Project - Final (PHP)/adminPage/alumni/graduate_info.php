@@ -127,7 +127,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             $address = $row['address'];
             $displayAddress = str_replace(',', '', $address);
             $email = $row['email'];
-            $uploadDate = $row['date_created'];
             $file = $row['picture'];
         } else {
             header("location: ./alumni.php");
@@ -158,7 +157,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $displayAddress = str_replace(',', '', $address);
         $email = $row['email'];
         $file = $row['picture'];
-        $uploadDate = $row['date_created'];
+
         $batch = $row["batch"];
     }
 }
@@ -406,16 +405,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                             </div>
                             <div class="col">
                                 <input class="form-control" type="email" id="email" name="email" disabled value="<?php echo $email; ?>">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="container">
-                        <div class="row align-items-end">
-                            <div class="col">
-                                <label class="col-sm-3 col-form-label" style="font-size: 20px;" for="name">Date Uploaded:</label>
-                            </div>
-                            <div class="col">
-                                <input class="form-control" type="email" id="email" name="email" disabled value="<?php echo $uploadDate; ?>">
                             </div>
                         </div>
                     </div>

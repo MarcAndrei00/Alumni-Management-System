@@ -76,10 +76,10 @@ else {
     $email = mysqli_real_escape_string($conn, $email);
     $verification_code = mysqli_real_escape_string($conn, $verification_code);
 
-    $check_email_status_qry = mysqli_query($conn, "SELECT status FROM alumni WHERE email = '$email' OR recovery_email = '$email'");
+    $check_email_status_qry = mysqli_query($conn, "SELECT status FROM alumni WHERE email = '$email'");
     $check_email_admin_qry = mysqli_query($conn, "SELECT * FROM admin WHERE email = '$email'");
     $check_email_coordinator_qry = mysqli_query($conn, "SELECT * FROM coordinator WHERE email = '$email'");
-    
+
     $check_email_alumniarchive_qry = mysqli_query($conn, "SELECT status FROM alumni_archive WHERE email = '$email'");
     $alumni_archive_checkstatus = mysqli_fetch_assoc($check_email_alumniarchive_qry);
 
@@ -120,7 +120,7 @@ else {
                   alertMessage('$redirectUrl', '$title', '$text', '$icon', '$iconHtml');
               });
           </script>";
-    }else if ($alumni_archive_checkstatus && $alumni_archive_checkstatus['status'] == "Inactive") {
+    }else if ($alumni_archive_checkstatus['status'] == "Inactive") {
       // VERIFY ALUMNI_ARCHIVE INACTIVE ACCOUNT
       $email = $_POST['email'];
       $verification_code = sprintf("%06d", mt_rand(1, 999999));

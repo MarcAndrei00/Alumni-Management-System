@@ -562,7 +562,10 @@ if ($Message == 'import') {
                                     <th scope="col" class="inline">GENDER</th>
                                     <th scope="col" class="inline">COURSE</th>
                                     <th scope="col" class="inline">BATCH</th>
+                                    <th scope="col" class="inline">CONTACT</th>
+                                    <th scope="col" class="inline">ADDRESS</th>
                                     <th scope="col" class="inline">EMAIL</th>
+                                    <th scope="col" class="inline">DATE UPLOADED</th>
                                     <th scope="col" class="inline">ACTION</th>
                                 </tr>
                             </thead>
@@ -575,6 +578,7 @@ if ($Message == 'import') {
                                         } else {
                                             $fullname = $row["lname"] . ", " . $row["fname"];
                                         }
+                                        $dateuploaded = date('F j, Y, g:i A', strtotime($row['date_created']));
                                 ?>
                                         <tr>
                                             <td class="inline"><?php echo $row['student_id'] ?></td>
@@ -582,7 +586,10 @@ if ($Message == 'import') {
                                             <td class="inline"><?php echo $row['gender'] ?></td>
                                             <td class="inline"><?php echo $row['course'] ?></td>
                                             <td class="inline"><?php echo $row["batch"] ?></td>
+                                            <td class="inline"><?php echo $row['contact'] ?></td>
+                                            <td class="inline"><?php echo $row['address'] ?></td>
                                             <td class="inline"><?php echo $row['email'] ?></td>
+                                            <td class="inline"><?php echo $dateuploaded ?></td>
                                             <?php
                                             echo "
                                                 <td class='inline act'>

@@ -94,16 +94,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     // Show the data of alumni
     if (!isset($_GET['id'])) {
         if (isset($_GET['ide'])) {
-            $icon = 'success';
-            $iconHtml = '<i class="fas fa-check-circle"></i>';
-            $title = 'Profile Updated Successfully';
-
-            echo "<script>
-                    document.addEventListener('DOMContentLoaded', function() {
-                        noTextMessage('$title', '$icon', '$iconHtml');
+            echo "
+                <script>
+                // Wait for the document to load
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Use SweetAlert2 for the alert
+                    Swal.fire({
+                        title: 'Profile Updated Successfully',
+                        timer: 2000,
+                        showConfirmButton: true, // Show the confirm button
+                        confirmButtonColor: '#4CAF50', // Set the button color to green
+                        confirmButtonText: 'OK' // Change the button text if needed
                     });
-                </script>";
-            sleep(2);
+                });
+            </script>
+            ";
             $alumni_id = $_GET['ide'];
 
             //read data from table alumni
@@ -125,7 +130,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             $course = $row['course'];
             $contact = $row['contact'];
             $address = $row['address'];
-            $displayAddress = str_replace(',', '', $address);
             $email = $row['email'];
             $file = $row['picture'];
 
@@ -155,13 +159,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $gender = $row['gender'];
         $course = $row['course'];
         $contact = $row['contact'];
+        $address = $row['address'];
         $email = $row['email'];
         $file = $row['picture'];
-        $recoveryEmail = $row['recovery_email'];
 
         $batch = $row["batch_startYear"] . " - " . $row["batch_endYear"];
-        $address = $row['address'];
-        $displayAddress = str_replace(',', '', $address);
     }
 }
 
@@ -180,16 +182,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     <link rel="stylesheet" href="	https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="	https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <style>
-        .btn-size {
-            display: inline-block;
-            width: 100px;
-            /* Adjust the width as needed */
-            text-align: center;
-        }
-    </style>
 </head>
 
 <body>
@@ -201,7 +195,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
         <div class="side-content">
             <div class="profile">
-                <i class="bi bi-person-circle"></i>
+            <i class="bi bi-person-circle"></i>
                 <h4><?php echo $user['fname']; ?></h4>
                 <small style="color: white;"><?php echo $user['email']; ?></small>
             </div>
@@ -288,7 +282,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                     <!-- PROFILE -->
                     <div class="container text-center" id="start">
                         <div class="row align-items-end">
-                            <div class="col"></div>
+                            <div class="col">
+                                <?php echo "
+                                    <a class='btn btn-warning' href='./update_profile.php?id=$row[alumni_id]'> Change Picture </a>
+                                    ";
+                                ?>
+                            </div>
                             <div class="col">
                                 <!-- Preview image -->
                                 <div class="form-control" style="width:225px;height:215px; border-radius: 100%;">
@@ -391,7 +390,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                                 <label class="col-sm-3 col-form-label" style="font-size: 20px;" for="address">Address:</label>
                             </div>
                             <div class="col">
-                                <input class="form-control" type="text" id="username" name="address" disabled value="<?php echo $displayAddress ?>">
+                                <input class="form-control" type="text" id="username" name="address" disabled value="<?php echo $address; ?>">
                             </div>
                         </div>
                     </div>
@@ -406,55 +405,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                         </div>
                     </div>
                     <div class="container">
-                        <div class="row align-items-end">
-                            <div class="col">
-                                <label class="col-sm-3 col-form-label" style="font-size: 20px;" for="name">Recovery Email:</label>
-                            </div>
-                            <div class="col">
-                                <input class="form-control" type="email" id="email" name="email" disabled value="<?php echo $recoveryEmail; ?>">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="container">
-                        <div class="row align-items-end">
-                            <div class="col">
-                                <label class="col-sm-3 col-form-label" style="font-size: 20px;" for="name">Status:</label>
-                            </div>
-                            <div class="col">
-                                <input class="form-control" type="email" id="email" name="email" style="color: <?php echo ($row['status'] == 'Verified') ? 'green' : 'red'; ?>" disabled value="<?php echo $row['status']; ?>">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="container">
-                        <div class="row align-items-end">
-                            <div class="col">
-                                <label class="col-sm-3 col-form-label" style="font-size: 20px;" for="name">Last Login:</label>
-                            </div>
-                            <div class="col">
-                                <input class="form-control" type="email" id="email" name="email" disabled value="<?php echo ($row['last_login'] == '0000-00-00 00:00:00') ? '-- / -- / --' : $row['last_login']; ?>">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="container">
-                        <div class="row align-items-end">
-                            <div class="col">
-                                <label class="col-sm-3 col-form-label" style="font-size: 20px;" for="name">Date Creation:</label>
-                            </div>
-                            <div class="col">
-                                <input class="form-control" type="email" id="email" name="email" disabled value="<?php echo $row['date_created']; ?>">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="container">
                         <div class="row" style="margin-top:20px;">
                             <div class="col" id="buttons">
                                 <div class="button">
 
-                                    <?php
+                                    <?php 
                                     echo "
-                                        <a class='btn btn-danger btn-size' href='./del_alumni.php?id=$row[alumni_id]'>Archive</a>
-                                        <a class='btn btn-warning btn-size' href='./alumni.php'>Back</a>
-                                    "; ?>
+                                        <a class='btn btn-danger' href='./del_alumni.php?id=$row[alumni_id]'>Archive</a>
+                                        <a class='btn btn-danger' href='./alumni.php'>Cancel</a>
+                                    ";?>
                                 </div>
                             </div>
                         </div>
@@ -472,58 +431,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             preview.src = image;
             preview.style.width = '200px';
             preview.style.height = '200px';
-        }
-
-        // FOR MESSAGEBOX
-        function alertMessage(redirectUrl, title, text, icon, iconHtml) {
-            Swal.fire({
-                icon: icon,
-                iconHtml: iconHtml, // Custom icon using Font Awesome
-                title: title,
-                text: text,
-                customClass: {
-                    popup: 'swal-custom'
-                },
-                showConfirmButton: true,
-                confirmButtonColor: '#4CAF50',
-                confirmButtonText: 'OK',
-                timer: 5000
-            }).then(() => {
-                window.location.href = redirectUrl; // Redirect to the desired page
-            });
-        }
-
-        // WARNING FOR DUPE ACCOUNT
-        function warningError(title, text, icon, iconHtml) {
-            Swal.fire({
-                icon: icon,
-                iconHtml: iconHtml, // Custom icon using Font Awesome
-                title: title,
-                text: text,
-                customClass: {
-                    popup: 'swal-custom'
-                },
-                showConfirmButton: true,
-                confirmButtonColor: '#4CAF50',
-                confirmButtonText: 'OK',
-                timer: 5000,
-            });
-        }
-
-        // FOR MESSAGEBOX WITHOUT TEXT AND REDIRECT
-        function noTextMessage(title, icon, iconHtml) {
-            Swal.fire({
-                icon: icon,
-                iconHtml: iconHtml, // Custom icon using Font Awesome
-                title: title,
-                customClass: {
-                    popup: 'swal-custom'
-                },
-                showConfirmButton: true,
-                confirmButtonColor: '#4CAF50',
-                confirmButtonText: 'OK',
-                timer: 5000
-            });
         }
     </script>
 </body>

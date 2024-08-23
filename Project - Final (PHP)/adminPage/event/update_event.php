@@ -84,6 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     $endTime = $row['end_time'];
     $venue = $row['venue'];
     $description = $row['description'];
+    $eventFor = explode(',', $row['event_for']); // Convert the comma-separated string to an array
 
     $address_parts = explode(', ', $row['address']);
 
@@ -96,7 +97,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     $house_no = implode(' ', $address_parts);
 
     // Check if 'ALL' is in $eventFor
-    $eventFor = explode(', ', $row['event_for']); // Convert the comma-separated string to an array
     $isAllChecked = in_array('ALL', $eventFor);
 } else {
 
@@ -137,7 +137,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         if (array_diff($allCourses, $eventFor) === []) {
             $eventForString = "ALL";
         } else {
-            $eventForString = implode(', ', $eventFor);
+            $eventForString = implode(',', $eventFor);
         }
 
         // For image
@@ -404,23 +404,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                                     <button class="form-control" type="button" id="eventForDropdown" onclick="toggleDropdown()" style="height: 100%; width: 430px;">Select Courses</button>
                                     <div id="eventForMenu" class="dropdown-menu" style="display:none; position: absolute; background-color: white; border: 1px solid #ccc; padding: 10px;">
                                         <label><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)" <?php echo $isAllChecked ? 'checked' : ''; ?>> All Courses</label><br>
-                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BAJ" <?php echo $isAllChecked || in_array('BAJ', $eventFor) ? 'checked' : ''; ?>> Bachelor of Arts in Journalism</label><br>
-                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BECEd" <?php echo $isAllChecked || in_array('BECEd', $eventFor) ? 'checked' : ''; ?>> Bachelor of Secondary Education</label><br>
-                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BEEd" <?php echo $isAllChecked || in_array('BEEd', $eventFor) ? 'checked' : ''; ?>> Bachelor of Elementary Education</label><br>
-                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSBM" <?php echo $isAllChecked || in_array('BSBM', $eventFor) ? 'checked' : ''; ?>> Bachelor of Science in Business Management</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BAJ" <?php echo $isAllChecked || in_array('BAJ', $eventFor) ? 'checked' : ''; ?>> Batchelor of Arts in Journalism</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BECEd" <?php echo $isAllChecked || in_array('BECEd', $eventFor) ? 'checked' : ''; ?>> Bachelor Of Secondary EducationBECEd</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BEEd" <?php echo $isAllChecked || in_array('BEEd', $eventFor) ? 'checked' : ''; ?>> Bachelor Of Elementary Education</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSBM" <?php echo $isAllChecked || in_array('BSBM', $eventFor) ? 'checked' : ''; ?>> Bachelor Of Science In Business Management</label><br>
                                         <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSOA" <?php echo $isAllChecked || in_array('BSOA', $eventFor) ? 'checked' : ''; ?>> Bachelor of Science in Office Administration</label><br>
-                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSEntrep" <?php echo $isAllChecked || in_array('BSEntrep', $eventFor) ? 'checked' : ''; ?>> Bachelor of Science in Entrepreneurship</label><br>
-                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSHM" <?php echo $isAllChecked || in_array('BSHM', $eventFor) ? 'checked' : ''; ?>> Bachelor of Science in Hospitality Management</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSEntrep" <?php echo $isAllChecked || in_array('BSEntrep', $eventFor) ? 'checked' : ''; ?>> Bachelor Of Science In Entrepreneurship</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSHM" <?php echo $isAllChecked || in_array('BSHM', $eventFor) ? 'checked' : ''; ?>> Bachelor Of Science In Hospitality Management</label><br>
                                         <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSIT" <?php echo $isAllChecked || in_array('BSIT', $eventFor) ? 'checked' : ''; ?>> Bachelor of Science in Information Technology</label><br>
                                         <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSCS" <?php echo $isAllChecked || in_array('BSCS', $eventFor) ? 'checked' : ''; ?>> Bachelor of Science in Computer Science</label><br>
-                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSc(Psych)" <?php echo $isAllChecked || in_array('BSc(Psych)', $eventFor) ? 'checked' : ''; ?>> Bachelor of Science in Psychology</label>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSc(Psych)" <?php echo $isAllChecked || in_array('BSc(Psych)', $eventFor) ? 'checked' : ''; ?>> Bachelor Of Science In Psychology</label>
                                     </div>
                                 </div>
                             </div>
-
-                            <!-- Hidden checkbox for validation -->
-                            <input type="checkbox" id="hiddenRequiredCheckbox" style="display:none;" required>
-
                             <div class="row">
                                 <div class="container-fluid">
                                     <div class="mb-3">
@@ -498,9 +494,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
         // FOR DROPDOWN CHECKLIST
         function toggleDropdown() {
-            var dropdown = document.getElementById('eventForMenu');
-            dropdown.style.display = (dropdown.style.display === 'none' || dropdown.style.display === '') ? 'block' : 'none';
-            updateHiddenCheckbox();
+            var menu = document.getElementById('eventForMenu');
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
         }
 
         function toggleSelectAll(selectAllCheckbox) {
@@ -508,37 +503,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             checkboxes.forEach(function(checkbox) {
                 checkbox.checked = selectAllCheckbox.checked;
             });
-            updateHiddenCheckbox();
         }
 
-        document.querySelectorAll('.eventForCheckbox').forEach(function(checkbox) {
-            checkbox.addEventListener('change', function() {
-                if (!this.checked) {
-                    document.getElementById('selectAll').checked = false;
-                }
-                updateHiddenCheckbox();
+        document.addEventListener('DOMContentLoaded', function() {
+            var checkboxes = document.querySelectorAll('.eventForCheckbox');
+            checkboxes.forEach(function(checkbox) {
+                checkbox.addEventListener('change', function() {
+                    var isAllChecked = Array.from(checkboxes).every(checkbox => checkbox.checked);
+                    document.getElementById('selectAll').checked = isAllChecked;
+                });
             });
         });
-
-        window.onload = function() {
-            updateHiddenCheckbox();
-        };
-
-        function updateHiddenCheckbox() {
-            var checkedBoxes = document.querySelectorAll('.eventForCheckbox:checked');
-            var hiddenCheckbox = document.getElementById('hiddenRequiredCheckbox');
-            var dropdownButton = document.getElementById('eventForDropdown');
-
-            if (checkedBoxes.length > 0) {
-                hiddenCheckbox.checked = true;
-                dropdownButton.textContent = 'Courses Selected';
-                dropdownButton.style.border = '1px solid #ccc';
-            } else {
-                hiddenCheckbox.checked = false;
-                dropdownButton.textContent = 'Select Courses (Required)';
-                dropdownButton.style.border = '1px solid red';
-            }
-        }
 
         // CONFIRM SUBMITION
         document.addEventListener('DOMContentLoaded', function() {
