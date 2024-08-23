@@ -1,5 +1,4 @@
 <?php
-require_once('vendor/autoload.php');
 require_once('../vendor/autoload.php');
 
 session_start();
@@ -75,8 +74,10 @@ if (isset($_POST['submit_btn'])) {
     $email = $_POST['email'];
     $contact_number = $_POST['contact_number'];
     $donation = $_POST['donation_amount'];
+    $donationInCents = $donation * 100;
 
-    if ($donation <= 0) {
+
+    if ($donationInCents <= 0) {
         $icon = 'error';
         $iconHtml = '<i class=\"fas fa-exclamation-circle\"></i>';
         $title = 'You input a negative value.';
@@ -84,9 +85,9 @@ if (isset($_POST['submit_btn'])) {
 
         echo "<script>
                 document.addEventListener('DOMContentLoaded', function() {
-                warningError('$title', '$text', '$icon', '$iconHtml');
+                    warningError('$title', '$text', '$icon', '$iconHtml');
                 });
-            </script>";
+              </script>";
         sleep(2);
     } else {
         // Multiply the payment by 100 to convert it to cents
@@ -126,16 +127,17 @@ if (isset($_POST['submit_btn'])) {
 
         // Redirect to a new page
         header('Location: redirect.php');
+        
         $icon = 'success';
-        $iconHtml = '<i class=\"fas fa-exclamation-circle\"></i>';
+        $iconHtml = '<i class="fas fa-check-circle"></i>';
         $title = 'Thank you for your donation.';
         $text = 'Have a great day!';
 
         echo "<script>
                 document.addEventListener('DOMContentLoaded', function() {
-                warningError('$title', '$text', '$icon', '$iconHtml');
+                    warningError('$title', '$text', '$icon', '$iconHtml');
                 });
-            </script>";
+              </script>";
         sleep(2);
         exit();
     }
@@ -157,6 +159,8 @@ $result = $conn->query($sql);
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Playfair+Display:wght@700&family=Dancing+Script:wght@400&family=Cinzel:wght@700&family=Oswald:wght@700&family=Raleway:wght@600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
@@ -936,23 +940,6 @@ $result = $conn->query($sql);
                 timer: 5000
             }).then(() => {
                 window.location.href = redirectUrl; // Redirect to the desired page
-            });
-        }
-
-        // WARNING FOR DUPE ACCOUNT
-        function warningError(title, text, icon, iconHtml) {
-            Swal.fire({
-                icon: icon,
-                iconHtml: iconHtml, // Custom icon using Font Awesome
-                title: title,
-                text: text,
-                customClass: {
-                    popup: 'swal-custom'
-                },
-                showConfirmButton: true,
-                confirmButtonColor: '#4CAF50',
-                confirmButtonText: 'OK',
-                timer: 5000,
             });
         }
 
