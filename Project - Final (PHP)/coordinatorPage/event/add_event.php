@@ -389,15 +389,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                     <div id="eventForMenu" class="dropdown-menu" style="display:none; position: absolute; background-color: white; border: 1px solid #ccc; padding: 10px;">
                                         <label><input type="checkbox" id="selectAll" onclick="toggleSelectAll(this)" checked> All Courses</label><br>
                                         <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BAJ" checked> Bachelor of Arts in Journalism</label><br>
-                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BECEd" checked> Bachelor Of Secondary Education</label><br>
-                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BEEd" checked> Bachelor Of Elementary Education</label><br>
-                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSBM" checked> Bachelor Of Science In Business Management</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BECEd" checked> Bachelor of Secondary Education</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BEEd" checked> Bachelor of Elementary Education</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSBM" checked> Bachelor of Science in Business Management</label><br>
                                         <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSOA" checked> Bachelor of Science in Office Administration</label><br>
-                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSEntrep" checked> Bachelor Of Science In Entrepreneurship</label><br>
-                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSHM" checked> Bachelor Of Science In Hospitality Management</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSEntrep" checked> Bachelor of Science in Entrepreneurship</label><br>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSHM" checked> Bachelor of Science in Hospitality Management</label><br>
                                         <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSIT" checked> Bachelor of Science in Information Technology</label><br>
                                         <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSCS" checked> Bachelor of Science in Computer Science</label><br>
-                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSc(Psych)" checked> Bachelor Of Science In Psychology</label>
+                                        <label><input type="checkbox" class="eventForCheckbox" name="eventFor[]" value="BSc(Psych)" checked> Bachelor of Science in Psychology</label>
                                     </div>
                                 </div>
                                 <!-- Hidden required checkbox -->

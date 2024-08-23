@@ -98,22 +98,22 @@ switch ($course) {
     case 'Bachelor of Arts in Journalism':
         $event_result = 'BAJ';
         break;
-    case 'Bachelor Of Secondary Education':
+    case 'Bachelor of Secondary Education':
         $event_result = 'BECEd';
         break;
-    case 'Bachelor Of Elementary Education':
+    case 'Bachelor of Elementary Education':
         $event_result = 'BEEd';
         break;
-    case 'Bachelor Of Science In Business Management':
+    case 'Bachelor of Science in Business Management':
         $event_result = 'BSBM';
         break;
     case 'Bachelor of Science in Office Administration':
         $event_result = 'BSOA';
         break;
-    case 'Bachelor Of Science In Entrepreneurship':
+    case 'Bachelor of Science in Entrepreneurship':
         $event_result = 'BSEntrep';
         break;
-    case 'Bachelor Of Science In Hospitality Management':
+    case 'Bachelor of Science in Hospitality Management':
         $event_result = 'BSHM';
         break;
     case 'Bachelor of Science in Information Technology':
@@ -122,7 +122,7 @@ switch ($course) {
     case 'Bachelor of Science in Computer Science':
         $event_result = 'BSCS';
         break;
-    case 'Bachelor Of Science In Psychology':
+    case 'Bachelor of Science in Psychology':
         $event_result = 'BSc(Psych)';
         break;
     default:
