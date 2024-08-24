@@ -116,7 +116,8 @@ $result = $conn->query($sql);
     <style>
         .popup {
             display: none;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
+            margin-top: -10px;
         }
 
         .popup {

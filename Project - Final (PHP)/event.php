@@ -827,8 +827,8 @@ $result = $conn->query($sql);
                                     <input type="hidden" name="titlee" value="<?php echo $row['title']; ?>">
                                     <h2><?php echo $row['title']; ?></h2>
                                     <p><?php echo $row['description']; ?></p>
-                                    <p class="card-text"><small class="text-muted"><b>DATE: </b><?php echo $row['date']; ?></small></p>
-                                    <p class="card-text"><small class="text-muted"><b>TIME: </b><?php echo $row['start_time']; ?> To <?php echo $row['end_time']; ?></small></p>
+                                    <p class="card-text"><small class="text-muted"><b>DATE: </b><?php echo date('F j, Y', strtotime($row['date_created'])); ?></small></p>
+                                    <p class="card-text"><small class="text-muted"><b>TIME: </b><?php echo date('g:i A', strtotime($row['start_time'])); ?> To <?php echo date('g:i A', strtotime($row['end_time'])) ?></small></p>
                                     <p class="card-text"><small class="text-muted"><b>VENUE: </b><?php echo $row['venue']; ?></small></p>
                                     <p class="card-text"><small class="text-muted"><b>ADDRESS: </b><?php echo $displayAddress; ?></small></p>
                                     <!-- Buttons for Donation and View Details -->
@@ -853,8 +853,8 @@ $result = $conn->query($sql);
                                     <input type="hidden" name="titlee" value="<?php echo $row['title']; ?>">
                                     <h2><?php echo $row['title']; ?></h2>
                                     <p><?php echo $row['description']; ?></p>
-                                    <p class="card-text"><small class="text-muted"><b>DATE: </b><?php echo $row['date']; ?></small></p>
-                                    <p class="card-text"><small class="text-muted"><b>TIME: </b><?php echo $row['start_time']; ?> To <?php echo $row['end_time']; ?></small></p>
+                                    <p class="card-text"><small class="text-muted"><b>DATE: </b><?php echo date('F j, Y', strtotime($row['date'])); ?></small></p>
+                                    <p class="card-text"><small class="text-muted"><b>TIME: </b><?php echo date('g:i A', strtotime($row['start_time'])); ?> To <?php echo date('g:i A', strtotime($row['end_time'])); ?></small></p>
                                     <p class="card-text"><small class="text-muted"><b>VENUE: </b><?php echo $row['venue']; ?></small></p>
                                     <p class="card-text"><small class="text-muted"><b>ADDRESS: </b><?php echo $displayAddress; ?></small></p>
                                     <!-- Buttons for Donation and View Details -->

@@ -396,7 +396,7 @@ if (isset($_GET['ide'])) {
                                     $time = $row["start_time"] . " - " . $row["end_time"];
                                     $address = $row['address'];
                                     $displayAddress = str_replace(',', '', $address);
-                                    $date = date('F j, Y, g:i A', strtotime($row['date']));
+                                    $date = date('F j, Y', strtotime($row['date']));
 
 
                             ?>

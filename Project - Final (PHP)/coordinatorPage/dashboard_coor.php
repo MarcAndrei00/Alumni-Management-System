@@ -411,7 +411,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
                     <div class="popup-form" id="update-popup" style="display: none;">
                         <form method="POST">
-                            <h1>Announcement Detail</h1>
+                            <h1>Announcement Details</h1>
                             <input type="hidden" id="announce-id" name="announce_id">
 
                             <div class="form-group">

@@ -351,7 +351,7 @@ $endTime = date('g:i A', strtotime($row["end_time"]));
 $time = $startTime . " - " . $endTime;
 
 // Date and time formatting combined in a single column
-$date = date('F j, Y, g:i A', strtotime($row['date']));
+$date = date('F j, Y', strtotime($row['date_created']));
 ?>
 
 <!DOCTYPE html>
