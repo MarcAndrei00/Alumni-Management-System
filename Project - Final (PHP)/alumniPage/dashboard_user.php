@@ -224,7 +224,7 @@ $result = $conn->query($sql);
                 <div>
                     <img id="preview" src="data:image/jpeg;base64,<?php echo base64_encode($row['picture']); ?>" style="width:83px;height:83px; border-radius: 100%;border: 2px solid white;">
                 </div>
-                <h4><?php echo $user['fname']; ?></h4>
+                <h4 style="overflow-y: hidden;"><?php echo $user['fname']; ?></h4>
                 <small style="color: white;"><?php echo $user['email']; ?></small>
             </div>
 
@@ -285,7 +285,7 @@ $result = $conn->query($sql);
         <main>
 
             <div class="page-header">
-                <h1><Strong>Dashboard</Strong></h1>
+                <h1 style="overflow-y: hidden;"><Strong>Dashboard</Strong></h1>
             </div>
         </main>
         <div class="col-md-11 notice-box">
@@ -322,7 +322,7 @@ $result = $conn->query($sql);
         <div class="calendar-container">
             <div class="calendar-header">
                 <button id="prevMonth">&lt;</button>
-                <h2 id="monthYear"></h2>
+                <h2 id="monthYear" style="overflow-y: hidden;"></h2>
                 <button id="nextMonth">&gt;</button>
             </div>
             <div class="calendar-days">
@@ -340,7 +340,7 @@ $result = $conn->query($sql);
         <!-- Announcement Section -->
         <div class="announcement1">
             <div class="announcement-header">
-                <h2>Announcements</h2>
+                <h2 style="overflow-y: hidden;">Announcements</h2>
             </div>
             <div class="announcement-list">
                 <?php
@@ -350,7 +350,7 @@ $result = $conn->query($sql);
                 ?>
                         <div class="announcement-item inline" onclick="openPopup('popup-<?php echo $announceId; ?>', this)">
                             <div class="announcement-header">
-                                <h3><?php echo $rowww['title']; ?></h3>
+                                <h3 style="overflow-y: hidden; font-family: 'Poppins', sans-serif;"><?php echo $rowww['title']; ?></h3>
                                 <span class="announcement-date-display">Posted on: <?php echo $rowww['creation_date']; ?></span>
                             </div>
                             <p class="inline"><?php echo $rowww['body']; ?></p>
@@ -360,7 +360,7 @@ $result = $conn->query($sql);
                         <div id="popup-<?php echo $announceId; ?>" class="popup">
                             <div class="popup-content">
                                 <span class="close-button" onclick="closePopup('popup-<?php echo $announceId; ?>')">&times;</span>
-                                <h3><?php echo $rowww['title']; ?></h3>
+                                <h3 style="overflow-y: hidden; font-family: 'Poppins', sans-serif;"><?php echo $rowww['title']; ?></h3>
                                 <textarea disabled><?php echo $rowww['body']; ?></textarea>
                                 <br>
                                 <span class="announcement-date">Posted on: <?php echo $rowww['creation_date']; ?></span>

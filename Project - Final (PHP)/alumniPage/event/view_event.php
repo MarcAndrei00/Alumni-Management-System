@@ -272,11 +272,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_btn'])) {
-    $name = $_POST['name'];
-    $email = $_POST['email'];
+    $name = $rowpic['fname'];
+    $email = $rowpic['email'];
     $event_id = $_POST['event_id'];
     $titlee = $_POST['title'];
-    $contact_number = $_POST['contact_number'];
+    $contact_number = $rowpic['contact'];
     $donation = $_POST['donation_amount'];
 
     $donationInCents = $donation * 100;
@@ -296,7 +296,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_btn'])) {
     } else {
 
         $donation_qry = mysqli_query($conn, "INSERT INTO donation_table (name, email, event_id, event_title, contact_number, donation_amount)
-        VALUES('$name','$email','$event_id','$titlee','$contact_number','$donationInCents')");
+        VALUES('$name','$email','$event_id','$titlee','$contact_number','$donation')");
 
 
 
@@ -345,6 +345,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_btn'])) {
         exit();
     }
 }
+// Convert start_time and end_time to 12-hour format with AM/PM
+$startTime = date('g:i A', strtotime($row["start_time"]));
+$endTime = date('g:i A', strtotime($row["end_time"]));
+$time = $startTime . " - " . $endTime;
+
+// Date and time formatting combined in a single column
+$date = date('F j, Y, g:i A', strtotime($row['date']));
 ?>
 
 <!DOCTYPE html>
@@ -361,6 +368,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_btn'])) {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="https://maxst.icons8.com/vue-static/landings/line-awesome/line-awesome/1.3.0/css/line-awesome.min.css">
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
@@ -439,7 +448,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_btn'])) {
                 <div>
                     <img id="preview" src="data:image/jpeg;base64,<?php echo base64_encode($rowpic['picture']); ?>" style="width:83px;height:83px; border-radius: 100%;border: 2px solid white;">
                 </div>
-                <h4><?php echo $user['fname']; ?></h4>
+                <h4 style="overflow-y: hidden;"><?php echo $user['fname']; ?></h4>
                 <small style="color: white;"><?php echo $user['email']; ?></small>
             </div>
 
@@ -501,7 +510,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_btn'])) {
 
         <main>
             <div class="page-header">
-                <h1><strong>Event</strong></h1>
+                <h1 style="overflow-y: hidden;"><strong>Event</strong></h1>
             </div>
         </main>
         <div class="container-fluid" id="page-content">
@@ -510,7 +519,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_btn'])) {
             <div class="container" id="main-container">
                 <div class="container-fluid" id="content-container">
                     <div class="container-title">
-                        <h4>More Details</h4>
+                        <h4 style="overflow-y: hidden;">More Details</h4>
                     </div>
                     <div class="row g-0 position-relative">
                         <div class="col-md-6 mb-md-0 p-md-4">
@@ -542,7 +551,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_btn'])) {
                             ?>
                         </div>
                         <div class="col-md-6 p-4 ps-md-0" id="right-side">
-                            <h3 class="mt-0"> <strong><?php echo $row['title'] ?></strong></h3>
+                            <h3 class="mt-0" style="overflow-y: hidden;"> <strong><?php echo $row['title'] ?></strong></h3>
 
                             <fieldset disabled>
                                 <div class="description">
@@ -559,11 +568,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_btn'])) {
                                             <div class="date d-flex">
                                                 <div class="me-3" style="width: 100%;">
                                                     <label for="">Date:</label>
-                                                    <input type="date" class="form-control form-label mt-3" value="<?php echo $row['date'] ?>">
+                                                    <input type="text" class="form-control form-label mt-3" value="<?php echo $date ?>">
                                                 </div>
                                                 <div style="width: 100%;">
                                                     <label for="">Time:</label>
-                                                    <input type="text" class="form-control form-label mt-3" value="<?php echo $row['start_time'] . ' To ' . $row['end_time'] ?>">
+                                                    <input type="text" class="form-control form-label mt-3" value="<?php echo $startTime . ' To ' . $endTime ?>">
                                                 </div>
                                             </div>
                                             <div class="date">
@@ -625,18 +634,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_btn'])) {
                                                     <form method="POST">
                                                         <input type="hidden" name="event_id" id="modal_event_id">
                                                         <input type="hidden" name="title" id="modal_event_title">
-                                                        <div class="form-group">
-                                                            <label for="donorName">Name</label>
-                                                            <input type="text" name="name" class="form-control" id="donorName" placeholder="Enter your name" required>
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label for="donorEmail">Email</label>
-                                                            <input type="email" name="email" class="form-control" id="donorEmail" placeholder="Enter your email" required>
-                                                        </div>
-                                                        <div class="form-group">
-                                                            <label for="donorEmail">Contact Number</label>
-                                                            <input type="number" name="contact_number" class="form-control" id="donorNumber" placeholder="Enter your contact number" required>
-                                                        </div>
                                                         <div class="form-group">
                                                             <label for="donationAmount">Donation Amount</label>
                                                             <input type="number" name="donation_amount" class="form-control" id="donationAmount" onkeyup="donationValue()" placeholder="Enter amount" required>

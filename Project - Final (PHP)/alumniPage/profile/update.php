@@ -209,7 +209,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                 <div>
                     <img id="preview" src="data:image/jpeg;base64,<?php echo base64_encode($row['picture']); ?>" style="width:83px;height:83px; border-radius: 100%;border: 2px solid white;">
                 </div>
-                <h4><?php echo $user['fname']; ?></h4>
+                <h4 style="overflow-y: hidden;"><?php echo $user['fname']; ?></h4>
                 <small style="color: white;"><?php echo $user['email']; ?></small>
             </div>
 
@@ -263,7 +263,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         </header>
         <main>
             <div class="page-header">
-                <h1><strong>Profile</strong></h1>
+                <h1 style="overflow-y: hidden;"><strong>Profile</strong></h1>
             </div>
             <div class="page-content">
                 <div class="row">

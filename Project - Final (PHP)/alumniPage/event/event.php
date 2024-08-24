@@ -174,7 +174,6 @@ if (isset($_GET['ide'])) {
     </script>";
     sleep(2);
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -284,7 +283,7 @@ if (isset($_GET['ide'])) {
                 <div>
                     <img id="preview" src="data:image/jpeg;base64,<?php echo base64_encode($row['picture']); ?>" style="width:83px;height:83px; border-radius: 100%;border: 2px solid white;">
                 </div>
-                <h4><?php echo $user['fname']; ?></h4>
+                <h4 style="overflow-y: hidden;"><?php echo $user['fname']; ?></h4>
                 <small style="color: white;"><?php echo $user['email']; ?></small>
             </div>
 
@@ -346,13 +345,13 @@ if (isset($_GET['ide'])) {
 
         <main>
             <div class="page-header">
-                <h1><strong>Event</strong></h1>
+                <h1 style="overflow-y: hidden;"><strong>Event</strong></h1>
             </div>
         </main>
         <div class="container-fluid" id="main-container">
             <div class="container-fluid" id="content-container">
                 <div class="container-title">
-                    <h4>Event List</h4>
+                    <h4 style="overflow-y: hidden;">Event List</h4>
                 </div>
                 <div class="congainer-fluid" id="column-header">
                     <div class="row">
@@ -397,11 +396,13 @@ if (isset($_GET['ide'])) {
                                     $time = $row["start_time"] . " - " . $row["end_time"];
                                     $address = $row['address'];
                                     $displayAddress = str_replace(',', '', $address);
+                                    $date = date('F j, Y, g:i A', strtotime($row['date']));
+
 
                             ?>
                                     <tr>
                                         <td class="inline"><?php echo $row['title'] ?></td>
-                                        <td class="inline"><?php echo $row['date'] ?></td>
+                                        <td class="inline"><?php echo $date ?></td>
                                         <td class="inline"><?php echo htmlspecialchars($time) ?></td>
                                         <td class="inline"><?php echo $row['venue'] ?></td>
                                         <td class="inline"><?php echo $displayAddress ?></td>

@@ -105,6 +105,7 @@ if ($result->num_rows > 0) {
     $email = $row['email'];
     $password = $row['password'];
     $recoveryEmail = $row['recovery_email'];
+    $dateCreation = $row['date_created'];
 
     $address = $row['address'];
     $displayAddress = str_replace(',', '', $address);
@@ -125,6 +126,8 @@ if (isset($_GET['id'])) {
             });
         </script>";
 }
+
+$dateCreation = date('F j, Y, g:i A', strtotime($row['date_created']));
 ?>
 
 <!DOCTYPE html>
@@ -194,7 +197,7 @@ if (isset($_GET['id'])) {
                 <div>
                     <img id="preview" src="data:image/jpeg;base64,<?php echo base64_encode($row['picture']); ?>" style="width:83px;height:83px; border-radius: 100%;border: 2px solid white;">
                 </div>
-                <h4><?php echo $user['fname']; ?></h4>
+                <h4 style="overflow-y: hidden;"><?php echo $user['fname']; ?></h4>
                 <small style="color: white;"><?php echo $user['email']; ?></small>
             </div>
 
@@ -209,7 +212,7 @@ if (isset($_GET['id'])) {
                     <li>
                         <a href="./profile.php" class="active">
                             <span class="las la-user-alt" style="color:#fff"></span>
-                            <small>PROFILE</small>
+                            <small >PROFILE</small>
                         </a>
                     </li>
                     <li>
@@ -251,7 +254,7 @@ if (isset($_GET['id'])) {
         <main>
 
             <div class="page-header" style="color: #74767d;">
-                <h1><strong>Profile</strong></h1>
+                <h1 style="overflow-y: hidden;"><strong>Profile</strong></h1>
             </div>
 
             <div class="page-content">
@@ -299,6 +302,10 @@ if (isset($_GET['id'])) {
                                             <div class="mb-3">
                                                 <label for="disabledTextInput" class="form-label">EMAIL ADDRESS</label>
                                                 <input email="email" id="disabledTextInput" class="form-control" value="<?php echo htmlspecialchars($email); ?>" />
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="disabledTextInput" class="form-label">ACCOUNT CREATED</label>
+                                                <input email="text" id="disabledTextInput" class="form-control" value="<?php echo htmlspecialchars($dateCreation); ?>" />
                                             </div>
                                         </fieldset>
                                     </form>

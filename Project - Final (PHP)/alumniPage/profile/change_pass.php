@@ -245,7 +245,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <div>
                     <img id="preview" src="data:image/jpeg;base64,<?php echo base64_encode($row['picture']); ?>" style="width:83px;height:83px; border-radius: 100%;border: 2px solid white;">
                 </div>
-                <h4><?php echo $user['fname']; ?></h4>
+                <h4 style="overflow-y: hidden;"><?php echo $user['fname']; ?></h4>
                 <small style="color: white;"><?php echo $user['email']; ?></small>
             </div>
 
@@ -296,7 +296,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         <main>
             <div class="page-header">
-                <h1><strong>Profile</strong></h1>
+                <h1 style="overflow-y: hidden;"><strong>Profile</strong></h1>
             </div>
 
             <div class="container-fluid" id="page-content">
@@ -304,7 +304,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <div class="container-fluid" id="main-container">
                         <div class="container-fluid" id="content-container">
                             <span>
-                                <h3>CHANGE PASSWORD</h3>
+                                <h3 style="overflow-y: hidden;">CHANGE PASSWORD</h3>
                             </span>
                             <div class="alert alert-danger text-center error-list" id="real-time-errors"></div>
                             <br>
