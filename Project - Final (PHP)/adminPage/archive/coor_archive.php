@@ -415,8 +415,8 @@ if (isset($_GET['ide'])) {
                                             <td class="inline"><?php echo htmlspecialchars($fullname) ?></td>
                                             <td class="inline"><?php echo $row['contact'] ?></td>
                                             <td class="inline"><?php echo $row['email'] ?></td>
-                                            <td class="inline"><?php echo ($row['last_login'] == '0000-00-00 00:00:00') ? '-- / -- / --' : $row['last_login']; ?></td>
-                                            <td class="inline"><?php echo $row['date_archived'] ?></td>
+                                            <td class="inline"><?php echo ($row['last_login'] == '0000-00-00 00:00:00') ? '-- / -- / --' : date('F j, Y, g:i A', strtotime($row['last_login'])) ?></td>
+                                            <td class="inline"><?php echo date('F j, Y, g:i A', strtotime($row['date_archived'])) ?></td>
                                             <?php
                                             echo "
                                                 <td class='inline act'>

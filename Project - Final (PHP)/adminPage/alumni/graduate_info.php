@@ -158,7 +158,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $displayAddress = str_replace(',', '', $address);
         $email = $row['email'];
         $file = $row['picture'];
-        $uploadDate = $row['date_created'];
+        $uploadDate = date('F j, Y, g:i A', strtotime($row['date_created']));
         $batch = $row["batch"];
     }
 }

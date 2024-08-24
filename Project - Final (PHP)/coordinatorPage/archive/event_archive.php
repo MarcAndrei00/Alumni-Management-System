@@ -407,14 +407,14 @@ if (isset($_GET['ide'])) {
                                 <?php
                                 if ($result->num_rows > 0) {
                                     while ($row = $result->fetch_assoc()) {
-                                        $time = $row["start_time"] . " - " . $row["end_time"];
+                                        $time = date('g:i A', strtotime($row['start_time'])) . " - " . date('g:i A', strtotime($row['end_time']));
                                         $address = $row['address'];
                                         $displayAddress = str_replace(',', '', $address);
 
                                 ?>
                                         <tr>
                                             <td class="inline"><?php echo $row['title'] ?></td>
-                                            <td class="inline"><?php echo $row['date'] ?></td>
+                                            <td class="inline"><?php echo date('F j, Y', strtotime($row['date'])) ?></td>
                                             <td class="inline"><?php echo htmlspecialchars($time) ?></td>
                                             <td class="inline"><?php echo $row['venue'] ?></td>
                                             <td class="inline"><?php echo $displayAddress ?></td>
@@ -423,7 +423,7 @@ if (isset($_GET['ide'])) {
                                             <td class="inline"><?php echo $row['going'] ?></td>
                                             <td class="inline"><?php echo $row['interested'] ?></td>
                                             <td class="inline"><?php echo $row['not_interested'] ?></td>
-                                            <td class="inline"><?php echo $row['date_archived'] ?></td>
+                                            <td class="inline"><?php echo date('F j, Y', strtotime($row['date_archived'])) ?></td>
                                             <?php
                                             echo "
                                                 <td class='inline act'>

@@ -129,7 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             $address = $row['address'];
             $displayAddress = str_replace(',', '', $address);
             $email = $row['email'];
-            $uploadDate = $row['date_created'];
+            $uploadDate = date('F j, Y, g:i A', strtotime($row['date_created']));
             $file = $row['picture'];
         } else {
             header("location: ./alumni.php");
@@ -180,6 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     <link rel="stylesheet" href="	https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="	https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js">
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
@@ -411,7 +412,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
                                 <label class="col-sm-3 col-form-label" style="font-size: 20px;" for="name">Date Uploaded:</label>
                             </div>
                             <div class="col">
-                                <input class="form-control" type="email" id="email" name="email" disabled value="<?php echo $uploadDate; ?>">
+                                <input class="form-control" type="email" id="email" name="email" disabled value="<?php echo date('F j, Y, g:i A', strtotime($row['date_created'])); ?>">
                             </div>
                         </div>
                     </div>

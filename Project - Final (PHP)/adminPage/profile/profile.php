@@ -91,6 +91,7 @@ if ($result->num_rows > 0) {
     $contact = $row['contact'];
     $email = $row['email'];
     $password = $row['password'];
+    $dateCreation = date('F j, Y, g:i A', strtotime($row['date_created']));
     // Add more fields as needed
 } else {
     echo "0 results";
@@ -253,6 +254,10 @@ if ($result->num_rows > 0) {
                                             <div class="mb-3">
                                                 <label for="disabledTextInput" class="form-label">EMAIL ADDRESS</label>
                                                 <input email="email" id="disabledTextInput" class="form-control" placeholder="Email" value="<?php echo htmlspecialchars($email); ?>" />
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="disabledTextInput" class="form-label">ACCOUNT CREATED</label>
+                                                <input email="email" id="disabledTextInput" class="form-control" placeholder="Email" value="<?php echo htmlspecialchars($dateCreation); ?>" />
                                             </div>
                                     </form>
                                 </div>

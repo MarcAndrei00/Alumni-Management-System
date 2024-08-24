@@ -396,9 +396,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         if ($result->num_rows > 0) {
                             while ($rowww = $result->fetch_assoc()) {
                         ?>
-                                <div class="announcement" data-id="<?php echo $rowww['announce_id']; ?>" data-title="<?php echo $rowww['title']; ?>" data-body="<?php echo $rowww['body']; ?>" data-date="<?php echo $rowww['creation_date']; ?>">
+                                <div class="announcement" data-id="<?php echo $rowww['announce_id']; ?>" data-title="<?php echo $rowww['title']; ?>" data-body="<?php echo $rowww['body']; ?>" data-date="<?php echo date('m/d/Y, h:iA', strtotime($rowww['creation_date'])); ?>">
                                     <div class="announcement-title inline"><?php echo $rowww['title']; ?></div>
-                                    <div class="announcement-date" style="text-align: right;"><small>Posted on: <?php echo $rowww['creation_date']; ?></small> </div>
+                                    <div class="announcement-date" style="text-align: right;"><small>Posted on: <?php echo date('m/d/Y', strtotime($rowww['creation_date'])); ?></small> </div>
                                     <div class="inlineBody"><?php echo $rowww['body']; ?></div>
                                 </div>
                         <?php
