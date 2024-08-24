@@ -83,7 +83,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 
       if (mysqli_num_rows($check_verifcode_qry) > 0) {
 
-        $sql_archive = "UPDATE admin SET email = '$inputEmail' WHERE coor_id=$account";
+        $sql_archive = "UPDATE coordinator SET email = '$inputEmail' WHERE coor_id=$account";
         $conn->query($sql_archive);
 
         $_SESSION['user_email'] = $inputEmail;
@@ -93,7 +93,7 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
         $icon = 'success';
         $iconHtml = '<i class="fas fa-check-circle"></i>';
         $title = 'Verification code match!';
-        $text = 'You will be redirected shortly to Dashboard';
+        $text = 'You will be redirected shortly to your profile';
         $redirectUrl = './profile.php';
 
         echo "<script>

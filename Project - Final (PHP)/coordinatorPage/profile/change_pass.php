@@ -202,9 +202,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            text-decoration: none;
+            list-style-type: none;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            overflow-x: hidden;
+        }
         .swal2-popup {
             padding-bottom: 30px;
             /* Adjust the padding as needed */
+        }
+        .title,.icon{
+            overflow-y: hidden;
         }
 
         .confirm-button-class,
@@ -244,7 +258,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <div class="side-content">
             <div class="profile">
                 <i class="bi bi-person-circle"></i>
-                <h4><?php echo $user['fname']; ?></h4>
+                <h4 style="overflow-y: hidden;"><?php echo $user['fname']; ?></h4>
                 <small style="color: white;"><?php echo $user['email']; ?></small>
             </div>
 
@@ -325,7 +339,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         <main>
             <div class="page-header">
-                <h1><strong>Profile</strong></h1>
+                <h1 style="overflow-y: hidden;"><strong>Profile</strong></h1>
             </div>
 
             <div class="container-fluid" id="page-content">
@@ -333,7 +347,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <div class="container-fluid" id="main-container">
                         <div class="container-fluid" id="content-container">
                             <span>
-                                <h3>CHANGE PASSWORD</h3>
+                                <h3 style="overflow-y: hidden;">CHANGE PASSWORD</h3>
                             </span>
                             <div class="alert alert-danger text-center error-list" id="real-time-errors"></div>
                             <br>
@@ -403,9 +417,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         confirmButtonText: 'Ok',
                         cancelButtonText: 'Cancel',
                         customClass: {
-                            confirmButton: 'confirm-button-class',
-                            cancelButton: 'cancel-button-class'
-                        }
+                                    icon: 'icon',
+                                    title: 'title',
+                                    confirmButton: 'confirm-button-class',
+                                    cancelButton: 'cancel-button-class'
+                                }
                     }).then((result) => {
                         if (result.isConfirmed) {
                             console.log("User confirmed action");
@@ -488,7 +504,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 iconHtml: iconHtml, // Custom icon using Font Awesome
                 title: title,
                 customClass: {
-                    popup: 'swal-custom'
+                    popup: 'swal-custom',
+                    icon: 'icon',
+                    title: 'title',
                 },
                 showConfirmButton: true,
                 confirmButtonColor: '#4CAF50',
@@ -507,7 +525,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 title: title,
                 text: text,
                 customClass: {
-                    popup: 'swal-custom'
+                    popup: 'swal-custom',
+                    icon: 'icon',
+                    title: 'title',
                 },
                 showConfirmButton: true,
                 confirmButtonColor: '#4CAF50',
