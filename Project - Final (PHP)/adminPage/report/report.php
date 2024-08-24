@@ -76,6 +76,8 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 }
 
 
+
+
 // COUNTS
 //query for alumni count
 $sql_alumni = "SELECT COUNT(student_id) AS alumni_count FROM alumni";
@@ -83,63 +85,268 @@ $result_alumni = $conn->query($sql_alumni);
 $row_alumni = $result_alumni->fetch_assoc();
 $count_alumni = $row_alumni['alumni_count'];
 
-//query for alumni count
-$sql_coordinator = "SELECT COUNT(coor_id) AS coordinators_count FROM coordinator";
-$result_coordinator = $conn->query($sql_coordinator);
-$row_coordinator = $result_coordinator->fetch_assoc();
-$coordinator_count = $row_coordinator['coordinators_count'];
-
 //query for events count
 $sql_event = "SELECT COUNT(event_id) AS events_count FROM event";
 $result_event = $conn->query($sql_event);
 $row_event = $result_event->fetch_assoc();
 $event_count = $row_event['events_count'];
 
-
-$sql = "SELECT course, COUNT(*) as count FROM alumni GROUP BY course";
-$result = $conn->query($sql);
-
-// DTA FOR CHART
-$labels = ['BAJ', 'BECEd', 'BEEd', 'BSBM', 'BSOA', 'BSEntrep', 'BSHM', 'BSIT', 'BSCS', 'BSc(Psych)'];
-$data = array_fill(0, count($labels), 0);
-
-if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $index = array_search($row['course'], $labels);
-        if ($index !== false) {
-            $data[$index] = $row['count'];
-        }
-    }
-}
-
 // EVENT COUNT EVERY MONTH
 $query_event = "SELECT MONTH(date) as month, COUNT(*) as count FROM event GROUP BY MONTH(date)";
 $res_event = $conn->query($query_event);
 
 $labels_event = ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.'];
-$data_event = array_fill(0, 12, 0);
+$data_event = array_fill(0, 12, 0); // Initialize an array with 12 zeros for each month
 
 if ($res_event->num_rows > 0) {
     while ($row_event = $res_event->fetch_assoc()) {
-        $data_event[$row_event['month'] - 1] = $row_event['count'];
+        $data_event[$row_event['month'] - 1] = $row_event['count']; // Store the count for the respective month
     }
 }
 
+// DONATION COUNT PER MONTH
+$query_event = "SELECT MONTH(donate_date) as month, COUNT(*) as count FROM donation_table GROUP BY MONTH(donate_date)";
+$res_event = $conn->query($query_event);
 
-// Query to get the count of alumni registered in each month
-$qeury_alumniCount = "SELECT MONTH(date_created) as month, COUNT(*) as count FROM alumni GROUP BY MONTH(date_created)
-";
+$labels_event = ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.'];
+$data_donation = array_fill(0, 12, 0); // Initialize an array with 12 zeros for each month
 
-// Execute the query
-$res_alumniCount = $conn->query($qeury_alumniCount);
+if ($res_event->num_rows > 0) {
+    while ($row_event = $res_event->fetch_assoc()) {
+        $data_donation[$row_event['month'] - 1] = $row_event['count']; // Store the count for the respective month
+    }
+}
 
-// Prepare data for the chart
-$labels_alumniCount = ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.'];
-$data_alumniCount = array_fill(0, 12, 0);
+$query_event = "SELECT MONTH(date_created) as month, COUNT(*) as count FROM alumni GROUP BY MONTH(date_created)";
+$res_event = $conn->query($query_event);
 
-if ($res_alumniCount->num_rows > 0) {
-    while ($row_alumniCount = $res_alumniCount->fetch_assoc()) {
-        $data_alumniCount[$row_alumniCount['month'] - 1] = $row_alumniCount['count'];
+$labels_event = ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.'];
+$registered_alumni = array_fill(0, 12, 0); // Initialize an array with 12 zeros for each month
+
+if ($res_event->num_rows > 0) {
+    while ($row_event = $res_event->fetch_assoc()) {
+        $registered_alumni[$row_event['month'] - 1] = $row_event['count']; // Store the count for the respective month
+    }
+}
+
+// For registered alumni
+$sql = "SELECT COUNT(*) as count FROM alumni";
+$result = $conn->query($sql);
+$registeredCount = $result->fetch_assoc()['count'];
+
+// For unregistered alumni (from list_of_graduate)
+$sql2 = "SELECT COUNT(*) as count FROM list_of_graduate";
+$result2 = $conn->query($sql2);
+$unregisteredCount = $result2->fetch_assoc()['count'];
+
+// ALUMNI FOR EVERY COURSES
+$alumni_list = "SELECT * FROM alumni";
+$result = $conn->query($alumni_list);
+
+// verified
+$verified = "SELECT COUNT(*) as count FROM alumni WHERE status='Verified'";
+$result_verified = $conn->query($verified);
+$verified = $result_verified->fetch_assoc()['count'];
+
+// unverified
+$unverified = "SELECT COUNT(*) as count FROM alumni WHERE status='Unverified'";
+$result_unverified = $conn->query($unverified);
+$unverified = $result_unverified->fetch_assoc()['count'];
+
+// inactive
+$inactive = "SELECT COUNT(*) as count FROM alumni_archive";
+$result_inactive = $conn->query($inactive);
+$inactive = $result_inactive->fetch_assoc()['count'];
+
+
+// ALUMNI FOR EVERY COURSES
+$alumni_list = "SELECT * FROM alumni";
+$result = $conn->query($alumni_list);
+
+// Initialize course counts
+$course_counts = [
+    'BAJ' => 0,
+    'BECEd' => 0,
+    'BEEd' => 0,
+    'BSBM' => 0,
+    'BSOA' => 0,
+    'BSEntrep' => 0,
+    'BSHM' => 0,
+    'BSIT' => 0,
+    'BSCS' => 0,
+    'BSc(Psych)' => 0
+];
+
+while ($row = $result->fetch_assoc()) {
+    $courseCode = '';
+
+    switch ($row['course']) {
+        case 'Bachelor of Arts in Journalism':
+            $courseCode = 'BAJ';
+            break;
+        case 'Bachelor of Secondary Education':
+            $courseCode = 'BECEd';
+            break;
+        case 'Bachelor of Elementary Education':
+            $courseCode = 'BEEd';
+            break;
+        case 'Bachelor of Science in Business Management':
+            $courseCode = 'BSBM';
+            break;
+        case 'Bachelor of Science in Office Administration':
+            $courseCode = 'BSOA';
+            break;
+        case 'Bachelor of Science in Entrepreneurship':
+            $courseCode = 'BSEntrep';
+            break;
+        case 'Bachelor of Science in Hospitality Management':
+            $courseCode = 'BSHM';
+            break;
+        case 'Bachelor of Science in Information Technology':
+            $courseCode = 'BSIT';
+            break;
+        case 'Bachelor of Science in Computer Science':
+            $courseCode = 'BSCS';
+            break;
+        case 'Bachelor of Science in Psychology':
+            $courseCode = 'BSc(Psych)';
+            break;
+    }
+
+    // Increment the course count
+    if (!empty($courseCode)) {
+        $course_counts[$courseCode]++;
+    }
+}
+
+// Initialize course counts for verified, unverified, and inactive alumni
+$verifCourse = $unverifCourse = $inactiveCourse = [
+    'BAJ' => 0,
+    'BECEd' => 0,
+    'BEEd' => 0,
+    'BSBM' => 0,
+    'BSOA' => 0,
+    'BSEntrep' => 0,
+    'BSHM' => 0,
+    'BSIT' => 0,
+    'BSCS' => 0,
+    'BSc(Psych)' => 0
+];
+
+// Fetch verified alumni
+$alumni_verified = "SELECT * FROM alumni WHERE status='Verified'";
+$resVerified = $conn->query($alumni_verified);
+
+while ($row = $resVerified->fetch_assoc()) {
+    switch ($row['course']) {
+        case '  ':
+            $verifCourse['BAJ']++;
+            break;
+        case 'Bachelor of Secondary Education':
+            $verifCourse['BECEd']++;
+            break;
+        case 'Bachelor of Elementary Education':
+            $verifCourse['BEEd']++;
+            break;
+        case 'Bachelor of Science in Business Management':
+            $verifCourse['BSBM']++;
+            break;
+        case 'Bachelor of Science in Office Administration':
+            $verifCourse['BSOA']++;
+            break;
+        case 'Bachelor of Science in Entrepreneurship':
+            $verifCourse['BSEntrep']++;
+            break;
+        case 'Bachelor of Science in Hospitality Management':
+            $verifCourse['BSHM']++;
+            break;
+        case 'Bachelor of Science in Information Technology':
+            $verifCourse['BSIT']++;
+            break;
+        case 'Bachelor of Science in Computer Science':
+            $verifCourse['BSCS']++;
+            break;
+        case 'Bachelor of Science in Psychology':
+            $verifCourse['BSc(Psych)']++;
+            break;
+    }
+}
+
+// Fetch unverified alumni
+$alumni_unverified = "SELECT * FROM alumni WHERE status='Unverified'";
+$resUnverified = $conn->query($alumni_unverified);
+
+while ($row = $resUnverified->fetch_assoc()) {
+    switch ($row['course']) {
+        case 'Bachelor of Arts in Journalism':
+            $unverifCourse['BAJ']++;
+            break;
+        case 'Bachelor of Secondary Education':
+            $unverifCourse['BECEd']++;
+            break;
+        case 'Bachelor of Elementary Education':
+            $unverifCourse['BEEd']++;
+            break;
+        case 'Bachelor of Science in Business Management':
+            $unverifCourse['BSBM']++;
+            break;
+        case 'Bachelor of Science in Office Administration':
+            $unverifCourse['BSOA']++;
+            break;
+        case 'Bachelor of Science in Entrepreneurship':
+            $unverifCourse['BSEntrep']++;
+            break;
+        case 'Bachelor of Science in Hospitality Management':
+            $unverifCourse['BSHM']++;
+            break;
+        case 'Bachelor of Science in Information Technology':
+            $unverifCourse['BSIT']++;
+            break;
+        case 'Bachelor of Science in Computer Science':
+            $unverifCourse['BSCS']++;
+            break;
+        case 'Bachelor of Science in Psychology':
+            $unverifCourse['BSc(Psych)']++;
+            break;
+    }
+}
+
+// Fetch inactive alumni
+$alumni_inactive = "SELECT * FROM alumni_archive";
+$resInactive = $conn->query($alumni_inactive);
+
+while ($row = $resInactive->fetch_assoc()) {
+    switch ($row['course']) {
+        case 'Bachelor of Arts in Journalism':
+            $inactiveCourse['BAJ']++;
+            break;
+        case 'Bachelor of Secondary Education':
+            $inactiveCourse['BECEd']++;
+            break;
+        case 'Bachelor of Elementary Education':
+            $inactiveCourse['BEEd']++;
+            break;
+        case 'Bachelor of Science in Business Management':
+            $inactiveCourse['BSBM']++;
+            break;
+        case 'Bachelor of Science in Office Administration':
+            $inactiveCourse['BSOA']++;
+            break;
+        case 'Bachelor of Science in Entrepreneurship':
+            $inactiveCourse['BSEntrep']++;
+            break;
+        case 'Bachelor of Science in Hospitality Management':
+            $inactiveCourse['BSHM']++;
+            break;
+        case 'Bachelor of Science in Information Technology':
+            $inactiveCourse['BSIT']++;
+            break;
+        case 'Bachelor of Science in Computer Science':
+            $inactiveCourse['BSCS']++;
+            break;
+        case 'Bachelor of Science in Psychology':
+            $inactiveCourse['BSc(Psych)']++;
+            break;
     }
 }
 ?>
@@ -384,46 +591,53 @@ if ($res_alumniCount->num_rows > 0) {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha512-JPcRR8yFa8mmCsfrw4TNte1ZvF1e3+1SdGMslZvmrzDYxS69J7J49vkFL8u6u8PlPJK+H3voElBtUCzaXj+6ig==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
         const data = {
-            labels: ['BSIT', 'BSCS', 'BSOA', 'BAJ', 'BECED', 'BEED', 'BSBM', 'BSENTREP', 'BSHM', 'BSPsych'], // Updated labels
+            labels: ['BSIT', 'BSCS', 'BSOA', 'BAJ', 'BECEd', 'BEEd', 'BSBM', 'BSEntrep', 'BSHM', 'BSPsych'],
             datasets: [{
                 label: 'Alumni Registered',
-                data: [18, 12, 16, 19, 12, 10, 15, 11, 13, 17], // Ensure data corresponds to each course
+                data: [
+                    <?= $course_counts['BSIT']; ?>,
+                    <?= $course_counts['BSCS']; ?>,
+                    <?= $course_counts['BSOA']; ?>,
+                    <?= $course_counts['BAJ']; ?>,
+                    <?= $course_counts['BECEd']; ?>,
+                    <?= $course_counts['BEEd']; ?>,
+                    <?= $course_counts['BSBM']; ?>,
+                    <?= $course_counts['BSEntrep']; ?>,
+                    <?= $course_counts['BSHM']; ?>,
+                    <?= $course_counts['BSc(Psych)']; ?>
+                ],
                 backgroundColor: [
-                'rgba(255, 26, 104, 0.5)',
-                'rgba(54, 162, 235, 0.5)',
-                'rgba(255, 206, 86, 0.5)',
-                'rgba(75, 192, 192, 0.5)',
-                'rgba(153, 102, 255, 0.5)',
-                'rgba(255, 159, 64, 0.5)',
-                'rgba(0, 0, 0, 0.5)',
-                'rgba(123, 50, 123, 0.5)',
-                'rgba(189, 183, 107, 0.5)',
-                'rgba(72, 61, 139, 0.5)'
-            ],
-            borderColor: [
-                'rgba(255, 26, 104, 1)',
-                'rgba(54, 162, 235, 1)',
-                'rgba(255, 206, 86, 1)',
-                'rgba(75, 192, 192, 1)',
-                'rgba(153, 102, 255, 1)',
-                'rgba(255, 159, 64, 1)',
-                'rgba(0, 0, 0, 1)',
-                'rgba(123, 50, 123, 1)',
-                'rgba(189, 183, 107, 1)',
-                'rgba(72, 61, 139, 1)'
-            ],
-            borderWidth: 1
-
+                    'rgba(255, 26, 104, 0.5)',
+                    'rgba(54, 162, 235, 0.5)',
+                    'rgba(255, 206, 86, 0.5)',
+                    'rgba(75, 192, 192, 0.5)',
+                    'rgba(153, 102, 255, 0.5)',
+                    'rgba(255, 159, 64, 0.5)',
+                    'rgba(0, 0, 0, 0.5)',
+                    'rgba(123, 50, 123, 0.5)',
+                    'rgba(189, 183, 107, 0.5)',
+                    'rgba(72, 61, 139, 0.5)'
+                ],
+                borderColor: [
+                    'rgba(255, 26, 104, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(0, 0, 0, 1)',
+                    'rgba(123, 50, 123, 1)',
+                    'rgba(189, 183, 107, 1)',
+                    'rgba(72, 61, 139, 1)'
+                ],
+                borderWidth: 1
             }]
         };
-
-        // Use the same course names for datalabels
-        const courseNames = ['BSIT', 'BSCS', 'BSOA', 'BAJ', 'BECED', 'BEED', 'BSBM', 'BSENTREP', 'BSHM', 'BSPsych'];
 
         // config 
         const config = {
             type: 'pie',
-            data,
+            data: data,
             options: {
                 plugins: {
                     tooltip: {
@@ -439,10 +653,9 @@ if ($res_alumniCount->num_rows > 0) {
                     }
                 }
             },
-            plugins: [ChartDataLabels],
+            plugins: [ChartDataLabels]
         };
 
-        
 
         // render init block
         const myChart = new Chart(
@@ -450,7 +663,7 @@ if ($res_alumniCount->num_rows > 0) {
             config
         );
         // Common Colors for Consistency
-        
+
         const colors = {
             background: [
                 'rgba(255, 26, 104, 0.2)',
@@ -465,16 +678,16 @@ if ($res_alumniCount->num_rows > 0) {
                 'rgba(72, 61, 139, 0.2)'
             ],
             border: [
-                'rgba(255, 26, 104, 1)', 
-                'rgba(54, 162, 235, 1)', 
-                'rgba(255, 206, 86, 1)', 
-                'rgba(75, 192, 192, 1)', 
+                'rgba(255, 26, 104, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
                 'rgba(153, 102, 255, 1)',
-                'rgba(255, 159, 64, 1)', 
-                'rgba(0, 0, 0, 1)', 
-                'rgba(123, 50, 123, 1)', 
-                'rgba(189, 183, 107, 1)', 
-                'rgba(72, 61, 139, 1)' 
+                'rgba(255, 159, 64, 1)',
+                'rgba(0, 0, 0, 1)',
+                'rgba(123, 50, 123, 1)',
+                'rgba(189, 183, 107, 1)',
+                'rgba(72, 61, 139, 1)'
             ]
 
         };
@@ -519,144 +732,202 @@ if ($res_alumniCount->num_rows > 0) {
                 options: {
                     scales: {
                         y: {
-                            beginAtZero: true
+                            beginAtZero: true, // Start the y-axis at 0
+                            ticks: {
+                                stepSize: 1, // Use whole numbers for y-axis increments
+                                callback: function(value) {
+                                    return Number.isInteger(value) ? value : ''; // Only display whole numbers
+                                }
+                            }
                         }
                     }
                 }
             });
         }
 
-                // Pie Chart: Registered vs Unregistered Alumni
-            const registeredUnregisteredChart = createPieChart(
-                document.getElementById('registeredUnregisteredChart'),
-                ['Registered', 'Unregistered'],
-                [300, 200],
-                {
-                    background: [
-                        'rgba(255, 26, 104, 0.5)',
-                        'rgba(54, 162, 235, 0.5)'
-                    ],
-                    border: [
-                        'rgba(255, 26, 104, 1)',
-                        'rgba(54, 162, 235, 1)'
-                    ]
-                }
-            );
 
-            // Pie Chart: Verified, Unverified, and Inactive Alumni
-            const statusChart = createPieChart(
-                document.getElementById('statusChart'),
-                ['Verified', 'Unverified', 'Inactive'],
-                [150, 250, 100],
-                {
-                    background: [
-                        'rgba(255, 26, 104, 0.5)',
-                        'rgba(54, 162, 235, 0.5)',
-                        'rgba(255, 206, 86, 0.5)'
-                    ],
-                    border: [
-                        'rgba(255, 26, 104, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)'
-                    ]
-                }
-            );
-
-            // Bar Chart: Verified, Unverified, and Inactive Alumni Per Course
-            const statusPerCourseChart = createBarChart(
-                document.getElementById('statusPerCourseChart'),
-                ['BSIT', 'BSCS', 'BSOA', 'BAJ', 'BECED', 'BEED', 'BSBM', 'BSENTREP', 'BSHM', 'BSPsych'],
-                [{
-                        label: 'Verified',
-                        data: [50, 30, 70, 60, 40, 50, 70, 65, 75, 80],
-                        backgroundColor: colors.background[0],
-                        borderColor: colors.border[0], // Solid border color
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Unverified',
-                        data: [20, 40, 60, 30, 20, 35, 50, 45, 55, 60],
-                        backgroundColor: colors.background[1],
-                        borderColor: colors.border[1], // Solid border color
-                        borderWidth: 1
-                    },
-                    {
-                        label: 'Inactive',
-                        data: [10, 50, 40, 20, 30, 25, 35, 30, 40, 50],
-                        backgroundColor: colors.background[2],
-                        borderColor: colors.border[2], // Solid border color
-                        borderWidth: 1
-                    }
+        // Pie Chart: Registered vs Unregistered Alumni
+        const registeredUnregisteredChart = createPieChart(
+            document.getElementById('registeredUnregisteredChart'),
+            ['Registered', 'Unregistered'],
+            [<?php echo $registeredCount; ?>, <?php echo $unregisteredCount; ?>], // Use PHP variables here
+            {
+                background: [
+                    'rgba(255, 26, 104, 0.5)',
+                    'rgba(54, 162, 235, 0.5)'
+                ],
+                border: [
+                    'rgba(255, 26, 104, 1)',
+                    'rgba(54, 162, 235, 1)'
                 ]
-            );
+            }
+        );
 
-            // Bar Chart: Registered Alumni Per Course
-            const registeredPerCourseChart = createBarChart(
-                document.getElementById('registeredPerCourseChart'),
-                ['BSIT', 'BSCS', 'BSOA', 'BAJ', 'BECED', 'BEED', 'BSBM', 'BSENTREP', 'BSHM', 'BSPsych'],
-                [{
-                    label: 'Registered Alumni Per Course',
-                    data: [300, 400, 200, 350, 300, 400, 450, 425, 475, 500],
-                    backgroundColor: colors.background[3],
-                    borderColor: colors.border[3], // Solid border color
+        // Pie Chart: Verified, Unverified, and Inactive Alumni
+        const statusChart = createPieChart(
+            document.getElementById('statusChart'),
+            ['Verified', 'Unverified', 'Inactive'],
+            [<?php echo $verified; ?>, <?php echo $unverified; ?>, <?php echo $inactive; ?>], {
+                background: [
+                    'rgba(255, 26, 104, 0.5)',
+                    'rgba(54, 162, 235, 0.5)',
+                    'rgba(255, 206, 86, 0.5)'
+                ],
+                border: [
+                    'rgba(255, 26, 104, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)'
+                ]
+            }
+        );
+
+        // Bar Chart: Verified, Unverified, and Inactive Alumni Per Course
+        const statusPerCourseChart = createBarChart(
+            document.getElementById('statusPerCourseChart'),
+            ['BSIT', 'BSCS', 'BSOA', 'BAJ', 'BECED', 'BEED', 'BSBM', 'BSEntrep', 'BSHM', 'BSPsych'],
+            [{
+                    label: 'Verified',
+                    data: [
+                        <?= $verifCourse['BSIT']; ?>,
+                        <?= $verifCourse['BSCS']; ?>,
+                        <?= $verifCourse['BSOA']; ?>,
+                        <?= $verifCourse['BAJ']; ?>,
+                        <?= $verifCourse['BECEd']; ?>,
+                        <?= $verifCourse['BEEd']; ?>,
+                        <?= $verifCourse['BSBM']; ?>,
+                        <?= $verifCourse['BSEntrep']; ?>,
+                        <?= $verifCourse['BSHM']; ?>,
+                        <?= $verifCourse['BSc(Psych)']; ?>
+                    ],
+                    backgroundColor: colors.background[0],
+                    borderColor: colors.border[0], // Solid border color
                     borderWidth: 1
-                }]
-            );
-
-            // Bar Chart: Events Created Per Month
-            const eventsPerMonthChart = createBarChart(
-                document.getElementById('eventsPerMonthChart'),
-                ['January', 'February', 'March', 'April'],
-                [{
-                    label: 'Events Created',
-                    data: [5, 10, 8, 6],
-                    backgroundColor: colors.background[4],
-                    borderColor: colors.border[4], // Solid border color
-                    borderWidth: 1
-                }]
-            );
-
-            // Bar Chart: Alumni Registered Per Month
-            const registeredPerMonthChart = createBarChart(
-                document.getElementById('registeredPerMonthChart'),
-                ['January', 'February', 'March', 'April'],
-                [{
-                    label: 'Registered Alumni Every Month',
-                    data: [25, 35, 40, 30],
-                    backgroundColor: colors.background[5],
-                    borderColor: colors.border[5], // Solid border color
-                    borderWidth: 1
-                }]
-            );
-
-            // Doughnut Chart: Donations
-            const donationsChart = new Chart(document.getElementById('donationsChart'), { // Updated ID
-                type: 'doughnut',
-                data: {
-                    labels: ['Jan', 'Feb', 'Mar', 'April'],
-                    datasets: [{
-                        label: 'Total Donation Per Month',
-                        data: [500, 300, 200, 100],
-                        backgroundColor: [
-                            colors.background[0],
-                            colors.background[1],
-                            colors.background[2],
-                            colors.background[3]
-                        ],
-                        borderColor: [
-                            colors.border[0],
-                            colors.border[1],
-                            colors.border[2],
-                            colors.border[3]
-                        ], // Solid border colors
-                        borderWidth: 1
-                    }]
                 },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
+                {
+                    label: 'Unverified',
+                    data: [
+                        <?= $unverifCourse['BSIT']; ?>,
+                        <?= $unverifCourse['BSCS']; ?>,
+                        <?= $unverifCourse['BSOA']; ?>,
+                        <?= $unverifCourse['BAJ']; ?>,
+                        <?= $unverifCourse['BECEd']; ?>,
+                        <?= $unverifCourse['BEEd']; ?>,
+                        <?= $unverifCourse['BSBM']; ?>,
+                        <?= $unverifCourse['BSEntrep']; ?>,
+                        <?= $unverifCourse['BSHM']; ?>,
+                        <?= $unverifCourse['BSc(Psych)']; ?>
+                    ],
+                    backgroundColor: colors.background[1],
+                    borderColor: colors.border[1], // Solid border color
+                    borderWidth: 1
+                },
+                {
+                    label: 'Inactive',
+                    data: [
+                        <?= $inactiveCourse['BSIT']; ?>,
+                        <?= $inactiveCourse['BSCS']; ?>,
+                        <?= $inactiveCourse['BSOA']; ?>,
+                        <?= $inactiveCourse['BAJ']; ?>,
+                        <?= $inactiveCourse['BECEd']; ?>,
+                        <?= $inactiveCourse['BEEd']; ?>,
+                        <?= $inactiveCourse['BSBM']; ?>,
+                        <?= $inactiveCourse['BSEntrep']; ?>,
+                        <?= $inactiveCourse['BSHM']; ?>,
+                        <?= $inactiveCourse['BSc(Psych)']; ?>
+                    ],
+                    backgroundColor: colors.background[2],
+                    borderColor: colors.border[2], // Solid border color
+                    borderWidth: 1
                 }
-            });
+            ]
+        );
+
+
+        // Bar Chart: Registered Alumni Per Course
+        const registeredPerCourseChart = createBarChart(
+            document.getElementById('registeredPerCourseChart'),
+            ['BSIT', 'BSCS', 'BSOA', 'BAJ', 'BECED', 'BEED', 'BSBM', 'BSENTREP', 'BSHM', 'BSPsych'],
+            [{
+                label: 'Registered Alumni Per Course',
+                data: [
+                    <?= $course_counts['BSIT']; ?>,
+                    <?= $course_counts['BSCS']; ?>,
+                    <?= $course_counts['BSOA']; ?>,
+                    <?= $course_counts['BAJ']; ?>,
+                    <?= $course_counts['BECEd']; ?>,
+                    <?= $course_counts['BEEd']; ?>,
+                    <?= $course_counts['BSBM']; ?>,
+                    <?= $course_counts['BSEntrep']; ?>,
+                    <?= $course_counts['BSHM']; ?>,
+                    <?= $course_counts['BSc(Psych)']; ?>
+                ],
+                backgroundColor: colors.background[3],
+                borderColor: colors.border[3], // Solid border color
+                borderWidth: 1
+            }]
+        );
+
+        // Bar Chart: Events Created Per Month
+        const labels_event = <?php echo json_encode($labels_event); ?>;
+        const data_event = <?php echo json_encode($data_event); ?>;
+
+        const eventsPerMonthChart = createBarChart(
+            document.getElementById('eventsPerMonthChart'),
+            labels_event, // Use the labels for all months
+            [{
+                label: 'Events Created',
+                data: data_event, // Use the dynamic event data from PHP
+                backgroundColor: colors.background[4],
+                borderColor: colors.border[4],
+                borderWidth: 1
+            }]
+        );
+
+
+        // Bar Chart: Alumni Registered Per Month
+        const registered_alumni = <?php echo json_encode($registered_alumni); ?>;
+
+        // Create the bar chart with the data using your custom configuration
+        const registeredPerMonthChart = createBarChart(
+            document.getElementById('registeredPerMonthChart'),
+            ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.'],
+            [{
+                label: 'Registered Alumni Every Month',
+                data: registered_alumni, // Use the PHP variable here
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        );
+
+        // Doughnut Chart: Donations
+        const donationsChart = new Chart(document.getElementById('donationsChart'), { // Updated ID
+            type: 'doughnut',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'April'],
+                datasets: [{
+                    label: 'Total Donation Per Month',
+                    data: [500, 300, 200, 100],
+                    backgroundColor: [
+                        colors.background[0],
+                        colors.background[1],
+                        colors.background[2],
+                        colors.background[3]
+                    ],
+                    borderColor: [
+                        colors.border[0],
+                        colors.border[1],
+                        colors.border[2],
+                        colors.border[3]
+                    ], // Solid border colors
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+            }
+        });
 
 
         document.getElementById('download-pdf').addEventListener('click', () => {
@@ -781,9 +1052,18 @@ if ($res_alumniCount->num_rows > 0) {
             const opt = {
                 margin: 0.50,
                 filename: `alumni-report-${formattedDate}.pdf`,
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 }, // Increased scale for better quality
-                jsPDF: { unit: 'in', format: 'legal', orientation: 'portrait' }
+                image: {
+                    type: 'jpeg',
+                    quality: 0.98
+                },
+                html2canvas: {
+                    scale: 2
+                }, // Increased scale for better quality
+                jsPDF: {
+                    unit: 'in',
+                    format: 'legal',
+                    orientation: 'portrait'
+                }
             };
 
             // Generate the PDF from the temporary container
@@ -795,9 +1075,8 @@ if ($res_alumniCount->num_rows > 0) {
 
 
         document.getElementById('refresh-page').addEventListener('click', () => {
-        location.reload();
-    });
-
+            location.reload();
+        });
     </script>
 </body>
 
