@@ -117,7 +117,7 @@ if ($result->num_rows > 0) {
     }
 }
 
-// Query to group donations by month and count them
+// Query to get the donation data
 $query = "SELECT MONTH(donate_date) AS donate_month, COUNT(*) AS donation_count
           FROM donation_table
           GROUP BY donate_month
@@ -125,17 +125,27 @@ $query = "SELECT MONTH(donate_date) AS donate_month, COUNT(*) AS donation_count
 $result = $conn->query($query);
 
 // Initialize months and counts
-$month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
+$month_names = ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.'];
 $months = $month_names;
 $donation_count = array_fill(0, 12, 0); // Initialize all months with 0
+
+// Calculate total donations
+$total_donations = 0;
 
 // Process the query result
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
         $donate_month = $row['donate_month'] - 1;
         $donation_count[$donate_month] = $row['donation_count']; // Update count for the month
+        $total_donations += $row['donation_count']; // Calculate total donations
     }
 }
+
+// Calculate percentages
+$percentages = array_map(function ($count) use ($total_donations) {
+    return $total_donations > 0 ? number_format(($count / $total_donations * 100), 1) : 0;
+}, $donation_count);
+
 
 
 // ALUMNI COUNT
@@ -892,21 +902,33 @@ while ($row = $resInactive->fetch_assoc()) {
 
         // Pie Chart: Donations
         const months = <?php echo json_encode($months); ?>;
-        const donation_count = <?php echo json_encode($donation_count); ?>;
+        const percentages = <?php echo json_encode($percentages); ?>;
 
-        const donationsChart = new Chart(document.getElementById('donationsChart'), {
+        // Create a mapping of months and percentages, keeping all months but setting zero percentages to null
+        const dataWithLabels = months.map((month, index) => ({
+            month: month,
+            percentage: percentages[index]
+        }));
+
+        // Filter out zero percentage values for chart display
+        const filteredData = dataWithLabels.filter(data => data.percentage > 0);
+
+        const filteredMonths = filteredData.map(data => data.month);
+        const filteredPercentages = filteredData.map(data => data.percentage);
+
+        // Configuration for the pie chart
+        const configDonate = {
             type: 'pie',
             data: {
-                labels: months, // Use months from PHP
+                labels: months, // Show all months
                 datasets: [{
                     label: 'Total Donation Per Month',
-                    data: donation_count, // Use donation count from PHP
+                    data: percentages, // Show all data
                     backgroundColor: [
-                        // Define your color array
-                        '#FF6384', '#36A2EB', '#FFCE56', '#E7E9AC', '#4BC0C0', '#FF9F40', '#FFCE56', '#36A2EB', '#FF6384', '#4BC0C0', '#E7E9AC', '#FF9F40'
+                        '#FF8C8C', '#FFB84D', '#FFFF66', '#66FF66', '#66B3FF', '#FF66B2', '#D9B3FF', '#99FFFF', '#FFFF99', '#FFB84D', '#FF6666', '#B3A1FF'
                     ],
                     borderColor: [
-                        '#FF6384', '#36A2EB', '#FFCE56', '#E7E9AC', '#4BC0C0', '#FF9F40', '#FFCE56', '#36A2EB', '#FF6384', '#4BC0C0', '#E7E9AC', '#FF9F40'
+                        '#FF8C8C', '#FFB84D', '#FFFF66', '#66FF66', '#66B3FF', '#FF66B2', '#D9B3FF', '#99FFFF', '#FFFF99', '#FFB84D', '#FF6666', '#B3A1FF'
                     ],
                     borderWidth: 1
                 }]
@@ -914,8 +936,27 @@ while ($row = $resInactive->fetch_assoc()) {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-            }
-        });
+                plugins: {
+                    tooltip: {
+                        enabled: false // Disable tooltips
+                    },
+                    datalabels: {
+                        formatter: (value, context) => {
+                            return value > 0 ? `${value}%` : null; // Show percentage only if value > 0
+                        },
+                        color: '#333', // Darker color for the text
+                        font: {
+                            weight: 'bold',
+                            size: 14
+                        }
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
+        };
+
+        // Initialize the chart
+        const donationsChart = new Chart(document.getElementById('donationsChart'), configDonate);
 
         // Bar Chart for Monthly donation
         const monthly_donation = <?php echo json_encode($monthly_donation); ?>;
