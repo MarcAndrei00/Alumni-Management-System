@@ -464,509 +464,533 @@ while ($row = $resInactive->fetch_assoc()) {
 
     <div class="main-content">
 
-<header>
-    <div class="header-content">
-        <label for="menu-toggle">
-            <span class="las la-bars bars" style="color: white;"></span>
-        </label>
+        <header>
+            <div class="header-content">
+                <label for="menu-toggle">
+                    <span class="las la-bars bars" style="color: white;"></span>
+                </label>
 
-        <div class="header-menu">
-            <label for="">
-            </label>
+                <div class="header-menu">
+                    <label for="">
+                    </label>
 
-            <div class="user">
-                <a href="../logout.php">
-                    <span class="las la-power-off" style="font-size: 30px; border-left: 1px solid #fff; padding-left:10px; color:#fff"></span>
-                </a>
-            </div>
-        </div>
-    </div>
-</header>
-<main>
-    <div class="page-header">
-        <h1><strong>Report</strong></h1>
-    </div>
-
-    <div class="container mt-4 p-3 shadow bg-white rounded d-flex justify-content-between">
-        <div>
-            <button id="refresh-page" class="btn btn-secondary">Refresh</button>
-        </div>
-        <div>
-            <button id="another-page" class="btn btn-success" onclick="window.location.href='../report/reportgraph.php'">List of Graduates</button>
-        </div>
-    </div>
-
-    <div class="container mt-4 p-3 shadow bg-white rounded">
-        <form id="report-form">
-            <div class="summary-boxes">
-                <div id="hidden-content" style="display:none;">
-                    <img src="../../assets/head.jpg" id="header-image" style="width:100%; height:auto;">
-                </div>
-                <div class="summary-box" id="alumni">
-                    <h2>Total Alumni Registered</h2>
-                    <p><?php echo $count_alumni; ?></p>
-                </div>
-                <div class="summary-box" id="events">
-                    <h2>Total Events Posted</h2>
-                    <p><?php echo $event_count; ?></p>
+                    <div class="user">
+                        <a href="../logout.php">
+                            <span class="las la-power-off" style="font-size: 30px; border-left: 1px solid #fff; padding-left:10px; color:#fff"></span>
+                        </a>
+                    </div>
                 </div>
             </div>
-        </form>
+        </header>
+        <main>
+            <div class="page-header">
+                <h1><strong>Report</strong></h1>
+            </div>
+
+            <div class="container mt-4 p-3 shadow bg-white rounded d-flex justify-content-between">
+                <div>
+                    <button id="refresh-page" class="btn btn-secondary">Refresh</button>
+                </div>
+                <div>
+                    <button id="another-page" class="btn btn-success" onclick="window.location.href='../report/reportgraph.php'">List of Graduates</button>
+                </div>
+            </div>
+
+            <div class="container mt-4 p-3 shadow bg-white rounded">
+                <form id="report-form">
+                    <div class="summary-boxes">
+                        <div id="hidden-content" style="display:none;">
+                            <img src="../../assets/head.jpg" id="header-image" style="width:100%; height:auto;">
+                        </div>
+                        <div class="summary-box" id="alumni">
+                            <h2>Total Alumni Registered</h2>
+                            <p><?php echo $count_alumni; ?></p>
+                        </div>
+                        <div class="summary-box" id="events">
+                            <h2>Total Events Posted</h2>
+                            <p><?php echo $event_count; ?></p>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="container mt-4 p-3 shadow bg-white rounded d-flex justify-content-between">
+                <div class="chartCard">
+                    <div class="chartBox">
+                        <canvas id="myChart"></canvas>
+                    </div>
+                </div>
+                <!-- Pie Charts -->
+                <div class="chartCard">
+                    <div class="chartBox">
+                        <canvas id="registeredUnregisteredChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="container mt-4 p-3 shadow bg-white rounded d-flex justify-content-between">
+                <div class="chartCard">
+                    <div class="chartBox">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+                <div class="chartCard">
+                    <div class="chartBoxs">
+                        <canvas id="statusPerCourseChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="container mt-4 p-3 shadow bg-white rounded d-flex justify-content-between">
+                <!-- Bar Charts -->
+                <div class="chartCard">
+                    <div class="chartBoxs">
+                        <canvas id="registeredPerCourseChart"></canvas>
+                    </div>
+                </div>
+                <div class="chartCard">
+                    <div class="chartBoxs">
+                        <canvas id="eventsPerMonthChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="container mt-4 p-3 shadow bg-white rounded d-flex justify-content-between">
+                <!-- Doughnut Chart: Donations -->
+                <div class="chartCard">
+                    <div class="chartBoxs">
+                        <canvas id="donationsChart"></canvas> <!-- Updated ID -->
+                    </div>
+                </div>
+                <!-- Table: Donations Data -->
+                <div class="chartCard">
+                    <div class="chartBoxs">
+                        <canvas id="donationPerMonthChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="container mt-4 p-3 shadow bg-white rounded d-flex justify-content-between">
+                <div class="chartCard">
+                    <div class="chartBoxs">
+                        <canvas id="registeredPerMonthChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
     </div>
-    <div class="container mt-4 p-3 shadow bg-white rounded d-flex justify-content-between">
-        <div class="chartCard">
-            <div class="chartBox">
-                <canvas id="myChart"></canvas>
-            </div>
-        </div>
-        <!-- Pie Charts -->
-        <div class="chartCard">
-            <div class="chartBox">
-                <canvas id="registeredUnregisteredChart"></canvas>
-            </div>
-        </div>
+    </main>
     </div>
-    <div class="container mt-4 p-3 shadow bg-white rounded d-flex justify-content-between">
-        <div class="chartCard">
-            <div class="chartBox">
-                <canvas id="statusChart"></canvas>
-            </div>
-        </div>
-        <div class="chartCard">
-            <div class="chartBoxs">
-                <canvas id="statusPerCourseChart"></canvas>
-            </div>
-        </div>
-    </div>
-    <div class="container mt-4 p-3 shadow bg-white rounded d-flex justify-content-between">
-        <!-- Bar Charts -->
-        <div class="chartCard">
-            <div class="chartBoxs">
-                <canvas id="registeredPerCourseChart"></canvas>
-            </div>
-        </div>
-        <div class="chartCard">
-            <div class="chartBoxs">
-                <canvas id="eventsPerMonthChart"></canvas>
-            </div>
-        </div>
-    </div>
-    <div class="container mt-4 p-3 shadow bg-white rounded d-flex justify-content-between">
-        <!-- Doughnut Chart: Donations -->
-        <div class="chartCard">
-            <div class="chartBoxs">
-                <canvas id="donationsChart"></canvas> <!-- Updated ID -->
-            </div>
-        </div>
-        <!-- Table: Donations Data -->
-        <div class="chartCard">
-            <div class="chartBoxs">
-                <canvas id="donationPerMonthChart"></canvas>
-            </div>
-        </div>
-    </div>
-    <div class="container mt-4 p-3 shadow bg-white rounded d-flex justify-content-between">
-        <div class="chartCard">
-            <div class="chartBoxs">
-                <canvas id="registeredPerMonthChart"></canvas>
-            </div>
-        </div>
-    </div>
-
-</div>
-</main>
-</div>
-<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha512-JPcRR8yFa8mmCsfrw4TNte1ZvF1e3+1SdGMslZvmrzDYxS69J7J49vkFL8u6u8PlPJK+H3voElBtUCzaXj+6ig==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script>
-const data = {
-    labels: ['BSIT', 'BSCS', 'BSOA', 'BAJ', 'BECEd', 'BEEd', 'BSBM', 'BSEntrep', 'BSHM', 'BSPsych'],
-    datasets: [{
-        label: 'Alumni Registered',
-        data: [
-            <?= $course_counts['BSIT']; ?>,
-            <?= $course_counts['BSCS']; ?>,
-            <?= $course_counts['BSOA']; ?>,
-            <?= $course_counts['BAJ']; ?>,
-            <?= $course_counts['BECEd']; ?>,
-            <?= $course_counts['BEEd']; ?>,
-            <?= $course_counts['BSBM']; ?>,
-            <?= $course_counts['BSEntrep']; ?>,
-            <?= $course_counts['BSHM']; ?>,
-            <?= $course_counts['BSc(Psych)']; ?>
-        ],
-        backgroundColor: [
-            'rgba(255, 26, 104, 0.5)',
-            'rgba(54, 162, 235, 0.5)',
-            'rgba(255, 206, 86, 0.5)',
-            'rgba(75, 192, 192, 0.5)',
-            'rgba(153, 102, 255, 0.5)',
-            'rgba(255, 159, 64, 0.5)',
-            'rgba(0, 0, 0, 0.5)',
-            'rgba(123, 50, 123, 0.5)',
-            'rgba(189, 183, 107, 0.5)',
-            'rgba(72, 61, 139, 0.5)'
-        ],
-        borderColor: [
-            'rgba(255, 26, 104, 1)',
-            'rgba(54, 162, 235, 1)',
-            'rgba(255, 206, 86, 1)',
-            'rgba(75, 192, 192, 1)',
-            'rgba(153, 102, 255, 1)',
-            'rgba(255, 159, 64, 1)',
-            'rgba(0, 0, 0, 1)',
-            'rgba(123, 50, 123, 1)',
-            'rgba(189, 183, 107, 1)',
-            'rgba(72, 61, 139, 1)'
-        ],
-        borderWidth: 1
-    }]
-};
-
-// config 
-const config = {
-    type: 'pie',
-    data: data,
-    options: {
-        plugins: {
-            tooltip: {
-                enabled: false
-            },
-            datalabels: {
-                formatter: (value, context) => {
-                    const datapoints = context.chart.data.datasets[0].data;
-                    const totalSum = datapoints.reduce((total, datapoint) => total + datapoint, 0);
-                    const percentageValue = (value / totalSum * 100).toFixed(1);
-                    return `${percentageValue}%`; // Only display the percentage
-                }
-            }
-        }
-    },
-    plugins: [ChartDataLabels]
-};
-
-
-// render init block
-const myChart = new Chart(
-    document.getElementById('myChart'),
-    config
-);
-// Common Colors for Consistency
-
-const colors = {
-    background: [
-        'rgba(255, 26, 104, 0.2)',
-        'rgba(54, 162, 235, 0.2)',
-        'rgba(255, 206, 86, 0.2)',
-        'rgba(75, 192, 192, 0.2)',
-        'rgba(153, 102, 255, 0.2)',
-        'rgba(255, 159, 64, 0.2)',
-        'rgba(0, 0, 0, 0.2)',
-        'rgba(123, 50, 123, 0.2)',
-        'rgba(189, 183, 107, 0.2)',
-        'rgba(72, 61, 139, 0.2)'
-    ],
-    border: [
-        'rgba(255, 26, 104, 1)',
-        'rgba(54, 162, 235, 1)',
-        'rgba(255, 206, 86, 1)',
-        'rgba(75, 192, 192, 1)',
-        'rgba(153, 102, 255, 1)',
-        'rgba(255, 159, 64, 1)',
-        'rgba(0, 0, 0, 1)',
-        'rgba(123, 50, 123, 1)',
-        'rgba(189, 183, 107, 1)',
-        'rgba(72, 61, 139, 1)'
-    ]
-
-};
-
-// Config for Pie Charts
-function createPieChart(ctx, labels, data, colors) {
-    return new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: labels,
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha512-JPcRR8yFa8mmCsfrw4TNte1ZvF1e3+1SdGMslZvmrzDYxS69J7J49vkFL8u6u8PlPJK+H3voElBtUCzaXj+6ig==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        const data = {
+            labels: ['BSIT', 'BSCS', 'BSOA', 'BAJ', 'BECEd', 'BEEd', 'BSBM', 'BSEntrep', 'BSHM', 'BSPsych'],
             datasets: [{
-                data: data,
-                backgroundColor: colors.background,
-                borderColor: colors.border,
+                label: 'Alumni Registered',
+                data: [
+                    <?= $course_counts['BSIT']; ?>,
+                    <?= $course_counts['BSCS']; ?>,
+                    <?= $course_counts['BSOA']; ?>,
+                    <?= $course_counts['BAJ']; ?>,
+                    <?= $course_counts['BECEd']; ?>,
+                    <?= $course_counts['BEEd']; ?>,
+                    <?= $course_counts['BSBM']; ?>,
+                    <?= $course_counts['BSEntrep']; ?>,
+                    <?= $course_counts['BSHM']; ?>,
+                    <?= $course_counts['BSc(Psych)']; ?>
+                ],
+                backgroundColor: [
+                    'rgba(255, 26, 104, 0.5)',
+                    'rgba(54, 162, 235, 0.5)',
+                    'rgba(255, 206, 86, 0.5)',
+                    'rgba(75, 192, 192, 0.5)',
+                    'rgba(153, 102, 255, 0.5)',
+                    'rgba(255, 159, 64, 0.5)',
+                    'rgba(0, 0, 0, 0.5)',
+                    'rgba(123, 50, 123, 0.5)',
+                    'rgba(189, 183, 107, 0.5)',
+                    'rgba(72, 61, 139, 0.5)'
+                ],
+                borderColor: [
+                    'rgba(255, 26, 104, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)',
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(153, 102, 255, 1)',
+                    'rgba(255, 159, 64, 1)',
+                    'rgba(0, 0, 0, 1)',
+                    'rgba(123, 50, 123, 1)',
+                    'rgba(189, 183, 107, 1)',
+                    'rgba(72, 61, 139, 1)'
+                ],
                 borderWidth: 1
             }]
-        },
-        options: {
-            plugins: {
-                datalabels: {
-                    formatter: (value, context) => {
-                        const datapoints = context.chart.data.datasets[0].data;
-                        const totalSum = datapoints.reduce((total, datapoint) => total + datapoint, 0);
-                        const percentageValue = (value / totalSum * 100).toFixed(1);
-                        return `${percentageValue}%`;
-                    }
-                }
-            }
-        },
-        plugins: [ChartDataLabels],
-    });
-}
+        };
 
-// Config for Bar Charts
-function createBarChart(ctx, labels, datasets) {
-    return new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: datasets
-        },
-        options: {
-            scales: {
-                y: {
-                    beginAtZero: true, // Start the y-axis at 0
-                    ticks: {
-                        stepSize: 1, // Use whole numbers for y-axis increments
-                        callback: function(value) {
-                            return Number.isInteger(value) ? value : ''; // Only display whole numbers
+        // config 
+        const config = {
+            type: 'pie',
+            data,
+            options: {
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'right', // Place the legend (labels) to the right of the chart
+                        labels: {
+                            boxWidth: 20, // Size of the colored box beside the label
+                            padding: 20, // Space between the label and the box
+                        }
+                    },
+                    tooltip: {
+                        enabled: false
+                    },
+                    datalabels: {
+                        formatter: (value, context) => {
+                            const datapoints = context.chart.data.datasets[0].data;
+                            const totalSum = datapoints.reduce((total, datapoint) => total + datapoint, 0);
+                            const percentageValue = (value / totalSum * 100).toFixed(1);
+                            return `${percentageValue}%`; // Only display the percentage
+                        }
+                    },
+
+                }
+            },
+            plugins: [ChartDataLabels],
+        };
+
+
+        // render init block
+        const myChart = new Chart(
+            document.getElementById('myChart'),
+            config
+        );
+        // Common Colors for Consistency
+
+        const colors = {
+            background: [
+                'rgba(255, 26, 104, 0.2)',
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)',
+                'rgba(0, 0, 0, 0.2)',
+                'rgba(123, 50, 123, 0.2)',
+                'rgba(189, 183, 107, 0.2)',
+                'rgba(72, 61, 139, 0.2)'
+            ],
+            border: [
+                'rgba(255, 26, 104, 1)',
+                'rgba(54, 162, 235, 1)',
+                'rgba(255, 206, 86, 1)',
+                'rgba(75, 192, 192, 1)',
+                'rgba(153, 102, 255, 1)',
+                'rgba(255, 159, 64, 1)',
+                'rgba(0, 0, 0, 1)',
+                'rgba(123, 50, 123, 1)',
+                'rgba(189, 183, 107, 1)',
+                'rgba(72, 61, 139, 1)'
+            ]
+
+        };
+
+        // Config for Pie Charts
+        function createPieChart(ctx, labels, data, colors) {
+            return new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: data,
+                        backgroundColor: colors.background,
+                        borderColor: colors.border,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    plugins: {
+                        datalabels: {
+                            formatter: (value, context) => {
+                                const datapoints = context.chart.data.datasets[0].data;
+                                const totalSum = datapoints.reduce((total, datapoint) => total + datapoint, 0);
+                                const percentageValue = (value / totalSum * 100).toFixed(1);
+                                return `${percentageValue}%`;
+                            }
+                        }
+                    }
+                },
+                plugins: [ChartDataLabels],
+            });
+        }
+
+        // Config for Bar Charts
+        function createBarChart(ctx, labels, datasets) {
+            return new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: datasets
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true, // Start the y-axis at 0
+                            ticks: {
+                                stepSize: 1, // Use whole numbers for y-axis increments
+                                callback: function(value) {
+                                    return Number.isInteger(value) ? value : ''; // Only display whole numbers
+                                }
+                            }
                         }
                     }
                 }
+            });
+        }
+
+
+        // Pie Chart: Registered vs Unregistered Alumni
+        const registeredUnregisteredChart = createPieChart(
+            document.getElementById('registeredUnregisteredChart'),
+            ['Registered', 'Unregistered'],
+            [<?php echo $registeredCount; ?>, <?php echo $unregisteredCount; ?>], // Use PHP variables here
+            {
+                background: [
+                    'rgba(255, 26, 104, 0.5)',
+                    'rgba(54, 162, 235, 0.5)'
+                ],
+                border: [
+                    'rgba(255, 26, 104, 1)',
+                    'rgba(54, 162, 235, 1)'
+                ]
             }
-        }
-    });
-}
+        );
 
+        // Pie Chart: Verified, Unverified, and Inactive Alumni
+        const statusChart = createPieChart(
+            document.getElementById('statusChart'),
+            ['Verified', 'Unverified', 'Inactive'],
+            [<?php echo $verified; ?>, <?php echo $unverified; ?>, <?php echo $inactive; ?>], {
+                background: [
+                    'rgba(255, 26, 104, 0.5)',
+                    'rgba(54, 162, 235, 0.5)',
+                    'rgba(255, 206, 86, 0.5)'
+                ],
+                border: [
+                    'rgba(255, 26, 104, 1)',
+                    'rgba(54, 162, 235, 1)',
+                    'rgba(255, 206, 86, 1)'
+                ]
+            }
+        );
 
-// Pie Chart: Registered vs Unregistered Alumni
-const registeredUnregisteredChart = createPieChart(
-    document.getElementById('registeredUnregisteredChart'),
-    ['Registered', 'Unregistered'],
-    [<?php echo $registeredCount; ?>, <?php echo $unregisteredCount; ?>], // Use PHP variables here
-    {
-        background: [
-            'rgba(255, 26, 104, 0.5)',
-            'rgba(54, 162, 235, 0.5)'
-        ],
-        border: [
-            'rgba(255, 26, 104, 1)',
-            'rgba(54, 162, 235, 1)'
-        ]
-    }
-);
-
-// Pie Chart: Verified, Unverified, and Inactive Alumni
-const statusChart = createPieChart(
-    document.getElementById('statusChart'),
-    ['Verified', 'Unverified', 'Inactive'],
-    [<?php echo $verified; ?>, <?php echo $unverified; ?>, <?php echo $inactive; ?>], {
-        background: [
-            'rgba(255, 26, 104, 0.5)',
-            'rgba(54, 162, 235, 0.5)',
-            'rgba(255, 206, 86, 0.5)'
-        ],
-        border: [
-            'rgba(255, 26, 104, 1)',
-            'rgba(54, 162, 235, 1)',
-            'rgba(255, 206, 86, 1)'
-        ]
-    }
-);
-
-// Bar Chart: Verified, Unverified, and Inactive Alumni Per Course
-const statusPerCourseChart = createBarChart(
-    document.getElementById('statusPerCourseChart'),
-    ['BSIT', 'BSCS', 'BSOA', 'BAJ', 'BECED', 'BEED', 'BSBM', 'BSEntrep', 'BSHM', 'BSPsych'],
-    [{
-            label: 'Verified',
-            data: [
-                <?= $verifCourse['BSIT']; ?>,
-                <?= $verifCourse['BSCS']; ?>,
-                <?= $verifCourse['BSOA']; ?>,
-                <?= $verifCourse['BAJ']; ?>,
-                <?= $verifCourse['BECEd']; ?>,
-                <?= $verifCourse['BEEd']; ?>,
-                <?= $verifCourse['BSBM']; ?>,
-                <?= $verifCourse['BSEntrep']; ?>,
-                <?= $verifCourse['BSHM']; ?>,
-                <?= $verifCourse['BSc(Psych)']; ?>
-            ],
-            backgroundColor: colors.background[0],
-            borderColor: colors.border[0], // Solid border color
-            borderWidth: 1
-        },
-        {
-            label: 'Unverified',
-            data: [
-                <?= $unverifCourse['BSIT']; ?>,
-                <?= $unverifCourse['BSCS']; ?>,
-                <?= $unverifCourse['BSOA']; ?>,
-                <?= $unverifCourse['BAJ']; ?>,
-                <?= $unverifCourse['BECEd']; ?>,
-                <?= $unverifCourse['BEEd']; ?>,
-                <?= $unverifCourse['BSBM']; ?>,
-                <?= $unverifCourse['BSEntrep']; ?>,
-                <?= $unverifCourse['BSHM']; ?>,
-                <?= $unverifCourse['BSc(Psych)']; ?>
-            ],
-            backgroundColor: colors.background[1],
-            borderColor: colors.border[1], // Solid border color
-            borderWidth: 1
-        },
-        {
-            label: 'Inactive',
-            data: [
-                <?= $inactiveCourse['BSIT']; ?>,
-                <?= $inactiveCourse['BSCS']; ?>,
-                <?= $inactiveCourse['BSOA']; ?>,
-                <?= $inactiveCourse['BAJ']; ?>,
-                <?= $inactiveCourse['BECEd']; ?>,
-                <?= $inactiveCourse['BEEd']; ?>,
-                <?= $inactiveCourse['BSBM']; ?>,
-                <?= $inactiveCourse['BSEntrep']; ?>,
-                <?= $inactiveCourse['BSHM']; ?>,
-                <?= $inactiveCourse['BSc(Psych)']; ?>
-            ],
-            backgroundColor: colors.background[2],
-            borderColor: colors.border[2], // Solid border color
-            borderWidth: 1
-        }
-    ]
-);
-
-
-// Bar Chart: Registered Alumni Per Course
-const registeredPerCourseChart = createBarChart(
-    document.getElementById('registeredPerCourseChart'),
-    ['BSIT', 'BSCS', 'BSOA', 'BAJ', 'BECED', 'BEED', 'BSBM', 'BSENTREP', 'BSHM', 'BSPsych'],
-    [{
-        label: 'Registered Alumni Per Course',
-        data: [
-            <?= $course_counts['BSIT']; ?>,
-            <?= $course_counts['BSCS']; ?>,
-            <?= $course_counts['BSOA']; ?>,
-            <?= $course_counts['BAJ']; ?>,
-            <?= $course_counts['BECEd']; ?>,
-            <?= $course_counts['BEEd']; ?>,
-            <?= $course_counts['BSBM']; ?>,
-            <?= $course_counts['BSEntrep']; ?>,
-            <?= $course_counts['BSHM']; ?>,
-            <?= $course_counts['BSc(Psych)']; ?>
-        ],
-        backgroundColor: colors.background[3],
-        borderColor: colors.border[3], // Solid border color
-        borderWidth: 1
-    }]
-);
-
-// Bar Chart: Events Created Per Month
-const labels_event = <?php echo json_encode($labels_event); ?>;
-const data_event = <?php echo json_encode($data_event); ?>;
-
-const eventsPerMonthChart = createBarChart(
-    document.getElementById('eventsPerMonthChart'),
-    labels_event, // Use the labels for all months
-    [{
-        label: 'Events Created',
-        data: data_event, // Use the dynamic event data from PHP
-        backgroundColor: colors.background[4],
-        borderColor: colors.border[4],
-        borderWidth: 1
-    }]
-);
-
-
-// Bar Chart: Alumni Registered Per Month
-const registered_alumni = <?php echo json_encode($registered_alumni); ?>;
-
-// Create the bar chart with the data using your custom configuration
-const registeredPerMonthChart = createBarChart(
-    document.getElementById('registeredPerMonthChart'),
-    ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.'],
-    [{
-        label: 'Registered Alumni Every Month',
-        data: registered_alumni, // Use the PHP variable here
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        borderColor: 'rgba(75, 192, 192, 1)',
-        borderWidth: 1
-    }]
-);
-
-// Pie Chart: Donations
-const months = <?php echo json_encode($months); ?>;
-const percentages = <?php echo json_encode($percentages); ?>;
-
-// Create a mapping of months and percentages, keeping all months but setting zero percentages to null
-const dataWithLabels = months.map((month, index) => ({
-    month: month,
-    percentage: percentages[index]
-}));
-
-// Filter out zero percentage values for chart display
-const filteredData = dataWithLabels.filter(data => data.percentage > 0);
-
-const filteredMonths = filteredData.map(data => data.month);
-const filteredPercentages = filteredData.map(data => data.percentage);
-
-// Configuration for the pie chart
-const configDonate = {
-    type: 'pie',
-    data: {
-        labels: months, // Show all months
-        datasets: [{
-            label: 'Total Donation Per Month',
-            data: percentages, // Show all data
-            backgroundColor: [
-                '#FF8C8C', '#FFB84D', '#FFFF66', '#66FF66', '#66B3FF', '#FF66B2', '#D9B3FF', '#99FFFF', '#FFFF99', '#FFB84D', '#FF6666', '#B3A1FF'
-            ],
-            borderColor: [
-                '#FF8C8C', '#FFB84D', '#FFFF66', '#66FF66', '#66B3FF', '#FF66B2', '#D9B3FF', '#99FFFF', '#FFFF99', '#FFB84D', '#FF6666', '#B3A1FF'
-            ],
-            borderWidth: 1
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            tooltip: {
-                enabled: false // Disable tooltips
-            },
-            datalabels: {
-                formatter: (value, context) => {
-                    return value > 0 ? `${value}%` : null; // Show percentage only if value > 0
+        // Bar Chart: Verified, Unverified, and Inactive Alumni Per Course
+        const statusPerCourseChart = createBarChart(
+            document.getElementById('statusPerCourseChart'),
+            ['BSIT', 'BSCS', 'BSOA', 'BAJ', 'BECED', 'BEED', 'BSBM', 'BSEntrep', 'BSHM', 'BSPsych'],
+            [{
+                    label: 'Verified',
+                    data: [
+                        <?= $verifCourse['BSIT']; ?>,
+                        <?= $verifCourse['BSCS']; ?>,
+                        <?= $verifCourse['BSOA']; ?>,
+                        <?= $verifCourse['BAJ']; ?>,
+                        <?= $verifCourse['BECEd']; ?>,
+                        <?= $verifCourse['BEEd']; ?>,
+                        <?= $verifCourse['BSBM']; ?>,
+                        <?= $verifCourse['BSEntrep']; ?>,
+                        <?= $verifCourse['BSHM']; ?>,
+                        <?= $verifCourse['BSc(Psych)']; ?>
+                    ],
+                    backgroundColor: colors.background[0],
+                    borderColor: colors.border[0], // Solid border color
+                    borderWidth: 1
                 },
-                color: '#333', // Darker color for the text
-                font: {
-                    weight: 'bold',
-                    size: 14
+                {
+                    label: 'Unverified',
+                    data: [
+                        <?= $unverifCourse['BSIT']; ?>,
+                        <?= $unverifCourse['BSCS']; ?>,
+                        <?= $unverifCourse['BSOA']; ?>,
+                        <?= $unverifCourse['BAJ']; ?>,
+                        <?= $unverifCourse['BECEd']; ?>,
+                        <?= $unverifCourse['BEEd']; ?>,
+                        <?= $unverifCourse['BSBM']; ?>,
+                        <?= $unverifCourse['BSEntrep']; ?>,
+                        <?= $unverifCourse['BSHM']; ?>,
+                        <?= $unverifCourse['BSc(Psych)']; ?>
+                    ],
+                    backgroundColor: colors.background[1],
+                    borderColor: colors.border[1], // Solid border color
+                    borderWidth: 1
+                },
+                {
+                    label: 'Inactive',
+                    data: [
+                        <?= $inactiveCourse['BSIT']; ?>,
+                        <?= $inactiveCourse['BSCS']; ?>,
+                        <?= $inactiveCourse['BSOA']; ?>,
+                        <?= $inactiveCourse['BAJ']; ?>,
+                        <?= $inactiveCourse['BECEd']; ?>,
+                        <?= $inactiveCourse['BEEd']; ?>,
+                        <?= $inactiveCourse['BSBM']; ?>,
+                        <?= $inactiveCourse['BSEntrep']; ?>,
+                        <?= $inactiveCourse['BSHM']; ?>,
+                        <?= $inactiveCourse['BSc(Psych)']; ?>
+                    ],
+                    backgroundColor: colors.background[2],
+                    borderColor: colors.border[2], // Solid border color
+                    borderWidth: 1
                 }
-            }
-        }
-    },
-    plugins: [ChartDataLabels]
-};
+            ]
+        );
 
-// Initialize the chart
-const donationsChart = new Chart(document.getElementById('donationsChart'), configDonate);
 
-// Bar Chart for Monthly donation
-const monthly_donation = <?php echo json_encode($monthly_donation); ?>;
-const donationPerMonthChart = createBarChart(
-    document.getElementById('donationPerMonthChart'),
-    ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.'],
-    [{
-        label: 'Total Monthly Donation',
-        data: monthly_donation, // This variable is populated from PHP
-        backgroundColor: 'rgba(255, 206, 86, 0.5)',
-        borderColor: 'rgba(75, 192, 192, 1)',
-        borderWidth: 1
-    }]
-);
+        // Bar Chart: Registered Alumni Per Course
+        const registeredPerCourseChart = createBarChart(
+            document.getElementById('registeredPerCourseChart'),
+            ['BSIT', 'BSCS', 'BSOA', 'BAJ', 'BECED', 'BEED', 'BSBM', 'BSENTREP', 'BSHM', 'BSPsych'],
+            [{
+                label: 'Registered Alumni Per Course',
+                data: [
+                    <?= $course_counts['BSIT']; ?>,
+                    <?= $course_counts['BSCS']; ?>,
+                    <?= $course_counts['BSOA']; ?>,
+                    <?= $course_counts['BAJ']; ?>,
+                    <?= $course_counts['BECEd']; ?>,
+                    <?= $course_counts['BEEd']; ?>,
+                    <?= $course_counts['BSBM']; ?>,
+                    <?= $course_counts['BSEntrep']; ?>,
+                    <?= $course_counts['BSHM']; ?>,
+                    <?= $course_counts['BSc(Psych)']; ?>
+                ],
+                backgroundColor: colors.background[3],
+                borderColor: colors.border[3], // Solid border color
+                borderWidth: 1
+            }]
+        );
 
-document.getElementById('refresh-page').addEventListener('click', () => {
-    location.reload();
-});
-</script>
+        // Bar Chart: Events Created Per Month
+        const labels_event = <?php echo json_encode($labels_event); ?>;
+        const data_event = <?php echo json_encode($data_event); ?>;
+
+        const eventsPerMonthChart = createBarChart(
+            document.getElementById('eventsPerMonthChart'),
+            labels_event, // Use the labels for all months
+            [{
+                label: 'Events Created',
+                data: data_event, // Use the dynamic event data from PHP
+                backgroundColor: colors.background[4],
+                borderColor: colors.border[4],
+                borderWidth: 1
+            }]
+        );
+
+
+        // Bar Chart: Alumni Registered Per Month
+        const registered_alumni = <?php echo json_encode($registered_alumni); ?>;
+
+        // Create the bar chart with the data using your custom configuration
+        const registeredPerMonthChart = createBarChart(
+            document.getElementById('registeredPerMonthChart'),
+            ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.'],
+            [{
+                label: 'Registered Alumni Every Month',
+                data: registered_alumni, // Use the PHP variable here
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        );
+
+        // Pie Chart: Donations
+        const months = <?php echo json_encode($months); ?>;
+        const percentages = <?php echo json_encode($percentages); ?>;
+
+        // Create a mapping of months and percentages, keeping all months but setting zero percentages to null
+        const dataWithLabels = months.map((month, index) => ({
+            month: month,
+            percentage: percentages[index]
+        }));
+
+        // Filter out zero percentage values for chart display
+        const filteredData = dataWithLabels.filter(data => data.percentage > 0);
+
+        const filteredMonths = filteredData.map(data => data.month);
+        const filteredPercentages = filteredData.map(data => data.percentage);
+
+        // Configuration for the pie chart
+        const configDonate = {
+            type: 'pie',
+            data: {
+                labels: months, // Show all months
+                datasets: [{
+                    label: 'Total Donation Per Month',
+                    data: percentages, // Show all data
+                    backgroundColor: [
+                        '#FF8C8C', '#FFB84D', '#FFFF66', '#66FF66', '#66B3FF', '#FF66B2', '#D9B3FF', '#99FFFF', '#FFFF99', '#FFB84D', '#FF6666', '#B3A1FF'
+                    ],
+                    borderColor: [
+                        '#FF8C8C', '#FFB84D', '#FFFF66', '#66FF66', '#66B3FF', '#FF66B2', '#D9B3FF', '#99FFFF', '#FFFF99', '#FFB84D', '#FF6666', '#B3A1FF'
+                    ],
+                    borderWidth: 1,
+
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        right: 80 // Decrease space between the pie chart and the legend
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        enabled: false // Disable tooltips
+                    },
+                    legend: {
+                        display: true,
+                        position: 'right', // Place the legend (labels) to the right of the chart
+                        labels: {
+                            boxWidth: 30, // Size of the colored box beside the label
+                            padding: 10, // Space between the label and the box
+
+                        }
+                    },
+                    datalabels: {
+                        formatter: (value, context) => {
+                            return value > 0 ? `${value}%` : null; // Show percentage only if value > 0
+                        },
+                        color: '#333', // Darker color for the text
+                        font: {
+                            weight: 'bold',
+                            size: 14
+                        }
+                    }
+                }
+            },
+            plugins: [ChartDataLabels]
+        };
+
+        // Initialize the chart
+        const donationsChart = new Chart(document.getElementById('donationsChart'), configDonate);
+
+        // Bar Chart for Monthly donation
+        const monthly_donation = <?php echo json_encode($monthly_donation); ?>;
+        const donationPerMonthChart = createBarChart(
+            document.getElementById('donationPerMonthChart'),
+            ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.'],
+            [{
+                label: 'Total Monthly Donation',
+                data: monthly_donation, // This variable is populated from PHP
+                backgroundColor: 'rgba(255, 206, 86, 0.5)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        );
+
+        document.getElementById('refresh-page').addEventListener('click', () => {
+            location.reload();
+        });
+    </script>
 </body>
 
 </html>

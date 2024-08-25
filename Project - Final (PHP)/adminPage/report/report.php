@@ -637,9 +637,17 @@ while ($row = $resInactive->fetch_assoc()) {
         // config 
         const config = {
             type: 'pie',
-            data: data,
+            data,
             options: {
                 plugins: {
+                    legend: {
+                        display: true,
+                        position: 'right', // Place the legend (labels) to the right of the chart
+                        labels: {
+                            boxWidth: 20, // Size of the colored box beside the label
+                            padding: 20, // Space between the label and the box
+                        }
+                    },
                     tooltip: {
                         enabled: false
                     },
@@ -650,10 +658,11 @@ while ($row = $resInactive->fetch_assoc()) {
                             const percentageValue = (value / totalSum * 100).toFixed(1);
                             return `${percentageValue}%`; // Only display the percentage
                         }
-                    }
+                    },
+
                 }
             },
-            plugins: [ChartDataLabels]
+            plugins: [ChartDataLabels],
         };
 
 
@@ -930,15 +939,30 @@ while ($row = $resInactive->fetch_assoc()) {
                     borderColor: [
                         '#FF8C8C', '#FFB84D', '#FFFF66', '#66FF66', '#66B3FF', '#FF66B2', '#D9B3FF', '#99FFFF', '#FFFF99', '#FFB84D', '#FF6666', '#B3A1FF'
                     ],
-                    borderWidth: 1
+                    borderWidth: 1,
+
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                layout: {
+                    padding: {
+                        right: 80 // Decrease space between the pie chart and the legend
+                    }
+                },
                 plugins: {
                     tooltip: {
                         enabled: false // Disable tooltips
+                    },
+                    legend: {
+                        display: true,
+                        position: 'right', // Place the legend (labels) to the right of the chart
+                        labels: {
+                            boxWidth: 30, // Size of the colored box beside the label
+                            padding: 10, // Space between the label and the box
+
+                        }
                     },
                     datalabels: {
                         formatter: (value, context) => {
@@ -1003,53 +1027,53 @@ while ($row = $resInactive->fetch_assoc()) {
                 donationAndTableContainer.appendChild(clonedDonationContent);
             }
 
-            // Create the table element
-            const tableContainer = document.createElement('div');
-            const table = document.createElement('table');
-            table.style.borderCollapse = 'collapse';
-            table.style.width = '100%';
+            // // Create the table element
+            // const tableContainer = document.createElement('div');
+            // const table = document.createElement('table');
+            // table.style.borderCollapse = 'collapse';
+            // table.style.width = '173%';
 
-            // Add some sample data to the table
-            const tableHeader = `
-                <thead>
-                    <tr>
-                        <th style="border: 1px solid black; padding: 8px;">Event Title</th>
-                        <th style="border: 1px solid black; padding: 8px;">Total Donation</th>
-                        <th style="border: 1px solid black; padding: 8px;">Total Donors</th>
-                    </tr>
-                </thead>`;
-            const tableBody = `
-                <tbody>
-                    <tr>
-                        <td style="border: 1px solid black; padding: 8px;">Alumni Nigh</td>
-                        <td style="border: 1px solid black; padding: 8px;">$500</td>
-                        <td style="border: 1px solid black; padding: 8px;">5</td>
-                    </tr>
-                    <tr>
-                        <td style="border: 1px solid black; padding: 8px;">Fundrasing</td>
-                        <td style="border: 1px solid black; padding: 8px;">$300</td>
-                        <td style="border: 1px solid black; padding: 8px;">10</td>
-                    </tr>
-                    <tr>
-                        <td style="border: 1px solid black; padding: 8px;">Alumni Sportsfest</td>
-                        <td style="border: 1px solid black; padding: 8px;">$200</td>
-                        <td style="border: 1px solid black; padding: 8px;">15</td>
-                    </tr>
-                    <tr>
-                        <td style="border: 1px solid black; padding: 8px;">Grand Ball</td>
-                        <td style="border: 1px solid black; padding: 8px;">$100</td>
-                        <td style="border: 1px solid black; padding: 8px;">20</td>
-                    </tr>
-                </tbody>`;
+            // // Add some sample data to the table
+            // const tableHeader = `
+            //     <thead>
+            //         <tr>
+            //             <th style="border: 1px solid black; padding: 8px;">Event Title</th>
+            //             <th style="border: 1px solid black; padding: 8px;">Total Donation</th>
+            //             <th style="border: 1px solid black; padding: 8px;">Total Donors</th>
+            //         </tr>
+            //     </thead>`;
+            // const tableBody = `
+            //     <tbody>
+            //         <tr>
+            //             <td style="border: 1px solid black; padding: 8px;">Alumni Night</td>
+            //             <td style="border: 1px solid black; padding: 8px;">$500</td>
+            //             <td style="border: 1px solid black; padding: 8px;">5</td>
+            //         </tr>
+            //         <tr>
+            //             <td style="border: 1px solid black; padding: 8px;">Fundrasing</td>
+            //             <td style="border: 1px solid black; padding: 8px;">$300</td>
+            //             <td style="border: 1px solid black; padding: 8px;">10</td>
+            //         </tr>
+            //         <tr>
+            //             <td style="border: 1px solid black; padding: 8px;">Alumni Sportsfest</td>
+            //             <td style="border: 1px solid black; padding: 8px;">$200</td>
+            //             <td style="border: 1px solid black; padding: 8px;">15</td>
+            //         </tr>
+            //         <tr>
+            //             <td style="border: 1px solid black; padding: 8px;">Grand Ball</td>
+            //             <td style="border: 1px solid black; padding: 8px;">$100</td>
+            //             <td style="border: 1px solid black; padding: 8px;">20</td>
+            //         </tr>
+            //     </tbody>`;
 
-            table.innerHTML = tableHeader + tableBody;
-            tableContainer.appendChild(table);
+            // table.innerHTML = tableHeader + tableBody;
+            // tableContainer.appendChild(table);
 
-            // Append the table beside the donation content
-            donationAndTableContainer.appendChild(tableContainer);
+            // // Append the table beside the donation content
+            // donationAndTableContainer.appendChild(tableContainer);
 
-            // Add the combined container to the temporary content container
-            tempContainer.appendChild(donationAndTableContainer);
+            // // Add the combined container to the temporary content container
+            // tempContainer.appendChild(donationAndTableContainer);
 
             // Append the Event Created section below the Total Donation per Month and Table
             const eventCreatedContent = document.getElementById('event-created-section'); // Assuming the event chart has this id
