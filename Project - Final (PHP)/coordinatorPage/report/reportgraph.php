@@ -414,7 +414,7 @@ switch ($status_filter) {
 
             <div class="container mt-4 p-3 shadow bg-white rounded d-flex justify-content-between">
                 <div>
-                    <button id="download-pdf" class="btn btn-primary">Download as PDF</button>
+                    <button style="display:none;" id="download-pdf" class="btn btn-primary">Download as PDF</button>
                     <button id="refresh-page" class="btn btn-secondary">Refresh</button>
                 </div>
                 <div>
