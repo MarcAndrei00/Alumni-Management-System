@@ -351,14 +351,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             </div>
                             <div class="mb-3">
                                 <label for="formGroupExampleInput2" class="form-label">Date</label>
-                                <input type="date" name="date" class="form-control" id="formGroupExampleInput2" required placeholder="">
+                                <input type="date" name="date" class="form-control" id="date_input" required placeholder="">
                             </div>
                             <div class="mb-3">
                                 <label for="formGroupExampleInput3" class="form-label">Time</label>
                                 <div class="input-container">
-                                    <input type="time" name="startTime" class="form-control" id="formGroupExampleInput3" required placeholder="">
+                                    <input type="time" name="startTime" class="form-control" id="start_time_input" required placeholder="">
                                     <span class="time-separator" style="margin-top:7px;">To</span>
-                                    <input type="time" name="endTime" class="form-control" id="formGroupExampleInput4" required placeholder="">
+                                    <input type="time" name="endTime" class="form-control" id="end_time_input" required placeholder="">
                                 </div>
                             </div>
                             <div class="mb-3">
@@ -550,6 +550,59 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 window.location.href = redirectUrl; // Redirect to the desired page
             });
         }
+        // Wait until the DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', function () {
+            // Select the date and time input elements
+            const dateInput = document.getElementById('date_input');
+            const startTimeInput = document.getElementById('start_time_input');
+            const endTimeInput = document.getElementById('end_time_input');
+
+            // Function to disable past dates
+            function disablePastDates() {
+                const today = new Date().toISOString().split('T')[0];
+                dateInput.setAttribute('min', today);
+            }
+
+            // Function to show SweetAlert if a past date is selected
+            function handleDateChange() {
+                const selectedDate = new Date(dateInput.value);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0); // Remove time from the current date
+                
+                if (selectedDate < today) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Invalid Date',
+                        text: 'Previous dates are not allowed!',
+                    });
+                    dateInput.value = ''; // Clear the invalid date
+                }
+            }
+
+            // Function to validate end time based on start time
+            function handleTimeChange() {
+                const startTime = startTimeInput.value;
+                const endTime = endTimeInput.value;
+
+                if (startTime && endTime && endTime <= startTime) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Invalid Time',
+                        text: 'End time must be later than start time!',
+                    });
+                    endTimeInput.value = ''; // Clear the invalid end time
+                }
+            }
+
+            // Disable past dates on page load
+            disablePastDates();
+
+            // Event listeners
+            dateInput.addEventListener('change', handleDateChange);
+            startTimeInput.addEventListener('change', handleTimeChange);
+            endTimeInput.addEventListener('change', handleTimeChange);
+        });
+
     </script>
 </body>
 

@@ -1,4 +1,4 @@
-<?php
+F<?php
 session_start();
 $conn = new mysqli("localhost", "root", "", "alumni_management_system");
 
@@ -387,7 +387,7 @@ if (isset($_GET['ide'])) {
                                 <div class="add-button">
                                     <div class="span">
                                         <a href='./add_event.php'>
-                                            <button id="add-new-btn">Add New +</button>
+                                            <button id="add-new-btn" style="font-family: 'Poppins', sans-serif;">Add New +</button>
                                         </a>
                                     </div>
                                 </div>

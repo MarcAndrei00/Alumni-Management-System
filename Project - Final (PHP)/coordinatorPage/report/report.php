@@ -83,63 +83,300 @@ $result_alumni = $conn->query($sql_alumni);
 $row_alumni = $result_alumni->fetch_assoc();
 $count_alumni = $row_alumni['alumni_count'];
 
-//query for alumni count
-$sql_coordinator = "SELECT COUNT(coor_id) AS coordinators_count FROM coordinator";
-$result_coordinator = $conn->query($sql_coordinator);
-$row_coordinator = $result_coordinator->fetch_assoc();
-$coordinator_count = $row_coordinator['coordinators_count'];
-
 //query for events count
 $sql_event = "SELECT COUNT(event_id) AS events_count FROM event";
 $result_event = $conn->query($sql_event);
 $row_event = $result_event->fetch_assoc();
 $event_count = $row_event['events_count'];
 
-
-$sql = "SELECT course, COUNT(*) as count FROM alumni GROUP BY course";
-$result = $conn->query($sql);
-
-// DTA FOR CHART
-$labels = ['BAJ', 'BECEd', 'BEEd', 'BSBM', 'BSOA', 'BSEntrep', 'BSHM', 'BSIT', 'BSCS', 'BSc(Psych)'];
-$data = array_fill(0, count($labels), 0);
-
-if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $index = array_search($row['course'], $labels);
-        if ($index !== false) {
-            $data[$index] = $row['count'];
-        }
-    }
-}
-
 // EVENT COUNT EVERY MONTH
 $query_event = "SELECT MONTH(date) as month, COUNT(*) as count FROM event GROUP BY MONTH(date)";
 $res_event = $conn->query($query_event);
 
 $labels_event = ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.'];
-$data_event = array_fill(0, 12, 0);
+$data_event = array_fill(0, 12, 0); // Initialize an array with 12 zeros for each month
 
 if ($res_event->num_rows > 0) {
     while ($row_event = $res_event->fetch_assoc()) {
-        $data_event[$row_event['month'] - 1] = $row_event['count'];
+        $data_event[$row_event['month'] - 1] = $row_event['count']; // Store the count for the respective month
     }
 }
 
+// DONATION COUNT PER MONTH
+$query = "SELECT MONTH(donate_date) AS donate_month, SUM(donation_amount) AS total_donations
+          FROM donation_table
+          GROUP BY donate_month
+          ORDER BY donate_month";
+$result = $conn->query($query);
+$monthly_donation = array_fill(0, 12, 0);
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $monthly_donation[$row['donate_month'] - 1] = $row['total_donations'];
+    }
+}
 
-// Query to get the count of alumni registered in each month
-$qeury_alumniCount = "SELECT MONTH(date_created) as month, COUNT(*) as count FROM alumni GROUP BY MONTH(date_created)
-";
+// Query to get the donation data
+$query = "SELECT MONTH(donate_date) AS donate_month, COUNT(*) AS donation_count
+          FROM donation_table
+          GROUP BY donate_month
+          ORDER BY donate_month";
+$result = $conn->query($query);
 
-// Execute the query
-$res_alumniCount = $conn->query($qeury_alumniCount);
+// Initialize months and counts
+$month_names = ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.'];
+$months = $month_names;
+$donation_count = array_fill(0, 12, 0); // Initialize all months with 0
 
-// Prepare data for the chart
-$labels_alumniCount = ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.'];
-$data_alumniCount = array_fill(0, 12, 0);
+// Calculate total donations
+$total_donations = 0;
 
-if ($res_alumniCount->num_rows > 0) {
-    while ($row_alumniCount = $res_alumniCount->fetch_assoc()) {
-        $data_alumniCount[$row_alumniCount['month'] - 1] = $row_alumniCount['count'];
+// Process the query result
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $donate_month = $row['donate_month'] - 1;
+        $donation_count[$donate_month] = $row['donation_count']; // Update count for the month
+        $total_donations += $row['donation_count']; // Calculate total donations
+    }
+}
+
+// Calculate percentages
+$percentages = array_map(function ($count) use ($total_donations) {
+    return $total_donations > 0 ? number_format(($count / $total_donations * 100), 1) : 0;
+}, $donation_count);
+
+
+
+// ALUMNI COUNT
+$query_event = "SELECT MONTH(date_created) as month, COUNT(*) as count FROM alumni GROUP BY MONTH(date_created)";
+$res_event = $conn->query($query_event);
+
+$labels_event = ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.'];
+$registered_alumni = array_fill(0, 12, 0); // Initialize an array with 12 zeros for each month
+
+if ($res_event->num_rows > 0) {
+    while ($row_event = $res_event->fetch_assoc()) {
+        $registered_alumni[$row_event['month'] - 1] = $row_event['count']; // Store the count for the respective month
+    }
+}
+
+// For registered alumni
+$sql = "SELECT COUNT(*) as count FROM alumni";
+$result = $conn->query($sql);
+$registeredCount = $result->fetch_assoc()['count'];
+
+// For unregistered alumni (from list_of_graduate)
+$sql2 = "SELECT COUNT(*) as count FROM list_of_graduate";
+$result2 = $conn->query($sql2);
+$unregisteredCount = $result2->fetch_assoc()['count'];
+
+// ALUMNI FOR EVERY COURSES
+$alumni_list = "SELECT * FROM alumni";
+$result = $conn->query($alumni_list);
+
+// verified
+$verified = "SELECT COUNT(*) as count FROM alumni WHERE status='Verified'";
+$result_verified = $conn->query($verified);
+$verified = $result_verified->fetch_assoc()['count'];
+
+// unverified
+$unverified = "SELECT COUNT(*) as count FROM alumni WHERE status='Unverified'";
+$result_unverified = $conn->query($unverified);
+$unverified = $result_unverified->fetch_assoc()['count'];
+
+// inactive
+$inactive = "SELECT COUNT(*) as count FROM alumni_archive";
+$result_inactive = $conn->query($inactive);
+$inactive = $result_inactive->fetch_assoc()['count'];
+
+
+// ALUMNI FOR EVERY COURSES
+$alumni_list = "SELECT * FROM alumni";
+$result = $conn->query($alumni_list);
+
+// Initialize course counts
+$course_counts = [
+    'BAJ' => 0,
+    'BECEd' => 0,
+    'BEEd' => 0,
+    'BSBM' => 0,
+    'BSOA' => 0,
+    'BSEntrep' => 0,
+    'BSHM' => 0,
+    'BSIT' => 0,
+    'BSCS' => 0,
+    'BSc(Psych)' => 0
+];
+
+while ($row = $result->fetch_assoc()) {
+    $courseCode = '';
+
+    switch ($row['course']) {
+        case 'Bachelor of Arts in Journalism':
+            $courseCode = 'BAJ';
+            break;
+        case 'Bachelor of Secondary Education':
+            $courseCode = 'BECEd';
+            break;
+        case 'Bachelor of Elementary Education':
+            $courseCode = 'BEEd';
+            break;
+        case 'Bachelor of Science in Business Management':
+            $courseCode = 'BSBM';
+            break;
+        case 'Bachelor of Science in Office Administration':
+            $courseCode = 'BSOA';
+            break;
+        case 'Bachelor of Science in Entrepreneurship':
+            $courseCode = 'BSEntrep';
+            break;
+        case 'Bachelor of Science in Hospitality Management':
+            $courseCode = 'BSHM';
+            break;
+        case 'Bachelor of Science in Information Technology':
+            $courseCode = 'BSIT';
+            break;
+        case 'Bachelor of Science in Computer Science':
+            $courseCode = 'BSCS';
+            break;
+        case 'Bachelor of Science in Psychology':
+            $courseCode = 'BSc(Psych)';
+            break;
+    }
+
+    // Increment the course count
+    if (!empty($courseCode)) {
+        $course_counts[$courseCode]++;
+    }
+}
+
+// Initialize course counts for verified, unverified, and inactive alumni
+$verifCourse = $unverifCourse = $inactiveCourse = [
+    'BAJ' => 0,
+    'BECEd' => 0,
+    'BEEd' => 0,
+    'BSBM' => 0,
+    'BSOA' => 0,
+    'BSEntrep' => 0,
+    'BSHM' => 0,
+    'BSIT' => 0,
+    'BSCS' => 0,
+    'BSc(Psych)' => 0
+];
+
+// Fetch verified alumni
+$alumni_verified = "SELECT * FROM alumni WHERE status='Verified'";
+$resVerified = $conn->query($alumni_verified);
+
+while ($row = $resVerified->fetch_assoc()) {
+    switch ($row['course']) {
+        case '  ':
+            $verifCourse['BAJ']++;
+            break;
+        case 'Bachelor of Secondary Education':
+            $verifCourse['BECEd']++;
+            break;
+        case 'Bachelor of Elementary Education':
+            $verifCourse['BEEd']++;
+            break;
+        case 'Bachelor of Science in Business Management':
+            $verifCourse['BSBM']++;
+            break;
+        case 'Bachelor of Science in Office Administration':
+            $verifCourse['BSOA']++;
+            break;
+        case 'Bachelor of Science in Entrepreneurship':
+            $verifCourse['BSEntrep']++;
+            break;
+        case 'Bachelor of Science in Hospitality Management':
+            $verifCourse['BSHM']++;
+            break;
+        case 'Bachelor of Science in Information Technology':
+            $verifCourse['BSIT']++;
+            break;
+        case 'Bachelor of Science in Computer Science':
+            $verifCourse['BSCS']++;
+            break;
+        case 'Bachelor of Science in Psychology':
+            $verifCourse['BSc(Psych)']++;
+            break;
+    }
+}
+
+// Fetch unverified alumni
+$alumni_unverified = "SELECT * FROM alumni WHERE status='Unverified'";
+$resUnverified = $conn->query($alumni_unverified);
+
+while ($row = $resUnverified->fetch_assoc()) {
+    switch ($row['course']) {
+        case 'Bachelor of Arts in Journalism':
+            $unverifCourse['BAJ']++;
+            break;
+        case 'Bachelor of Secondary Education':
+            $unverifCourse['BECEd']++;
+            break;
+        case 'Bachelor of Elementary Education':
+            $unverifCourse['BEEd']++;
+            break;
+        case 'Bachelor of Science in Business Management':
+            $unverifCourse['BSBM']++;
+            break;
+        case 'Bachelor of Science in Office Administration':
+            $unverifCourse['BSOA']++;
+            break;
+        case 'Bachelor of Science in Entrepreneurship':
+            $unverifCourse['BSEntrep']++;
+            break;
+        case 'Bachelor of Science in Hospitality Management':
+            $unverifCourse['BSHM']++;
+            break;
+        case 'Bachelor of Science in Information Technology':
+            $unverifCourse['BSIT']++;
+            break;
+        case 'Bachelor of Science in Computer Science':
+            $unverifCourse['BSCS']++;
+            break;
+        case 'Bachelor of Science in Psychology':
+            $unverifCourse['BSc(Psych)']++;
+            break;
+    }
+}
+
+// Fetch inactive alumni
+$alumni_inactive = "SELECT * FROM alumni_archive";
+$resInactive = $conn->query($alumni_inactive);
+
+while ($row = $resInactive->fetch_assoc()) {
+    switch ($row['course']) {
+        case 'Bachelor of Arts in Journalism':
+            $inactiveCourse['BAJ']++;
+            break;
+        case 'Bachelor of Secondary Education':
+            $inactiveCourse['BECEd']++;
+            break;
+        case 'Bachelor of Elementary Education':
+            $inactiveCourse['BEEd']++;
+            break;
+        case 'Bachelor of Science in Business Management':
+            $inactiveCourse['BSBM']++;
+            break;
+        case 'Bachelor of Science in Office Administration':
+            $inactiveCourse['BSOA']++;
+            break;
+        case 'Bachelor of Science in Entrepreneurship':
+            $inactiveCourse['BSEntrep']++;
+            break;
+        case 'Bachelor of Science in Hospitality Management':
+            $inactiveCourse['BSHM']++;
+            break;
+        case 'Bachelor of Science in Information Technology':
+            $inactiveCourse['BSIT']++;
+            break;
+        case 'Bachelor of Science in Computer Science':
+            $inactiveCourse['BSCS']++;
+            break;
+        case 'Bachelor of Science in Psychology':
+            $inactiveCourse['BSc(Psych)']++;
+            break;
     }
 }
 ?>
@@ -227,348 +464,509 @@ if ($res_alumniCount->num_rows > 0) {
 
     <div class="main-content">
 
-        <header>
-            <div class="header-content">
-                <label for="menu-toggle">
-                    <span class="las la-bars bars" style="color: white;"></span>
-                </label>
+<header>
+    <div class="header-content">
+        <label for="menu-toggle">
+            <span class="las la-bars bars" style="color: white;"></span>
+        </label>
 
-                <div class="header-menu">
-                    <label for="">
-                    </label>
+        <div class="header-menu">
+            <label for="">
+            </label>
 
-                    <div class="user">
-                        <a href="../logout.php">
-                            <span class="las la-power-off" style="font-size: 30px; border-left: 1px solid #fff; padding-left:10px; color:#fff"></span>
-                        </a>
-                    </div>
-                </div>
+            <div class="user">
+                <a href="../logout.php">
+                    <span class="las la-power-off" style="font-size: 30px; border-left: 1px solid #fff; padding-left:10px; color:#fff"></span>
+                </a>
             </div>
-        </header>
-        <main>
-            <div class="page-header">
-                <h1><strong>Report</strong></h1>
-            </div>
-
-            <div class="container mt-4 p-3 shadow bg-white rounded d-flex justify-content-between">
-                <div>
-                    <button id="download-pdf" class="btn btn-primary">Download as PDF</button>
-                    <button id="refresh-page" class="btn btn-secondary">Refresh</button>
-                </div>
-                <div>
-                    <button id="another-page" class="btn btn-success" onclick="window.location.href='../report/reportgraph.php'">List of Graduates</button>
-                </div>
-            </div>
-
-            <div class="container mt-4 p-3 shadow bg-white rounded">
-                <form id="report-form">
-                    <div class="summary-boxes">
-                        <div class="summary-box" id="alumni">
-                            <h2>Total Alumni Registered</h2>
-                            <p><?php echo $count_alumni; ?></p>
-                        </div>
-                        <div class="summary-box" id="events">
-                            <h2>Total Events Posted</h2>
-                            <p><?php echo $event_count; ?></p>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="container mt-4 p-3 shadow bg-white rounded d-flex justify-content-between">
-                <div class="chartCard">
-                    <div class="chartBox">
-                        <canvas id="myChart"></canvas>
-                    </div>
-                </div>
-                <!-- Pie Charts -->
-                <div class="chartCard">
-                    <div class="chartBox">
-                        <canvas id="registeredUnregisteredChart"></canvas>
-                    </div>
-                </div>
-            </div>
-            <div class="container mt-4 p-3 shadow bg-white rounded d-flex justify-content-between">
-                <div class="chartCard">
-                    <div class="chartBox">
-                        <canvas id="statusChart"></canvas>
-                    </div>
-                </div>
-                <div class="chartCard">
-                    <div class="chartBoxs">
-                        <canvas id="statusPerCourseChart"></canvas>
-                    </div>
-                </div>
-            </div>
-            <div class="container mt-4 p-3 shadow bg-white rounded d-flex justify-content-between">
-                <!-- Bar Charts -->
-                <div class="chartCard">
-                    <div class="chartBoxs">
-                        <canvas id="registeredPerCourseChart"></canvas>
-                    </div>
-                </div>
-                <div class="chartCard">
-                    <div class="chartBoxs">
-                        <canvas id="eventsPerMonthChart"></canvas>
-                    </div>
-                </div>
-            </div>
-            <div class="container mt-4 p-3 shadow bg-white rounded d-flex justify-content-between">
-                <div class="chartCard">
-                    <div class="chartBoxs">
-                        <canvas id="registeredPerMonthChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
+        </div>
     </div>
-    </main>
+</header>
+<main>
+    <div class="page-header">
+        <h1><strong>Report</strong></h1>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha512-JPcRR8yFa8mmCsfrw4TNte1ZvF1e3+1SdGMslZvmrzDYxS69J7J49vkFL8u6u8PlPJK+H3voElBtUCzaXj+6ig==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script>
-        const data = {
-            labels: ['BSIT', 'BSCS', 'BSOA', 'BAJ', 'BECED', 'BEED', 'BSBM', 'BSENTREP', 'BSHM', 'BSPsych'], // Updated labels
+
+    <div class="container mt-4 p-3 shadow bg-white rounded d-flex justify-content-between">
+        <div>
+            <button id="refresh-page" class="btn btn-secondary">Refresh</button>
+        </div>
+        <div>
+            <button id="another-page" class="btn btn-success" onclick="window.location.href='../report/reportgraph.php'">List of Graduates</button>
+        </div>
+    </div>
+
+    <div class="container mt-4 p-3 shadow bg-white rounded">
+        <form id="report-form">
+            <div class="summary-boxes">
+                <div id="hidden-content" style="display:none;">
+                    <img src="../../assets/head.jpg" id="header-image" style="width:100%; height:auto;">
+                </div>
+                <div class="summary-box" id="alumni">
+                    <h2>Total Alumni Registered</h2>
+                    <p><?php echo $count_alumni; ?></p>
+                </div>
+                <div class="summary-box" id="events">
+                    <h2>Total Events Posted</h2>
+                    <p><?php echo $event_count; ?></p>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="container mt-4 p-3 shadow bg-white rounded d-flex justify-content-between">
+        <div class="chartCard">
+            <div class="chartBox">
+                <canvas id="myChart"></canvas>
+            </div>
+        </div>
+        <!-- Pie Charts -->
+        <div class="chartCard">
+            <div class="chartBox">
+                <canvas id="registeredUnregisteredChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="container mt-4 p-3 shadow bg-white rounded d-flex justify-content-between">
+        <div class="chartCard">
+            <div class="chartBox">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+        <div class="chartCard">
+            <div class="chartBoxs">
+                <canvas id="statusPerCourseChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="container mt-4 p-3 shadow bg-white rounded d-flex justify-content-between">
+        <!-- Bar Charts -->
+        <div class="chartCard">
+            <div class="chartBoxs">
+                <canvas id="registeredPerCourseChart"></canvas>
+            </div>
+        </div>
+        <div class="chartCard">
+            <div class="chartBoxs">
+                <canvas id="eventsPerMonthChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="container mt-4 p-3 shadow bg-white rounded d-flex justify-content-between">
+        <!-- Doughnut Chart: Donations -->
+        <div class="chartCard">
+            <div class="chartBoxs">
+                <canvas id="donationsChart"></canvas> <!-- Updated ID -->
+            </div>
+        </div>
+        <!-- Table: Donations Data -->
+        <div class="chartCard">
+            <div class="chartBoxs">
+                <canvas id="donationPerMonthChart"></canvas>
+            </div>
+        </div>
+    </div>
+    <div class="container mt-4 p-3 shadow bg-white rounded d-flex justify-content-between">
+        <div class="chartCard">
+            <div class="chartBoxs">
+                <canvas id="registeredPerMonthChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+</div>
+</main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/chart.js/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js" integrity="sha512-JPcRR8yFa8mmCsfrw4TNte1ZvF1e3+1SdGMslZvmrzDYxS69J7J49vkFL8u6u8PlPJK+H3voElBtUCzaXj+6ig==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script>
+const data = {
+    labels: ['BSIT', 'BSCS', 'BSOA', 'BAJ', 'BECEd', 'BEEd', 'BSBM', 'BSEntrep', 'BSHM', 'BSPsych'],
+    datasets: [{
+        label: 'Alumni Registered',
+        data: [
+            <?= $course_counts['BSIT']; ?>,
+            <?= $course_counts['BSCS']; ?>,
+            <?= $course_counts['BSOA']; ?>,
+            <?= $course_counts['BAJ']; ?>,
+            <?= $course_counts['BECEd']; ?>,
+            <?= $course_counts['BEEd']; ?>,
+            <?= $course_counts['BSBM']; ?>,
+            <?= $course_counts['BSEntrep']; ?>,
+            <?= $course_counts['BSHM']; ?>,
+            <?= $course_counts['BSc(Psych)']; ?>
+        ],
+        backgroundColor: [
+            'rgba(255, 26, 104, 0.5)',
+            'rgba(54, 162, 235, 0.5)',
+            'rgba(255, 206, 86, 0.5)',
+            'rgba(75, 192, 192, 0.5)',
+            'rgba(153, 102, 255, 0.5)',
+            'rgba(255, 159, 64, 0.5)',
+            'rgba(0, 0, 0, 0.5)',
+            'rgba(123, 50, 123, 0.5)',
+            'rgba(189, 183, 107, 0.5)',
+            'rgba(72, 61, 139, 0.5)'
+        ],
+        borderColor: [
+            'rgba(255, 26, 104, 1)',
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 206, 86, 1)',
+            'rgba(75, 192, 192, 1)',
+            'rgba(153, 102, 255, 1)',
+            'rgba(255, 159, 64, 1)',
+            'rgba(0, 0, 0, 1)',
+            'rgba(123, 50, 123, 1)',
+            'rgba(189, 183, 107, 1)',
+            'rgba(72, 61, 139, 1)'
+        ],
+        borderWidth: 1
+    }]
+};
+
+// config 
+const config = {
+    type: 'pie',
+    data: data,
+    options: {
+        plugins: {
+            tooltip: {
+                enabled: false
+            },
+            datalabels: {
+                formatter: (value, context) => {
+                    const datapoints = context.chart.data.datasets[0].data;
+                    const totalSum = datapoints.reduce((total, datapoint) => total + datapoint, 0);
+                    const percentageValue = (value / totalSum * 100).toFixed(1);
+                    return `${percentageValue}%`; // Only display the percentage
+                }
+            }
+        }
+    },
+    plugins: [ChartDataLabels]
+};
+
+
+// render init block
+const myChart = new Chart(
+    document.getElementById('myChart'),
+    config
+);
+// Common Colors for Consistency
+
+const colors = {
+    background: [
+        'rgba(255, 26, 104, 0.2)',
+        'rgba(54, 162, 235, 0.2)',
+        'rgba(255, 206, 86, 0.2)',
+        'rgba(75, 192, 192, 0.2)',
+        'rgba(153, 102, 255, 0.2)',
+        'rgba(255, 159, 64, 0.2)',
+        'rgba(0, 0, 0, 0.2)',
+        'rgba(123, 50, 123, 0.2)',
+        'rgba(189, 183, 107, 0.2)',
+        'rgba(72, 61, 139, 0.2)'
+    ],
+    border: [
+        'rgba(255, 26, 104, 1)',
+        'rgba(54, 162, 235, 1)',
+        'rgba(255, 206, 86, 1)',
+        'rgba(75, 192, 192, 1)',
+        'rgba(153, 102, 255, 1)',
+        'rgba(255, 159, 64, 1)',
+        'rgba(0, 0, 0, 1)',
+        'rgba(123, 50, 123, 1)',
+        'rgba(189, 183, 107, 1)',
+        'rgba(72, 61, 139, 1)'
+    ]
+
+};
+
+// Config for Pie Charts
+function createPieChart(ctx, labels, data, colors) {
+    return new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: labels,
             datasets: [{
-                label: 'Alumni Registered',
-                data: [18, 12, 16, 19, 12, 10, 15, 11, 13, 17], // Ensure data corresponds to each course
-                backgroundColor: [
-                    'rgba(255, 26, 104, 0.5)',
-                    'rgba(54, 162, 235, 0.5)',
-                    'rgba(255, 206, 86, 0.5)',
-                    'rgba(75, 192, 192, 0.5)',
-                    'rgba(153, 102, 255, 0.5)',
-                    'rgba(255, 159, 64, 0.5)',
-                    'rgba(0, 0, 0, 0.5)',
-                    'rgba(123, 50, 123, 0.5)',
-                    'rgba(189, 183, 107, 0.5)',
-                    'rgba(72, 61, 139, 0.5)'
-                ],
-                borderColor: [
-                    'rgba(255, 26, 104, 1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(153, 102, 255, 1)',
-                    'rgba(255, 159, 64, 1)',
-                    'rgba(0, 0, 0, 1)',
-                    'rgba(123, 50, 123, 1)',
-                    'rgba(189, 183, 107, 1)',
-                    'rgba(72, 61, 139, 1)'
-                ],
+                data: data,
+                backgroundColor: colors.background,
+                borderColor: colors.border,
                 borderWidth: 1
             }]
-        };
+        },
+        options: {
+            plugins: {
+                datalabels: {
+                    formatter: (value, context) => {
+                        const datapoints = context.chart.data.datasets[0].data;
+                        const totalSum = datapoints.reduce((total, datapoint) => total + datapoint, 0);
+                        const percentageValue = (value / totalSum * 100).toFixed(1);
+                        return `${percentageValue}%`;
+                    }
+                }
+            }
+        },
+        plugins: [ChartDataLabels],
+    });
+}
 
-        // Use the same course names for datalabels
-        const courseNames = ['BSIT', 'BSCS', 'BSOA', 'BAJ', 'BECED', 'BEED', 'BSBM', 'BSENTREP', 'BSHM', 'BSPsych'];
-
-        // config 
-        const config = {
-            type: 'pie',
-            data,
-            options: {
-                plugins: {
-                    tooltip: {
-                        enabled: false
-                    },
-                    datalabels: {
-                        formatter: (value, context) => {
-                            const datapoints = context.chart.data.datasets[0].data;
-                            const totalSum = datapoints.reduce((total, datapoint) => total + datapoint, 0);
-                            const percentageValue = (value / totalSum * 100).toFixed(1);
-                            return `${percentageValue}%`; // Only display the percentage
+// Config for Bar Charts
+function createBarChart(ctx, labels, datasets) {
+    return new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: datasets
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true, // Start the y-axis at 0
+                    ticks: {
+                        stepSize: 1, // Use whole numbers for y-axis increments
+                        callback: function(value) {
+                            return Number.isInteger(value) ? value : ''; // Only display whole numbers
                         }
                     }
                 }
-            },
-            plugins: [ChartDataLabels],
-        };
-        // Common Colors for Consistency
-        const colors = {
-            background: [
-                'rgba(255, 26, 104, 0.2)',
-                'rgba(54, 162, 235, 0.2)',
-                'rgba(255, 206, 86, 0.2)',
-                'rgba(75, 192, 192, 0.2)',
-                'rgba(153, 102, 255, 0.2)',
-                'rgba(255, 159, 64, 0.2)',
-                'rgba(0, 0, 0, 0.2)',
-                'rgba(123, 50, 123, 0.2)',
-                'rgba(189, 183, 107, 0.2)',
-                'rgba(72, 61, 139, 0.2)'
+            }
+        }
+    });
+}
+
+
+// Pie Chart: Registered vs Unregistered Alumni
+const registeredUnregisteredChart = createPieChart(
+    document.getElementById('registeredUnregisteredChart'),
+    ['Registered', 'Unregistered'],
+    [<?php echo $registeredCount; ?>, <?php echo $unregisteredCount; ?>], // Use PHP variables here
+    {
+        background: [
+            'rgba(255, 26, 104, 0.5)',
+            'rgba(54, 162, 235, 0.5)'
+        ],
+        border: [
+            'rgba(255, 26, 104, 1)',
+            'rgba(54, 162, 235, 1)'
+        ]
+    }
+);
+
+// Pie Chart: Verified, Unverified, and Inactive Alumni
+const statusChart = createPieChart(
+    document.getElementById('statusChart'),
+    ['Verified', 'Unverified', 'Inactive'],
+    [<?php echo $verified; ?>, <?php echo $unverified; ?>, <?php echo $inactive; ?>], {
+        background: [
+            'rgba(255, 26, 104, 0.5)',
+            'rgba(54, 162, 235, 0.5)',
+            'rgba(255, 206, 86, 0.5)'
+        ],
+        border: [
+            'rgba(255, 26, 104, 1)',
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 206, 86, 1)'
+        ]
+    }
+);
+
+// Bar Chart: Verified, Unverified, and Inactive Alumni Per Course
+const statusPerCourseChart = createBarChart(
+    document.getElementById('statusPerCourseChart'),
+    ['BSIT', 'BSCS', 'BSOA', 'BAJ', 'BECED', 'BEED', 'BSBM', 'BSEntrep', 'BSHM', 'BSPsych'],
+    [{
+            label: 'Verified',
+            data: [
+                <?= $verifCourse['BSIT']; ?>,
+                <?= $verifCourse['BSCS']; ?>,
+                <?= $verifCourse['BSOA']; ?>,
+                <?= $verifCourse['BAJ']; ?>,
+                <?= $verifCourse['BECEd']; ?>,
+                <?= $verifCourse['BEEd']; ?>,
+                <?= $verifCourse['BSBM']; ?>,
+                <?= $verifCourse['BSEntrep']; ?>,
+                <?= $verifCourse['BSHM']; ?>,
+                <?= $verifCourse['BSc(Psych)']; ?>
             ],
-            border: [
-                'rgba(255, 26, 104, 1)',
-                'rgba(54, 162, 235, 1)',
-                'rgba(255, 206, 86, 1)',
-                'rgba(75, 192, 192, 1)',
-                'rgba(153, 102, 255, 1)',
-                'rgba(255, 159, 64, 1)',
-                'rgba(0, 0, 0, 1)',
-                'rgba(123, 50, 123, 1)',
-                'rgba(189, 183, 107, 1)',
-                'rgba(72, 61, 139, 1)'
-            ]
-        };
-
-        // Config for Pie Charts
-        function createPieChart(ctx, labels, data, colors) {
-            return new Chart(ctx, {
-                type: 'pie',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        data: data,
-                        backgroundColor: colors.background,
-                        borderColor: colors.border,
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    plugins: {
-                        datalabels: {
-                            formatter: (value, context) => {
-                                const datapoints = context.chart.data.datasets[0].data;
-                                const totalSum = datapoints.reduce((total, datapoint) => total + datapoint, 0);
-                                const percentageValue = (value / totalSum * 100).toFixed(1);
-                                return `${percentageValue}%`;
-                            }
-                        }
-                    }
-                },
-                plugins: [ChartDataLabels],
-            });
+            backgroundColor: colors.background[0],
+            borderColor: colors.border[0], // Solid border color
+            borderWidth: 1
+        },
+        {
+            label: 'Unverified',
+            data: [
+                <?= $unverifCourse['BSIT']; ?>,
+                <?= $unverifCourse['BSCS']; ?>,
+                <?= $unverifCourse['BSOA']; ?>,
+                <?= $unverifCourse['BAJ']; ?>,
+                <?= $unverifCourse['BECEd']; ?>,
+                <?= $unverifCourse['BEEd']; ?>,
+                <?= $unverifCourse['BSBM']; ?>,
+                <?= $unverifCourse['BSEntrep']; ?>,
+                <?= $unverifCourse['BSHM']; ?>,
+                <?= $unverifCourse['BSc(Psych)']; ?>
+            ],
+            backgroundColor: colors.background[1],
+            borderColor: colors.border[1], // Solid border color
+            borderWidth: 1
+        },
+        {
+            label: 'Inactive',
+            data: [
+                <?= $inactiveCourse['BSIT']; ?>,
+                <?= $inactiveCourse['BSCS']; ?>,
+                <?= $inactiveCourse['BSOA']; ?>,
+                <?= $inactiveCourse['BAJ']; ?>,
+                <?= $inactiveCourse['BECEd']; ?>,
+                <?= $inactiveCourse['BEEd']; ?>,
+                <?= $inactiveCourse['BSBM']; ?>,
+                <?= $inactiveCourse['BSEntrep']; ?>,
+                <?= $inactiveCourse['BSHM']; ?>,
+                <?= $inactiveCourse['BSc(Psych)']; ?>
+            ],
+            backgroundColor: colors.background[2],
+            borderColor: colors.border[2], // Solid border color
+            borderWidth: 1
         }
+    ]
+);
 
-        // Config for Bar Charts
-        function createBarChart(ctx, labels, datasets) {
-            return new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: datasets
+
+// Bar Chart: Registered Alumni Per Course
+const registeredPerCourseChart = createBarChart(
+    document.getElementById('registeredPerCourseChart'),
+    ['BSIT', 'BSCS', 'BSOA', 'BAJ', 'BECED', 'BEED', 'BSBM', 'BSENTREP', 'BSHM', 'BSPsych'],
+    [{
+        label: 'Registered Alumni Per Course',
+        data: [
+            <?= $course_counts['BSIT']; ?>,
+            <?= $course_counts['BSCS']; ?>,
+            <?= $course_counts['BSOA']; ?>,
+            <?= $course_counts['BAJ']; ?>,
+            <?= $course_counts['BECEd']; ?>,
+            <?= $course_counts['BEEd']; ?>,
+            <?= $course_counts['BSBM']; ?>,
+            <?= $course_counts['BSEntrep']; ?>,
+            <?= $course_counts['BSHM']; ?>,
+            <?= $course_counts['BSc(Psych)']; ?>
+        ],
+        backgroundColor: colors.background[3],
+        borderColor: colors.border[3], // Solid border color
+        borderWidth: 1
+    }]
+);
+
+// Bar Chart: Events Created Per Month
+const labels_event = <?php echo json_encode($labels_event); ?>;
+const data_event = <?php echo json_encode($data_event); ?>;
+
+const eventsPerMonthChart = createBarChart(
+    document.getElementById('eventsPerMonthChart'),
+    labels_event, // Use the labels for all months
+    [{
+        label: 'Events Created',
+        data: data_event, // Use the dynamic event data from PHP
+        backgroundColor: colors.background[4],
+        borderColor: colors.border[4],
+        borderWidth: 1
+    }]
+);
+
+
+// Bar Chart: Alumni Registered Per Month
+const registered_alumni = <?php echo json_encode($registered_alumni); ?>;
+
+// Create the bar chart with the data using your custom configuration
+const registeredPerMonthChart = createBarChart(
+    document.getElementById('registeredPerMonthChart'),
+    ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.'],
+    [{
+        label: 'Registered Alumni Every Month',
+        data: registered_alumni, // Use the PHP variable here
+        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 1
+    }]
+);
+
+// Pie Chart: Donations
+const months = <?php echo json_encode($months); ?>;
+const percentages = <?php echo json_encode($percentages); ?>;
+
+// Create a mapping of months and percentages, keeping all months but setting zero percentages to null
+const dataWithLabels = months.map((month, index) => ({
+    month: month,
+    percentage: percentages[index]
+}));
+
+// Filter out zero percentage values for chart display
+const filteredData = dataWithLabels.filter(data => data.percentage > 0);
+
+const filteredMonths = filteredData.map(data => data.month);
+const filteredPercentages = filteredData.map(data => data.percentage);
+
+// Configuration for the pie chart
+const configDonate = {
+    type: 'pie',
+    data: {
+        labels: months, // Show all months
+        datasets: [{
+            label: 'Total Donation Per Month',
+            data: percentages, // Show all data
+            backgroundColor: [
+                '#FF8C8C', '#FFB84D', '#FFFF66', '#66FF66', '#66B3FF', '#FF66B2', '#D9B3FF', '#99FFFF', '#FFFF99', '#FFB84D', '#FF6666', '#B3A1FF'
+            ],
+            borderColor: [
+                '#FF8C8C', '#FFB84D', '#FFFF66', '#66FF66', '#66B3FF', '#FF66B2', '#D9B3FF', '#99FFFF', '#FFFF99', '#FFB84D', '#FF6666', '#B3A1FF'
+            ],
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            tooltip: {
+                enabled: false // Disable tooltips
+            },
+            datalabels: {
+                formatter: (value, context) => {
+                    return value > 0 ? `${value}%` : null; // Show percentage only if value > 0
                 },
-                options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true
-                        }
-                    }
+                color: '#333', // Darker color for the text
+                font: {
+                    weight: 'bold',
+                    size: 14
                 }
-            });
+            }
         }
+    },
+    plugins: [ChartDataLabels]
+};
 
-        // Pie Chart: Registered vs Unregistered Alumni
-        const registeredUnregisteredChart = createPieChart(
-            document.getElementById('registeredUnregisteredChart'),
-            ['Registered', 'Unregistered'],
-            [300, 200],
-            colors
-        );
+// Initialize the chart
+const donationsChart = new Chart(document.getElementById('donationsChart'), configDonate);
 
-        // Pie Chart: Verified, Unverified, and Inactive Alumni
-        const statusChart = createPieChart(
-            document.getElementById('statusChart'),
-            ['Verified', 'Unverified', 'Inactive'],
-            [150, 250, 100],
-            colors
-        );
+// Bar Chart for Monthly donation
+const monthly_donation = <?php echo json_encode($monthly_donation); ?>;
+const donationPerMonthChart = createBarChart(
+    document.getElementById('donationPerMonthChart'),
+    ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.'],
+    [{
+        label: 'Total Monthly Donation',
+        data: monthly_donation, // This variable is populated from PHP
+        backgroundColor: 'rgba(255, 206, 86, 0.5)',
+        borderColor: 'rgba(75, 192, 192, 1)',
+        borderWidth: 1
+    }]
+);
 
-        // Bar Chart: Verified, Unverified, and Inactive Alumni Per Course
-        const statusPerCourseChart = createBarChart(
-            document.getElementById('statusPerCourseChart'),
-            ['BSIT', 'BSCS', 'BSOA', 'BAJ', 'BECED', 'BEED', 'BSBM', 'BSENTREP', 'BSHM', 'BSPsych'],
-            [{
-                    label: 'Verified',
-                    data: [50, 30, 70, 60, 40, 50, 70, 65, 75, 80],
-                    backgroundColor: colors.background[0]
-                },
-                {
-                    label: 'Unverified',
-                    data: [20, 40, 60, 30, 20, 35, 50, 45, 55, 60],
-                    backgroundColor: colors.background[1]
-                },
-                {
-                    label: 'Inactive',
-                    data: [10, 50, 40, 20, 30, 25, 35, 30, 40, 50],
-                    backgroundColor: colors.background[2]
-                }
-            ]
-        );
-
-        // Bar Chart: Registered Alumni Per Course
-        const registeredPerCourseChart = createBarChart(
-            document.getElementById('registeredPerCourseChart'),
-            ['BSIT', 'BSCS', 'BSOA', 'BAJ', 'BECED', 'BEED', 'BSBM', 'BSENTREP', 'BSHM', 'BSPsych'],
-            [{
-                label: 'Registered Alumni Per Course',
-                data: [300, 400, 200, 350, 300, 400, 450, 425, 475, 500],
-                backgroundColor: colors.background[3]
-            }]
-        );
-
-        // Bar Chart: Events Created Per Month
-        const eventsPerMonthChart = createBarChart(
-            document.getElementById('eventsPerMonthChart'),
-            ['January', 'February', 'March', 'April'],
-            [{
-                label: 'Events Created',
-                data: [5, 10, 8, 6],
-                backgroundColor: colors.background[4]
-            }]
-        );
-
-        // Bar Chart: Alumni Registered Per Month
-        const registeredPerMonthChart = createBarChart(
-            document.getElementById('registeredPerMonthChart'),
-            ['January', 'February', 'March', 'April'],
-            [{
-                label: 'Registered Alumni Every Month',
-                data: [25, 35, 40, 30],
-                backgroundColor: colors.background[5]
-            }]
-        );
-
-
-        // render init block
-        const myChart = new Chart(
-            document.getElementById('myChart'),
-            config
-        );
-
-        document.getElementById('download-pdf').addEventListener('click', () => {
-            const element = document.querySelector('form');
-
-            // Get the current date
-            const currentDate = new Date();
-            const formattedDate = currentDate.toISOString().slice(0, 10);
-
-            const opt = {
-                margin: 1,
-                filename: `alumni-report-${formattedDate}.pdf`,
-                image: {
-                    type: 'jpeg',
-                    quality: 0.98
-                },
-                html2canvas: {
-                    scale: 2
-                },
-                jsPDF: {
-                    unit: 'in',
-                    format: 'legal',
-                    orientation: 'landscape'
-                }
-            };
-
-            html2pdf().from(element).set(opt).save();
-        });
-
-        document.getElementById('refresh-page').addEventListener('click', () => {
-            location.reload();
-        });
-    </script>
+document.getElementById('refresh-page').addEventListener('click', () => {
+    location.reload();
+});
+</script>
 </body>
 
 </html>
