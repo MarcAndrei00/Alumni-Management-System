@@ -105,18 +105,40 @@ if ($res_event->num_rows > 0) {
 }
 
 // DONATION COUNT PER MONTH
-$query_event = "SELECT MONTH(donate_date) as month, COUNT(*) as count FROM donation_table GROUP BY MONTH(donate_date)";
-$res_event = $conn->query($query_event);
-
-$labels_event = ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.'];
-$data_donation = array_fill(0, 12, 0); // Initialize an array with 12 zeros for each month
-
-if ($res_event->num_rows > 0) {
-    while ($row_event = $res_event->fetch_assoc()) {
-        $data_donation[$row_event['month'] - 1] = $row_event['count']; // Store the count for the respective month
+$query = "SELECT MONTH(donate_date) AS donate_month, SUM(donation_amount) AS total_donations
+          FROM donation_table
+          GROUP BY donate_month
+          ORDER BY donate_month";
+$result = $conn->query($query);
+$monthly_donation = array_fill(0, 12, 0);
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $monthly_donation[$row['donate_month'] - 1] = $row['total_donations'];
     }
 }
 
+// Query to group donations by month and count them
+$query = "SELECT MONTH(donate_date) AS donate_month, COUNT(*) AS donation_count
+          FROM donation_table
+          GROUP BY donate_month
+          ORDER BY donate_month";
+$result = $conn->query($query);
+
+// Initialize months and counts
+$month_names = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
+$months = $month_names;
+$donation_count = array_fill(0, 12, 0); // Initialize all months with 0
+
+// Process the query result
+if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+        $donate_month = $row['donate_month'] - 1;
+        $donation_count[$donate_month] = $row['donation_count']; // Update count for the month
+    }
+}
+
+
+// ALUMNI COUNT
 $query_event = "SELECT MONTH(date_created) as month, COUNT(*) as count FROM alumni GROUP BY MONTH(date_created)";
 $res_event = $conn->query($query_event);
 
@@ -537,40 +559,8 @@ while ($row = $resInactive->fetch_assoc()) {
                 </div>
                 <!-- Table: Donations Data -->
                 <div class="chartCard">
-                    <div class="table-responsive">
-                        <table class="table table-striped">
-                            <thead>
-                                <tr>
-                                    <th>Event Title</th>
-                                    <th>Total Donation</th>
-                                    <th>Total Donors</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Alumni Night</td>
-                                    <td>$500</td>
-                                    <td>5</td>
-                                </tr>
-                                <tr>
-                                    <td>Fundrasing</td>
-                                    <td>$300</td>
-                                    <td>10</td>
-
-                                </tr>
-                                <tr>
-                                    <td>Alumni Sportsfest</td>
-                                    <td>$200</td>
-                                    <td>15</td>
-
-                                </tr>
-                                <tr>
-                                    <td>Grand Ball</td>
-                                    <td>$100</td>
-                                    <td>20</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                    <div class="chartBoxs">
+                        <canvas id="donationPerMonthChart"></canvas>
                     </div>
                 </div>
             </div>
@@ -900,26 +890,24 @@ while ($row = $resInactive->fetch_assoc()) {
             }]
         );
 
-        // Doughnut Chart: Donations
-        const donationsChart = new Chart(document.getElementById('donationsChart'), { // Updated ID
-            type: 'doughnut',
+        // Pie Chart: Donations
+        const months = <?php echo json_encode($months); ?>;
+        const donation_count = <?php echo json_encode($donation_count); ?>;
+
+        const donationsChart = new Chart(document.getElementById('donationsChart'), {
+            type: 'pie',
             data: {
-                labels: ['Jan', 'Feb', 'Mar', 'April'],
+                labels: months, // Use months from PHP
                 datasets: [{
                     label: 'Total Donation Per Month',
-                    data: [500, 300, 200, 100],
+                    data: donation_count, // Use donation count from PHP
                     backgroundColor: [
-                        colors.background[0],
-                        colors.background[1],
-                        colors.background[2],
-                        colors.background[3]
+                        // Define your color array
+                        '#FF6384', '#36A2EB', '#FFCE56', '#E7E9AC', '#4BC0C0', '#FF9F40', '#FFCE56', '#36A2EB', '#FF6384', '#4BC0C0', '#E7E9AC', '#FF9F40'
                     ],
                     borderColor: [
-                        colors.border[0],
-                        colors.border[1],
-                        colors.border[2],
-                        colors.border[3]
-                    ], // Solid border colors
+                        '#FF6384', '#36A2EB', '#FFCE56', '#E7E9AC', '#4BC0C0', '#FF9F40', '#FFCE56', '#36A2EB', '#FF6384', '#4BC0C0', '#E7E9AC', '#FF9F40'
+                    ],
                     borderWidth: 1
                 }]
             },
@@ -929,6 +917,19 @@ while ($row = $resInactive->fetch_assoc()) {
             }
         });
 
+        // Bar Chart for Monthly donation
+        const monthly_donation = <?php echo json_encode($monthly_donation); ?>;
+        const donationPerMonthChart = createBarChart(
+            document.getElementById('donationPerMonthChart'),
+            ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.'],
+            [{
+                label: 'Total Monthly Donation',
+                data: monthly_donation, // This variable is populated from PHP
+                backgroundColor: 'rgba(255, 206, 86, 0.5)',
+                borderColor: 'rgba(75, 192, 192, 1)',
+                borderWidth: 1
+            }]
+        );
 
         document.getElementById('download-pdf').addEventListener('click', () => {
             const hiddenContent = document.getElementById('hidden-content').innerHTML;
