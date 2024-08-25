@@ -89,7 +89,8 @@ if ($status_filter === 'unregister') {
     }
     if (!empty($batch_filter)) {
         // Use LIKE to match the batch format, assuming batch is stored in '2020-2021' format
-        $sql .= " AND batch LIKE '%$batch_filter%'";
+        $batcher = '-' . $batch_filter;
+        $sql .= " AND batch LIKE '%$batcher%'";
     }
 } elseif ($status_filter === 'inactive') {
     $sql = "SELECT * FROM alumni_archive WHERE 1=1";
@@ -152,10 +153,66 @@ $total_records_row = $total_records_result->fetch_array();
 $total_records = $total_records_row[0];
 
 $total_pages = ceil($total_records / $records_per_page);
-// // Handle no records found message
-// if ($total_records == 0) {
-//     echo "No records found";
+
+$status_filter = isset($_GET['status']) ? $_GET['status'] : 'register'; // Default to 'register'
+// Determine the title based on the selected status
+switch ($status_filter) {
+    case 'unregister':
+        $title = 'Lists of Unregistered Alumni';
+        break;
+    case 'inactive':
+        $title = 'Lists of Inactive Alumni';
+        break;
+    case 'register':
+    default:
+        $title = 'Lists of Registered Alumni';
+        break;
+}
+
+
+// // PDF NOTE: itong sana ung mag kukuha ng data lahat hdipende sa filter tapos hindi ung div ang kukunin nya kundi lahat ng ng record bali gaagwa sya sariling query ganondapat, tapos may pinaka kumplikado jan ung sa list of graduate sa pag get ng batch kasi di sya naka hiwalay naka saam ung dalawa EX: 2020-2024
+// // Fetch filter parameters 
+// $status_filter = $_GET['status'] ?? '';
+// $course_filter = $_GET['course'] ?? '';
+// $batch_filter = $_GET['batch'] ?? '';
+
+// // Base SQL query depending on the status
+// if ($status_filter === 'unregister') {
+//     $sql = "SELECT * FROM list_of_graduate WHERE 1=1";
+//     if (!empty($course_filter) && $course_filter != 'all') {
+//         $sql .= " AND course = '$course_filter'";
+//     }
+//     if (!empty($batch_filter)) {
+//         // Special handling for batch filter
+//         $batcher = '-' . $batch_filter;
+//         $sql .= " AND batch LIKE '%$batcher%'";
+//     }
+// } elseif ($status_filter === 'inactive') {
+//     $sql = "SELECT * FROM alumni_archive WHERE 1=1";
+//     if (!empty($course_filter) && $course_filter != 'all') {
+//         $sql .= " AND course = '$course_filter'";
+//     }
+//     if (!empty($batch_filter) && $batch_filter != 'all') {
+//         $sql .= " AND batch_endYear = '$batch_filter'";
+//     }
+// } else {
+//     // Default to 'register' which means Registered Alumni
+//     $sql = "SELECT * FROM alumni WHERE 1=1";
+//     if (!empty($course_filter) && $course_filter != 'all') {
+//         $sql .= " AND course = '$course_filter'";
+//     }
+//     if (!empty($batch_filter) && $batch_filter != 'all') {
+//         $sql .= " AND batch_endYear = '$batch_filter'";
+//     }
 // }
+
+// // Execute the query and return results as JSON
+// $result = $conn->query($sql);
+// $data = [];
+// while ($row = $result->fetch_assoc()) {
+//     $data[] = $row;
+// }
+// echo json_encode($data);
 
 ?>
 <!DOCTYPE html>
@@ -403,7 +460,7 @@ $total_pages = ceil($total_records / $records_per_page);
                     <button id="refresh-page" class="btn btn-secondary">Refresh</button>
                 </div>
                 <div>
-                    <button id="another-page" class="btn btn-success" onclick="window.location.href='../report/report.php'">Graph</button>
+                    <button id="another-page" class="btn btn-success" onclick="window.location.href='../report/report.php'">Graphs</button>
                 </div>
             </div>
 
@@ -412,9 +469,11 @@ $total_pages = ceil($total_records / $records_per_page);
                 <div class="container mt-5">
                     <div id="hidden-content" style="display:none;">
                         <img src="../../assets/head.jpg" id="header-image" style="width:100%; height:auto;">
+                        <br>
+                        <h2><strong><?php echo $title; ?></strong></h2>
                     </div>
                     <div class="d-flex align-items-center mb-3">
-                        <h2 class="mb-0 flex-grow-1">Lists of Registered Alumni</h2>
+                        <h2 class="mb-0 flex-grow-1"><strong><?php echo $title; ?></strong></h2>
                         <div class="mb-0 flex-grow-1 ms-3">
                             <label for="statusSelect" class="form-label d-none">Status</label>
                             <select id="statusSelect" class="form-select w-100" name="status">
@@ -562,6 +621,82 @@ $total_pages = ceil($total_records / $records_per_page);
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
     <script>
         // PDF
+        // document.getElementById('download-pdf').addEventListener('click', () => {
+        //     // Get filter values
+        //     const statusSelect = document.getElementById('statusSelect').value;
+        //     const courseSelect = document.getElementById('courseSelect').value;
+        //     const batchSelect = document.getElementById('batchSelect').value;
+
+        //     // Fetch all filtered data from the backend
+        //     fetch(`fetch_all_data.php?status=${statusSelect}&course=${courseSelect}&batch=${batchSelect}`)
+        //         .then(response => response.json())
+        //         .then(data => {
+        //             // Create a table to display all data
+        //             let tableHtml = '<table border="1" style="width:100%; border-collapse: collapse;"><thead><tr><th>STUDENT ID</th><th>NAME</th><th>COURSE</th><th>BATCH</th><th>EMAIL</th><th>GENDER</th><th>STATUS</th></tr></thead><tbody>';
+
+        //             data.forEach(row => {
+        //                 let batch = '';
+        //                 if (statusSelect === 'unregister') {
+        //                     batch = row.batch;
+        //                 } else {
+        //                     batch = `${row.batch_startYear} - ${row.batch_endYear}`;
+        //                 }
+
+        //                 const statusColor = row.status === 'Verified' ? 'green' : 'red';
+        //                 tableHtml += `<tr>
+        //             <td>${row.student_id}</td>
+        //             <td>${row.lname}, ${row.fname} ${row.mname ? row.mname + '.' : ''}</td>
+        //             <td>${row.course}</td>
+        //             <td>${batch}</td>
+        //             <td>${row.email}</td>
+        //             <td>${row.gender}</td>
+        //             <td style="color: ${statusColor};">${row.status}</td>
+        //         </tr>`;
+        //             });
+
+        //             tableHtml += '</tbody></table>';
+
+        //             // Combine header and table for PDF
+        //             const hiddenContent = document.getElementById('hidden-content').innerHTML;
+        //             const tempContainer = document.createElement('div');
+        //             tempContainer.innerHTML = hiddenContent + '<br><br>' + tableHtml;
+        //             tempContainer.querySelector('#header-image').style.display = 'block';
+
+        //             // Set the style for the temporary container
+        //             tempContainer.style.display = 'block';
+        //             tempContainer.style.width = '100%';
+        //             tempContainer.style.fontSize = '12px'; // Adjusted font size for better readability
+
+        //             const currentDate = new Date();
+        //             const formattedDate = currentDate.toISOString().slice(0, 10);
+
+        //             // PDF options
+        //             const opt = {
+        //                 margin: 0.50,
+        //                 filename: `graduates-report-${formattedDate}.pdf`,
+        //                 image: {
+        //                     type: 'jpeg',
+        //                     quality: 0.98
+        //                 },
+        //                 html2canvas: {
+        //                     scale: 2
+        //                 },
+        //                 jsPDF: {
+        //                     unit: 'in',
+        //                     format: 'legal',
+        //                     orientation: 'portrait'
+        //                 }
+        //             };
+
+        //             // Generate the PDF from the temporary container
+        //             html2pdf().from(tempContainer).set(opt).save().then(() => {
+        //                 // Clean up: remove the temporary container
+        //                 tempContainer.remove();
+        //             });
+        //         })
+        //         .catch(error => console.error('Error fetching data:', error));
+        // });
+
         document.getElementById('download-pdf').addEventListener('click', () => {
             const selectedCourse = courseSelect.value;
             displayGraduates(selectedCourse);
@@ -601,9 +736,8 @@ $total_pages = ceil($total_records / $records_per_page);
                 tempContainer.remove();
             });
         });
-        // document.getElementById('refresh-page').addEventListener('click', () => {
-        //     location.reload();
-        // });
+
+        // REFRESH
         document.getElementById('refresh-page').addEventListener('click', function() {
             // Reset course filter to default (assuming default is 'all')
             const courseFilter = document.getElementById('courseSelect');

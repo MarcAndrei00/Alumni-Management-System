@@ -78,72 +78,102 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
 
 
 
-// COUNTS
-    //query for alumni count
-    $sql_alumni = "SELECT COUNT(student_id) AS alumni_count FROM alumni";
-    $result_alumni = $conn->query($sql_alumni);
-    $row_alumni = $result_alumni->fetch_assoc();
-    $count_alumni = $row_alumni['alumni_count'];
+$records_per_page = 20;
+$current_page = isset($_GET['page']) ? $_GET['page'] : 1;
+$start_from = ($current_page - 1) * $records_per_page;
 
-    //query for alumni count
-    $sql_coordinator = "SELECT COUNT(coor_id) AS coordinators_count FROM coordinator";
-    $result_coordinator = $conn->query($sql_coordinator);
-    $row_coordinator = $result_coordinator->fetch_assoc();
-    $coordinator_count = $row_coordinator['coordinators_count'];
+$course_filter = isset($_GET['course']) ? $_GET['course'] : '';
+$batch_filter = isset($_GET['batch']) ? $_GET['batch'] : '';
+$status_filter = isset($_GET['status']) ? $_GET['status'] : 'register'; // Default to 'Registered'
 
-    //query for events count
-    $sql_event = "SELECT COUNT(event_id) AS events_count FROM event";
-    $result_event = $conn->query($sql_event);
-    $row_event = $result_event->fetch_assoc();
-    $event_count = $row_event['events_count'];
+// Base SQL query depending on the status
+if ($status_filter === 'unregister') {
+    $sql = "SELECT * FROM list_of_graduate WHERE 1=1";
+    if (!empty($course_filter) && $course_filter != 'all') {
+        $sql .= " AND course = '$course_filter'";
+    }
+    if (!empty($batch_filter)) {
+        // Use LIKE to match the batch format, assuming batch is stored in '2020-2021' format
+        $batcher = '-' . $batch_filter;
+        $sql .= " AND batch LIKE '%$batcher%'";
+    }
+} elseif ($status_filter === 'inactive') {
+    $sql = "SELECT * FROM alumni_archive WHERE 1=1";
+    if (!empty($course_filter) && $course_filter != 'all') {
+        $sql .= " AND course = '$course_filter'";
+    }
+    if (!empty($batch_filter) && $batch_filter != 'all') {
+        // Use batch_endYear for inactive
+        $sql .= " AND batch_endYear = '$batch_filter'";
+    }
+} else {
+    // Default to 'register' which means Registered Alumni
+    $sql = "SELECT * FROM alumni WHERE 1=1";
+    if (!empty($course_filter) && $course_filter != 'all') {
+        $sql .= " AND course = '$course_filter'";
+    }
+    if (!empty($batch_filter) && $batch_filter != 'all') {
+        // Use batch_endYear for registered
+        $sql .= " AND batch_endYear = '$batch_filter'";
+    }
+}
 
-
-$sql = "SELECT course, COUNT(*) as count FROM alumni GROUP BY course";
+// Add ordering and pagination
+$sql .= " ORDER BY lname ASC LIMIT $start_from, $records_per_page";
 $result = $conn->query($sql);
 
-// DTA FOR CHART
-$labels = ['BAJ', 'BECEd', 'BEEd', 'BSBM', 'BSOA', 'BSEntrep', 'BSHM', 'BSIT', 'BSCS', 'BSc(Psych)'];
-$data = array_fill(0, count($labels), 0);
-
-if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $index = array_search($row['course'], $labels);
-        if ($index !== false) {
-            $data[$index] = $row['count'];
-        }
+// Count total number of records
+if ($status_filter === 'unregister') {
+    $total_records_query = "SELECT COUNT(*) FROM list_of_graduate WHERE 1=1";
+    if (!empty($course_filter) && $course_filter != 'all') {
+        $total_records_query .= " AND course = '$course_filter'";
+    }
+    if (!empty($batch_filter)) {
+        // Count with LIKE to match the batch format
+        $total_records_query .= " AND batch LIKE '%$batch_filter%'";
+    }
+} elseif ($status_filter === 'inactive') {
+    $total_records_query = "SELECT COUNT(*) FROM alumni_archive WHERE 1=1";
+    if (!empty($course_filter) && $course_filter != 'all') {
+        $total_records_query .= " AND course = '$course_filter'";
+    }
+    if (!empty($batch_filter) && $batch_filter != 'all') {
+        // Count with batch_endYear for inactive
+        $total_records_query .= " AND batch_endYear = '$batch_filter'";
+    }
+} else {
+    // Default to 'register'
+    $total_records_query = "SELECT COUNT(*) FROM alumni WHERE 1=1";
+    if (!empty($course_filter) && $course_filter != 'all') {
+        $total_records_query .= " AND course = '$course_filter'";
+    }
+    if (!empty($batch_filter) && $batch_filter != 'all') {
+        // Count with batch_endYear for registered
+        $total_records_query .= " AND batch_endYear = '$batch_filter'";
     }
 }
 
-// EVENT COUNT EVERY MONTH
-$query_event = "SELECT MONTH(date) as month, COUNT(*) as count FROM event GROUP BY MONTH(date)";
-$res_event = $conn->query($query_event);
+$total_records_result = $conn->query($total_records_query);
+$total_records_row = $total_records_result->fetch_array();
+$total_records = $total_records_row[0];
 
-$labels_event = ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.'];
-$data_event = array_fill(0, 12, 0);
+$total_pages = ceil($total_records / $records_per_page);
 
-if ($res_event->num_rows > 0) {
-    while ($row_event = $res_event->fetch_assoc()) {
-        $data_event[$row_event['month'] - 1] = $row_event['count'];
-    }
+$status_filter = isset($_GET['status']) ? $_GET['status'] : 'register'; // Default to 'register'
+// Determine the title based on the selected status
+switch ($status_filter) {
+    case 'unregister':
+        $title = 'Lists of Unregistered Alumni';
+        break;
+    case 'inactive':
+        $title = 'Lists of Inactive Alumni';
+        break;
+    case 'register':
+    default:
+        $title = 'Lists of Registered Alumni';
+        break;
 }
 
-
-// Query to get the count of alumni registered in each month
-$qeury_alumniCount = "SELECT MONTH(date_created) as month, COUNT(*) as count FROM alumni GROUP BY MONTH(date_created)
-";
-
-// Execute the query
-$res_alumniCount = $conn->query($qeury_alumniCount);
-
-// Prepare data for the chart
-$labels_alumniCount = ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'June', 'July', 'Aug.', 'Sept.', 'Oct.', 'Nov.', 'Dec.'];
-$data_alumniCount = array_fill(0, 12, 0);
-
-if ($res_alumniCount->num_rows > 0) {
-    while($row_alumniCount = $res_alumniCount->fetch_assoc()) {
-        $data_alumniCount[$row_alumniCount['month'] - 1] = $row_alumniCount['count'];
-    }
-}
 ?>
 
 <!DOCTYPE html>
@@ -162,6 +192,136 @@ if ($res_alumniCount->num_rows > 0) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        /* FOR SWEETALERT */
+        .swal2-popup {
+            padding-bottom: 30px;
+            /* Adjust the padding as needed */
+        }
+
+        .confirm-button-class,
+        .cancel-button-class {
+            width: 150px;
+            /* Set the desired width */
+            height: 40px;
+            /* Set the desired height */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .confirm-button-class {
+            background-color: #e03444 !important;
+            color: white;
+        }
+
+        .cancel-button-class {
+            background-color: #ffc404 !important;
+            color: white;
+        }
+
+        /* FOR SWEETALERT  END LINE*/
+
+
+        /*  DESIGN FOR SEARCH BAR AND PAGINATION */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        td {
+            text-align: left;
+        }
+
+        .inline {
+            border: 1px solid #dddddd;
+            padding: 8px;
+            font-size: 12px;
+            white-space: nowrap;
+            /* Prevent text from wrapping */
+            overflow: hidden;
+            /* Hide overflowing content */
+            text-overflow: ellipsis;
+            /* Display ellipsis for truncated text */
+            max-width: 125px;
+            /* Set a max-width to control truncation */
+
+        }
+
+        .act {
+            max-width: 235px;
+            text-align: center;
+            /* Set a max-width to control truncation */
+        }
+
+        th {
+            background-color: #368DB8;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .pagination {
+            margin-top: 20px;
+            text-align: center;
+
+        }
+
+        .pagination a {
+            display: inline-block;
+            padding: 8px 16px;
+            text-decoration: none;
+            background-color: #f1f1f1;
+            color: black;
+            border: 1px solid #ccc;
+            margin-right: 5px;
+            /* Added margin to separate buttons */
+        }
+
+        .pagination a.active {
+            background-color: #4CAF50;
+            color: white;
+            border: 1px solid #4CAF50;
+        }
+
+        .pagination a:hover:not(.active) {
+            background-color: #ddd;
+        }
+
+        .pagination .prev :hover {
+            float: left;
+
+            /* Float left for "Previous" link */
+        }
+
+
+        .pagination .next {
+            float: right;
+            /* Float right for "Next" link */
+        }
+
+        .dropdown-menu {
+            max-height: absolute;
+            /* Limit the height of the dropdown menu */
+            overflow-y: auto;
+            /* Add scroll if content exceeds height */
+            padding: 0;
+            /* Remove extra padding if needed */
+        }
+
+        .dropdown-menu label {
+            display: block;
+            /* Ensure each label takes up a full line */
+            margin-bottom: 5px;
+            /* Space between items */
+            white-space: nowrap;
+            /* Prevent text from wrapping */
+        }
+
+        .dropdown-menu input[type="checkbox"] {
+            margin-right: 10px;
+            /* Space between checkbox and label text */
+        }
+    </style>
 </head>
 
 <body>
@@ -253,221 +413,268 @@ if ($res_alumniCount->num_rows > 0) {
             </div>
 
             <div class="container mt-4 p-3 shadow bg-white rounded d-flex justify-content-between">
-               <div>
+                <div>
                     <button id="download-pdf" class="btn btn-primary">Download as PDF</button>
                     <button id="refresh-page" class="btn btn-secondary">Refresh</button>
                 </div>
                 <div>
-                    <button id="another-page" class="btn btn-success" onclick="window.location.href='../report/report.php'">Graph</button>
+                    <button id="another-page" class="btn btn-success" onclick="window.location.href='../report/report.php'">Graphs</button>
                 </div>
             </div>
-        <div class="container mt-4 p-3 shadow bg-white rounded">
-            <div class="container mt-5">
-            <h2>Select Course and Batch</h2>
 
-            <!-- Course Selection Dropdown -->
-            <div class="mb-3">
-            <label for="courseSelect" class="form-label">Select Course</label>
-            <select id="courseSelect" class="form-select">
-                <option value="" disabled selected>Select a course</option>
-                <option value="bsit">Bachelor of Science in Information Technology</option>
-                <option value="bscs">Bachelor of Science in Computer Science</option>
-                <option value="bsoa">Bachelor of Science in Office Administration</option>
-                <option value="baj">Bachelor Of Arts In Journalism</option>
-                <option value="beced">Bachelor Of Elementary Education</option>
-                <option value="beed">Bachelor Of Secondary Education</option>          
-                <option value="bsbm">Bachelor Of Science In Business Management</option>
-                <option value="bsentrep">Bachelor Of Science In Entrepreneurship</option>
-                <option value="bshm">Bachelor Of Science In Hospitality Management</option>
-                <option value="bspsych">Bachelor Of Science In Psychology</option>
-            </select>
-            </div>
+            <!-- CONTAINER FOR LIST -->
+            <div class="container mt-4 p-3 shadow bg-white rounded">
+                <div class="container mt-5">
+                    <div id="hidden-content" style="display:none;">
+                        <img src="../../assets/head.jpg" id="header-image" style="width:100%; height:auto;">
+                        <br>
+                        <h2><strong><?php echo $title; ?></strong></h2>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <h2 class="mb-0 flex-grow-1"><strong><?php echo $title; ?></strong></h2>
+                        <div class="mb-0 flex-grow-1 ms-3">
+                            <label for="statusSelect" class="form-label d-none">Status</label>
+                            <select id="statusSelect" class="form-select w-100" name="status">
+                                <option value="register" <?php echo ($status_filter == 'register') ? 'selected' : ''; ?>>Registered</option>
+                                <option value="unregister" <?php echo ($status_filter == 'unregister') ? 'selected' : ''; ?>>Unregistered</option>
+                                <option value="inactive" <?php echo ($status_filter == 'inactive') ? 'selected' : ''; ?>>Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                    <form method="GET" action="">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="courseSelect" class="form-label">Course</label>
+                                <select id="courseSelect" class="form-select" name="course">
+                                    <option value="" selected>All Courses</option>
+                                    <option value="Bachelor of Arts in Journalism" <?php echo ($course_filter == 'Bachelor of Arts in Journalism') ? 'selected' : ''; ?>>Bachelor of Arts in Journalism</option>
+                                    <option value="Bachelor of Secondary Education" <?php echo ($course_filter == 'Bachelor of Secondary Education') ? 'selected' : ''; ?>>Bachelor of Secondary Education</option>
+                                    <option value="Bachelor of Elementary Education" <?php echo ($course_filter == 'Bachelor of Elementary Education') ? 'selected' : ''; ?>>Bachelor of Elementary Education</option>
+                                    <option value="Bachelor of Science in Business Management" <?php echo ($course_filter == 'Bachelor of Science in Business Management') ? 'selected' : ''; ?>>Bachelor of Science in Business Management</option>
+                                    <option value="Bachelor of Science in Office Administration" <?php echo ($course_filter == 'Bachelor of Science in Office Administration') ? 'selected' : ''; ?>>Bachelor of Science in Office Administration</option>
+                                    <option value="Bachelor of Science in Entrepreneurship" <?php echo ($course_filter == 'Bachelor of Science in Entrepreneurship') ? 'selected' : ''; ?>>Bachelor of Science in Entrepreneurship</option>
+                                    <option value="Bachelor of Science in Hospitality Management" <?php echo ($course_filter == 'Bachelor of Science in Hospitality Management') ? 'selected' : ''; ?>>Bachelor of Science in Hospitality Management</option>
+                                    <option value="Bachelor of Science in Information Technology" <?php echo ($course_filter == 'Bachelor of Science in Information Technology') ? 'selected' : ''; ?>>Bachelor of Science in Information Technology</option>
+                                    <option value="Bachelor of Science in Computer Science" <?php echo ($course_filter == 'Bachelor of Science in Computer Science') ? 'selected' : ''; ?>>Bachelor of Science in Computer Science</option>
+                                    <option value="Bachelor of Science in Psychology" <?php echo ($course_filter == 'Bachelor of Science in Psychology') ? 'selected' : ''; ?>>Bachelor of Science in Psychology</option>
+                                </select>
+                            </div>
 
-            <!-- Batch Selection Dropdown -->
-            <div class="mb-3">
-            <label for="batchSelect" class="form-label">Select Batch</label>
-            <select id="batchSelect" class="form-select" disabled>
-                <option value="" disabled selected>Select a batch</option>
-            </select>
-            </div>
+                            <div class="col-md-6">
+                                <label for="batchSelect" class="form-label">Year Graduated</label>
+                                <select id="batchSelect" class="form-select" name="batch">
+                                    <option value="" selected>All Batches</option>
+                                    <?php
+                                    for ($year = 2004; $year <= date("Y"); $year++) {
+                                        echo "<option value='$year' " . ($batch_filter == $year ? 'selected' : '') . ">$year</option>";
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                    <br>
+                    <div class="table-responsive" id="content-container">
+                        <div class="container-fluid" id="column-header">
+                            <div class="row">
+                                <!-- Left side: Search bar and dropdown (col-8) -->
+                                <br><br><br>
+                                <div class="table-content">
+                                    <table id="example" class="table-responsive table table-striped table-hover ">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col" class="inline">STUDENT ID</th>
+                                                <th scope="col" class="inline">NAME</th>
+                                                <th scope="col" class="inline">COURSE</th>
+                                                <th scope="col" class="inline">BATCH</th>
+                                                <th scope="col" class="inline">EMAIL</th>
+                                                <th scope="col" class="inline">GENDER</th>
+                                                <th scope="col" class="inline">STATUS</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php
+                                            if ($result->num_rows > 0) {
+                                                while ($row = $result->fetch_assoc()) {
+                                                    // Determine the batch value based on the SQL query
+                                                    if ($status_filter == 'unregister') {
+                                                        // If the status filter is 'unregister', use 'batch' column from list_of_graduate
+                                                        $batch = $row["batch"];
+                                                        $status = 'Unregistered';
+                                                    } else if ($status_filter == 'inactive') {
+                                                        // If the status filter is 'unregister', use 'batch' column from list_of_graduate
+                                                        $batch = $row["batch_startYear"] . " - " . $row["batch_endYear"];
+                                                        $status = 'Inactive';
+                                                    } else {
+                                                        // For other statuses, use 'batch_startYear' and 'batch_endYear' from alumni
+                                                        $batch = $row["batch_startYear"] . " - " . $row["batch_endYear"];
+                                                    }
 
-            <!-- Graduates Table -->
-            <div id="graduatesTable" class="table-responsive" style="display: none;">
-            <h4>Graduates List</h4>
-            <table class="table table-bordered">
-                <thead>
-                <tr>
-                    <th>Stud ID</th>
-                    <th>Name</th>
-                    <th>Course</th>
-                    <th>Batch</th>
-                    <th>Email</th>
-                    <th>Gender</th>
-                </tr>
-                </thead>
-                <tbody id="graduatesBody">
-                <!-- Graduates will be populated here -->
-                </tbody>
-            </table>
+                                                    // Handle the full name format
+                                                    if (!empty($row["mname"])) {
+                                                        $fullname = $row["lname"] . ", " . $row["fname"] . ", " . $row["mname"] . ".";
+                                                    } else {
+                                                        $fullname = $row["lname"] . ", " . $row["fname"];
+                                                    }
+
+                                                    // Handle address display (if needed)
+                                                    $address = $row['address'];
+                                                    $displayAddress = str_replace(',', '', $address);
+
+                                                    // Determine the status display and color
+                                                    if ($status_filter == 'unregister') {
+                                                        $statusDisplay = 'Unregistered';
+                                                        $color = '#e6b800';
+                                                    } else if ($status_filter == 'inactive') {
+                                                        $statusDisplay = 'Inactive';
+                                                        $color = '#e6b800';
+                                                    } else {
+                                                        $statusDisplay = ($row['status'] == 'Verified' || $row['status'] == 'Unverified') ? $row['status'] : $status;
+                                                        $color = ($row['status'] == 'Verified') ? 'green' : 'red';
+                                                    }
+                                            ?>
+                                                    <tr>
+                                                        <td class="inline"><?php echo $row['student_id']; ?></td>
+                                                        <td class="inline"><?php echo htmlspecialchars($fullname); ?></td>
+                                                        <td class="inline"><?php echo $row['course']; ?></td>
+                                                        <td class="inline"><?php echo htmlspecialchars($batch); ?></td>
+                                                        <td class="inline"><?php echo $row['email']; ?></td>
+                                                        <td class="inline"><?php echo $row['gender']; ?></td>
+                                                        <td class="inline" style="color: <?php echo $color; ?>">
+                                                            <?php echo $statusDisplay; ?>
+                                                        </td>
+                                                    </tr>
+                                            <?php
+                                                }
+                                            } else {
+                                                $current_page = 0;
+                                                echo '<tr><td colspan="12" style="text-align: center;">No records found</td></tr>';
+                                            }
+                                            ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding-right: 1.5%; padding-left: 1.5%;">
+                                    <p style="margin: 0;">Page <?= $current_page ?> out of <?= $total_pages ?></p>
+                                    <div class="pagination" id="content">
+                                        <?php if ($current_page > 1) : ?>
+                                            <a href="?page=<?= ($current_page - 1); ?>&query=<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>" class="prev" style="border-radius:4px;background-color:#368DB8;color:white;margin-bottom:13px;">&laquo; Previous</a>
+                                        <?php endif; ?>
+
+                                        <?php if ($current_page < $total_pages) : ?>
+                                            <a href="?page=<?= ($current_page + 1); ?>&query=<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>" class="next" style="border-radius:4px;background-color:#368DB8;color:white;margin-bottom:13px;">Next &raquo;</a>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div><br><br>
+                        </div>
+                    </div>
+                </div>
             </div>
-            </div>
-        </div>
+            <!-- CONTAINER END -->
         </main>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
     <script>
-            const courseSelect = document.getElementById('courseSelect');
-        const batchSelect = document.getElementById('batchSelect');
-        const graduatesTable = document.getElementById('graduatesTable');
-        const graduatesBody = document.getElementById('graduatesBody');
+        // PDF
+        // document.getElementById('download-pdf').addEventListener('click', () => {
+        //     // Get filter values
+        //     const statusSelect = document.getElementById('statusSelect').value;
+        //     const courseSelect = document.getElementById('courseSelect').value;
+        //     const batchSelect = document.getElementById('batchSelect').value;
 
-        // Data for batches based on the selected course (now showing ranges)
-        const batches = {
-        bsit: ['2020-2024', '2016-2020', '2012-2016'],
-        bscs: ['2018-2022', '2014-2018', '2010-2014'],
-        bsoa: ['2019-2023', '2015-2019', '2011-2015'],
-        baj: ['2017-2021', '2013-2017', '2009-2013'],
-        beced: ['2016-2020', '2015-2019', '2013-2017'],
-        beed: ['2016-2020', '2015-2019', '2013-2017'],
-        bsbm: ['2016-2020', '2015-2019', '2013-2017'],
-        bsentrep: ['2016-2020', '2015-2019', '2013-2017'],
-        bshm: ['2016-2020', '2015-2019', '2013-2017'],
-        bspsych: ['2016-2020', '2015-2019', '2013-2017']
-        };
+        //     // Fetch all filtered data from the backend
+        //     fetch(`fetch_all_data.php?status=${statusSelect}&course=${courseSelect}&batch=${batchSelect}`)
+        //         .then(response => response.json())
+        //         .then(data => {
+        //             // Create a table to display all data
+        //             let tableHtml = '<table border="1" style="width:100%; border-collapse: collapse;"><thead><tr><th>STUDENT ID</th><th>NAME</th><th>COURSE</th><th>BATCH</th><th>EMAIL</th><th>GENDER</th><th>STATUS</th></tr></thead><tbody>';
 
-        // Data for graduates based on course and batch
-        const graduates = {
-        bsit: {
-            '2020-2024': [
-            { studId: 'S001', lastName: 'Smith', firstName: 'Alice', middleName: 'Marie', course: 'BSIT', batch: '2020-2024', email: 'alice@example.com', gender: 'Female' },
-            { studId: 'S002', lastName: 'Johnson', firstName: 'Bob', middleName: 'Edward', course: 'BSIT', batch: '2020-2024', email: 'bob@example.com', gender: 'Male' }
-            ],
-            // Add more graduates for different batches if needed
-        },
-        bscs: {
-            '2018-2022': [
-            { studId: 'S009', lastName: 'Newton', firstName: 'Isaac', middleName: 'William', course: 'BSCS', batch: '2018-2022', email: 'isaac@example.com', gender: 'Male' },
-            { studId: 'S010', lastName: 'Austen', firstName: 'Jane', middleName: 'Elizabeth', course: 'BSCS', batch: '2018-2022', email: 'jane@example.com', gender: 'Female' }
-            ],
-            // Add more graduates for different batches if needed
-        },
-        bsoa: {
-            '2018-2022': [
-            { studId: 'S020', lastName: 'Newton', firstName: 'Albert', middleName: 'Eugene', course: 'BSCS', batch: '2018-2022', email: 'albert.newton@example.com', gender: 'Male' },
-            { studId: 'S030', lastName: 'Austen', firstName: 'Jane', middleName: 'Marie', course: 'BSCS', batch: '2018-2022', email: 'jane.m.austen@example.com', gender: 'Female' }
-            ],
-        },
-        baj: {
-            '2016-2020': [
-            { studId: 'S020', lastName: 'Newton', firstName: 'Albert', middleName: 'Eugene', course: 'BSCS', batch: '2018-2022', email: 'albert.newton@example.com', gender: 'Male' },
-            { studId: 'S030', lastName: 'Austen', firstName: 'Jane', middleName: 'Marie', course: 'BSCS', batch: '2018-2022', email: 'jane.m.austen@example.com', gender: 'Female' }
-            ]
-        },
-        beced: {
-            '2016-2020': [
-            { studId: 'S020', lastName: 'Newton', firstName: 'Albert', middleName: 'Eugene', course: 'BSCS', batch: '2018-2022', email: 'albert.newton@example.com', gender: 'Male' },
-            { studId: 'S030', lastName: 'Austen', firstName: 'Jane', middleName: 'Marie', course: 'BSCS', batch: '2018-2022', email: 'jane.m.austen@example.com', gender: 'Female' }
-            ]
-        },
-        beed: {
-            '2016-2020': [
-            { studId: 'S020', lastName: 'Newton', firstName: 'Albert', middleName: 'Eugene', course: 'BSCS', batch: '2018-2022', email: 'albert.newton@example.com', gender: 'Male' },
-            { studId: 'S030', lastName: 'Austen', firstName: 'Jane', middleName: 'Marie', course: 'BSCS', batch: '2018-2022', email: 'jane.m.austen@example.com', gender: 'Female' }
-            ]
-        },
-        bsbm: {
-            '2016-2020': [
-            { studId: 'S020', lastName: 'Newton', firstName: 'Albert', middleName: 'Eugene', course: 'BSCS', batch: '2018-2022', email: 'albert.newton@example.com', gender: 'Male' },
-            { studId: 'S030', lastName: 'Austen', firstName: 'Jane', middleName: 'Marie', course: 'BSCS', batch: '2018-2022', email: 'jane.m.austen@example.com', gender: 'Female' }
-            ]
-        },
-        bsentrep: {
-            '2016-2020': [
-            { studId: 'S020', lastName: 'Newton', firstName: 'Albert', middleName: 'Eugene', course: 'BSCS', batch: '2018-2022', email: 'albert.newton@example.com', gender: 'Male' },
-            { studId: 'S030', lastName: 'Austen', firstName: 'Jane', middleName: 'Marie', course: 'BSCS', batch: '2018-2022', email: 'jane.m.austen@example.com', gender: 'Female' }
-            ]
-        },
-        bshm: {
-            '2016-2020': [
-            { studId: 'S020', lastName: 'Newton', firstName: 'Albert', middleName: 'Eugene', course: 'BSCS', batch: '2018-2022', email: 'albert.newton@example.com', gender: 'Male' },
-            { studId: 'S030', lastName: 'Austen', firstName: 'Jane', middleName: 'Marie', course: 'BSCS', batch: '2018-2022', email: 'jane.m.austen@example.com', gender: 'Female' }
-            ]
-        },
-        bspsych: {
-            '2016-2020': [
-            { studId: 'S020', lastName: 'Newton', firstName: 'Albert', middleName: 'Eugene', course: 'BSCS', batch: '2018-2022', email: 'albert.newton@example.com', gender: 'Male' },
-            { studId: 'S030', lastName: 'Austen', firstName: 'Jane', middleName: 'Marie', course: 'BSCS', batch: '2018-2022', email: 'jane.m.austen@example.com', gender: 'Female' }
-            ]
-        },
-        // Similarly, data for BSBA and BSME courses can be added
-        };
+        //             data.forEach(row => {
+        //                 let batch = '';
+        //                 if (statusSelect === 'unregister') {
+        //                     batch = row.batch;
+        //                 } else {
+        //                     batch = `${row.batch_startYear} - ${row.batch_endYear}`;
+        //                 }
 
-        // Event listener for course selection
-        courseSelect.addEventListener('change', function() {
-        const selectedCourse = this.value;
-        batchSelect.innerHTML = '<option value="" disabled selected>Select a batch</option>'; // Reset batches
-        if (selectedCourse) {
-            batchSelect.disabled = false;
-            batches[selectedCourse].forEach(batch => {
-            const option = document.createElement('option');
-            option.value = batch;
-            option.textContent = batch;
-            batchSelect.appendChild(option);
-            });
-            displayGraduates(selectedCourse);
-        } else {
-            batchSelect.disabled = true;
-            graduatesTable.style.display = 'none';
-        }
-        });
+        //                 const statusColor = row.status === 'Verified' ? 'green' : 'red';
+        //                 tableHtml += `<tr>
+        //             <td>${row.student_id}</td>
+        //             <td>${row.lname}, ${row.fname} ${row.mname ? row.mname + '.' : ''}</td>
+        //             <td>${row.course}</td>
+        //             <td>${batch}</td>
+        //             <td>${row.email}</td>
+        //             <td>${row.gender}</td>
+        //             <td style="color: ${statusColor};">${row.status}</td>
+        //         </tr>`;
+        //             });
 
-        // Event listener for batch selection
-        batchSelect.addEventListener('change', function() {
-        const selectedCourse = courseSelect.value;
-        const selectedBatch = this.value;
-        displayGraduates(selectedCourse, selectedBatch);
-        });
+        //             tableHtml += '</tbody></table>';
 
-        // Function to display graduates based on course and batch
-        function displayGraduates(course, batch) {
-        graduatesBody.innerHTML = ''; // Clear previous data
-        if (course && graduates[course]) {
-            let graduatesList = graduates[course];
-            if (batch) {
-            graduatesList = graduates[course][batch];
-            } else {
-            graduatesList = Object.values(graduatesList).flat(); // Merge all batches
-            }
+        //             // Combine header and table for PDF
+        //             const hiddenContent = document.getElementById('hidden-content').innerHTML;
+        //             const tempContainer = document.createElement('div');
+        //             tempContainer.innerHTML = hiddenContent + '<br><br>' + tableHtml;
+        //             tempContainer.querySelector('#header-image').style.display = 'block';
 
-            graduatesList.forEach(graduate => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${graduate.studId}</td>
-                <td>${graduate.lastName}, ${graduate.firstName} ${graduate.middleName}</td>
-                <td>${graduate.course}</td>
-                <td>${graduate.batch}</td>
-                <td>${graduate.email}</td>
-                <td>${graduate.gender}</td>
-            `;
-            graduatesBody.appendChild(row);
-            });
+        //             // Set the style for the temporary container
+        //             tempContainer.style.display = 'block';
+        //             tempContainer.style.width = '100%';
+        //             tempContainer.style.fontSize = '12px'; // Adjusted font size for better readability
 
-            graduatesTable.style.display = 'block';
-        } else {
-            graduatesTable.style.display = 'none';
-        }
-        }
+        //             const currentDate = new Date();
+        //             const formattedDate = currentDate.toISOString().slice(0, 10);
+
+        //             // PDF options
+        //             const opt = {
+        //                 margin: 0.50,
+        //                 filename: `graduates-report-${formattedDate}.pdf`,
+        //                 image: {
+        //                     type: 'jpeg',
+        //                     quality: 0.98
+        //                 },
+        //                 html2canvas: {
+        //                     scale: 2
+        //                 },
+        //                 jsPDF: {
+        //                     unit: 'in',
+        //                     format: 'legal',
+        //                     orientation: 'portrait'
+        //                 }
+        //             };
+
+        //             // Generate the PDF from the temporary container
+        //             html2pdf().from(tempContainer).set(opt).save().then(() => {
+        //                 // Clean up: remove the temporary container
+        //                 tempContainer.remove();
+        //             });
+        //         })
+        //         .catch(error => console.error('Error fetching data:', error));
+        // });
+
         document.getElementById('download-pdf').addEventListener('click', () => {
-            const element = document.querySelector('form');
+            const selectedCourse = courseSelect.value;
+            displayGraduates(selectedCourse);
+            const graduatesTable = document.getElementById('graduatesTable');
+            const hiddenContent = document.getElementById('hidden-content').innerHTML;
+            const tempContainer = document.createElement('div');
+            tempContainer.innerHTML = hiddenContent + graduatesTable.outerHTML;
+            tempContainer.querySelector('#header-image').style.display = 'block';
+            tempContainer.querySelector('#graduatesTable').style.display = 'block';
 
-            // Get the current date
+            tempContainer.style.display = 'block';
+            tempContainer.style.width = '100%';
+            tempContainer.style.fontSize = '11px';
             const currentDate = new Date();
             const formattedDate = currentDate.toISOString().slice(0, 10);
 
+            // PDF options
             const opt = {
-                margin: 1,
-                filename: `alumni-report-${formattedDate}.pdf`,
+                margin: 0.50,
+                filename: `graduates-report-${formattedDate}.pdf`,
                 image: {
                     type: 'jpeg',
                     quality: 0.98
@@ -478,15 +685,124 @@ if ($res_alumniCount->num_rows > 0) {
                 jsPDF: {
                     unit: 'in',
                     format: 'legal',
-                    orientation: 'landscape'
+                    orientation: 'portrait'
                 }
             };
-
-            html2pdf().from(element).set(opt).save();
+            // Generate the PDF from the temporary container
+            html2pdf().from(tempContainer).set(opt).save().then(() => {
+                // Clean up: remove the temporary container
+                tempContainer.remove();
+            });
         });
 
-        document.getElementById('refresh-page').addEventListener('click', () => {
-            location.reload();
+        // REFRESH
+        document.getElementById('refresh-page').addEventListener('click', function() {
+            // Reset course filter to default (assuming default is 'all')
+            const courseFilter = document.getElementById('courseSelect');
+            if (courseFilter) {
+                courseFilter.value = 'all'; // Replace 'all' with the actual default value if different
+            }
+
+            // Reset batch filter to default (assuming default is 'all')
+            const batchFilter = document.getElementById('batchSelect');
+            if (batchFilter) {
+                batchFilter.value = 'all'; // Replace 'all' with the actual default value if different
+            }
+
+            // Remove query parameters from URL
+            const url = new URL(window.location.href);
+            url.searchParams.delete('course');
+            url.searchParams.delete('batch');
+            window.history.replaceState({}, document.title, url.pathname);
+
+            // Reload the page
+            location.reload(); // Reloads the entire page
+        });
+
+
+        // STATUS SELECTOR
+        document.getElementById('statusSelect').addEventListener('change', function() {
+            const status = this.value;
+            const course = document.getElementById('courseSelect').value;
+            const batch = document.getElementById('batchSelect').value;
+            const query = new URLSearchParams(window.location.search);
+            query.set('status', status);
+            query.set('course', course);
+            query.set('batch', batch);
+            window.location.search = query.toString();
+        });
+
+        document.getElementById('refresh-page').addEventListener('click', function() {
+            // Reset course filter to default (assuming default is 'all')
+            const courseFilter = document.getElementById('courseSelect');
+            if (courseFilter) {
+                courseFilter.value = ''; // Set to default value
+            }
+
+            // Reset batch filter to default (assuming default is 'all')
+            const batchFilter = document.getElementById('batchSelect');
+            if (batchFilter) {
+                batchFilter.value = ''; // Set to default value
+            }
+
+            // Reset status filter to default (assuming default is 'register')
+            const statusFilter = document.getElementById('statusSelect');
+            if (statusFilter) {
+                statusFilter.value = 'register'; // Set to default value
+            }
+
+            // Remove query parameters from URL
+            const url = new URL(window.location.href);
+            url.searchParams.delete('course');
+            url.searchParams.delete('batch');
+            url.searchParams.delete('status');
+            window.history.replaceState({}, document.title, url.pathname);
+
+            // Reload the page
+            location.reload(); // Reloads the entire page
+        });
+
+
+
+        // PAGINATION
+        document.addEventListener('DOMContentLoaded', (event) => {
+            let currentPage = 1;
+
+            function loadPage(page) {
+                // Simulate an AJAX request to get page content
+                const contentDiv = document.getElementById('content');
+                contentDiv.innerHTML = `Content for page ${page}`; // Replace with actual AJAX call
+                currentPage = page;
+            }
+            document.getElementById('prevPage').addEventListener('click', (event) => {
+                event.preventDefault();
+                if (currentPage > 1) {
+                    loadPage(currentPage - 1);
+                }
+            });
+            document.getElementById('nextPage').addEventListener('click', (event) => {
+                event.preventDefault();
+                loadPage(currentPage + 1);
+            });
+            loadPage(currentPage);
+        });
+
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const courseSelect = document.getElementById('courseSelect');
+            const batchSelect = document.getElementById('batchSelect');
+
+            function updateUrl() {
+                const course = courseSelect.value;
+                const batch = batchSelect.value;
+                const query = new URLSearchParams(window.location.search);
+                query.set('course', course);
+                query.set('batch', batch);
+                window.location.search = query.toString();
+            }
+
+            courseSelect.addEventListener('change', updateUrl);
+            batchSelect.addEventListener('change', updateUrl);
         });
     </script>
 </body>
