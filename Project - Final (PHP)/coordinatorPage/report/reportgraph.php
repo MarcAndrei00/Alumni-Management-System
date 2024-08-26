@@ -82,10 +82,25 @@ $records_per_page = 20;
 $current_page = isset($_GET['page']) ? $_GET['page'] : 1;
 $start_from = ($current_page - 1) * $records_per_page;
 
-$course_filter = isset($_GET['course']) ? $_GET['course'] : '';
-$batch_filter = isset($_GET['batch']) ? $_GET['batch'] : '';
-$status_filter = isset($_GET['status']) ? $_GET['status'] : 'register'; // Default to 'Registered'
-$alumni_stat = isset($_GET['alumni_stat']) ? $_GET['alumni_stat'] : '';
+// Retrieve filter values from GET request and update session variables
+if (isset($_GET['course'])) {
+    $_SESSION['course_filter'] = $_GET['course'];
+}
+if (isset($_GET['batch'])) {
+    $_SESSION['batch_filter'] = $_GET['batch'];
+}
+if (isset($_GET['status'])) {
+    $_SESSION['status_filter'] = $_GET['status'];
+}
+if (isset($_GET['alumni_stat'])) {
+    $_SESSION['alumni_stat'] = $_GET['alumni_stat'];
+}
+
+// Retrieve filter values from session variables
+$course_filter = isset($_SESSION['course_filter']) ? $_SESSION['course_filter'] : '';
+$batch_filter = isset($_SESSION['batch_filter']) ? $_SESSION['batch_filter'] : '';
+$status_filter = isset($_SESSION['status_filter']) ? $_SESSION['status_filter'] : 'register';
+$alumni_stat = isset($_SESSION['alumni_stat']) ? $_SESSION['alumni_stat'] : '';
 
 // Base SQL query depending on the status
 if ($status_filter === 'unregister') {
@@ -94,7 +109,6 @@ if ($status_filter === 'unregister') {
         $sql .= " AND course = '$course_filter'";
     }
     if (!empty($batch_filter)) {
-        // Use LIKE to match the batch format, assuming batch is stored in '2020-2021' format
         $batcher = '-' . $batch_filter;
         $sql .= " AND batch LIKE '%$batcher%'";
     }
@@ -104,21 +118,17 @@ if ($status_filter === 'unregister') {
         $sql .= " AND course = '$course_filter'";
     }
     if (!empty($batch_filter) && $batch_filter != 'all') {
-        // Use batch_endYear for inactive
         $sql .= " AND batch_endYear = '$batch_filter'";
     }
 } else {
-    // Default to 'register' which means Registered Alumni
     $sql = "SELECT * FROM alumni WHERE 1=1";
     if (!empty($course_filter) && $course_filter != 'all') {
         $sql .= " AND course = '$course_filter'";
     }
     if (!empty($batch_filter) && $batch_filter != 'all') {
-        // Use batch_endYear for registered
         $sql .= " AND batch_endYear = '$batch_filter'";
     }
     if (!empty($alumni_stat) && $alumni_stat != 'all') {
-        // Use batch_endYear for registered
         $sql .= " AND status = '$alumni_stat'";
     }
 }
@@ -134,7 +144,6 @@ if ($status_filter === 'unregister') {
         $total_records_query .= " AND course = '$course_filter'";
     }
     if (!empty($batch_filter)) {
-        // Count with LIKE to match the batch format
         $total_records_query .= " AND batch LIKE '%$batch_filter%'";
     }
 } elseif ($status_filter === 'inactive') {
@@ -143,21 +152,17 @@ if ($status_filter === 'unregister') {
         $total_records_query .= " AND course = '$course_filter'";
     }
     if (!empty($batch_filter) && $batch_filter != 'all') {
-        // Count with batch_endYear for inactive
         $total_records_query .= " AND batch_endYear = '$batch_filter'";
     }
 } else {
-    // Default to 'register'
     $total_records_query = "SELECT COUNT(*) FROM alumni WHERE 1=1";
     if (!empty($course_filter) && $course_filter != 'all') {
         $total_records_query .= " AND course = '$course_filter'";
     }
     if (!empty($batch_filter) && $batch_filter != 'all') {
-        // Count with batch_endYear for registered
         $total_records_query .= " AND batch_endYear = '$batch_filter'";
     }
     if (!empty($alumni_stat) && $alumni_stat != 'all') {
-        // Count with batch_endYear for registered
         $total_records_query .= " AND status = '$alumni_stat'";
     }
 }
@@ -168,7 +173,6 @@ $total_records = $total_records_row[0];
 
 $total_pages = ceil($total_records / $records_per_page);
 
-$status_filter = isset($_GET['status']) ? $_GET['status'] : 'register'; // Default to 'register'
 // Determine the title based on the selected status
 switch ($status_filter) {
     case 'unregister':
@@ -178,21 +182,19 @@ switch ($status_filter) {
         $title = 'Lists of Inactive Alumni';
         break;
     case 'register':
-    default:
         $title = 'Lists of Registered Alumni';
         break;
 }
-
 
 // PDF
 $records_per_page_pdf = 500000;
 $current_page_pdf = isset($_GET['page']) ? $_GET['page'] : 1;
 $start_from_pdf = ($current_page_pdf - 1) * $records_per_page_pdf;
 
-$course_filter_pdf = isset($_GET['course']) ? $_GET['course'] : '';
-$batch_filter_pdf = isset($_GET['batch']) ? $_GET['batch'] : '';
-$status_filter_pdf = isset($_GET['status']) ? $_GET['status'] : 'register'; // Default to 'Registered'
-$alumni_stat_pdf = isset($_GET['alumni_stat']) ? $_GET['alumni_stat'] : '';
+$course_filter_pdf = $course_filter;
+$batch_filter_pdf = $batch_filter;
+$status_filter_pdf = $status_filter; // Default to 'Registered'
+$alumni_stat_pdf = $alumni_stat;
 
 // Base SQL query depending on the status
 if ($status_filter_pdf === 'unregister') {
@@ -231,7 +233,7 @@ if ($status_filter_pdf === 'unregister') {
 }
 
 // Add ordering and pagination
-$sql_pdf .= " ORDER BY lname ASC LIMIT $start_from_pdf, $records_per_page_pdf";
+$sql_pdf .= " ORDER BY lname ASC";
 $result_pdf = $conn->query($sql_pdf);
 
 // Count total number of records
@@ -570,14 +572,16 @@ switch ($status_filter_pdf) {
                     </div>
                     <div class="d-flex align-items-center mb-3">
                         <h2 class="mb-0 flex-grow-1"><strong><?php echo $title; ?></strong></h2>
-                        <div class="dropdown-container ms-3">
-                            <label for="alumniSelect" class="form-label d-none">Status</label>
-                            <select id="alumniSelect" class="form-select" name="alumni_stat">
-                                <option value="">All Status</option>
-                                <option value="Verified" <?php echo ($alumni_stat == 'Verified') ? 'selected' : ''; ?>>Verified</option>
-                                <option value="Unverified" <?php echo ($alumni_stat == 'Unverified') ? 'selected' : ''; ?>>Unverified</option>
-                            </select>
-                        </div>
+                        <?php if ($status_filter === 'register'): ?>
+                            <div class="dropdown-container ms-3">
+                                <label for="alumniSelect" class="form-label d-none">Status</label>
+                                <select id="alumniSelect" class="form-select" name="alumni_stat">
+                                    <option value="">All Status</option>
+                                    <option value="Verified" <?php echo ($alumni_stat == 'Verified') ? 'selected' : ''; ?>>Verified</option>
+                                    <option value="Unverified" <?php echo ($alumni_stat == 'Unverified') ? 'selected' : ''; ?>>Unverified</option>
+                                </select>
+                            </div>
+                        <?php endif; ?>
 
                         <div class="dropdown-container ms-3">
                             <label for="statusSelect" class="form-label d-none">Status</label>
@@ -664,10 +668,6 @@ switch ($status_filter_pdf) {
                                                         $fullname = $row["lname"] . ", " . $row["fname"];
                                                     }
 
-                                                    // Handle address display (if needed)
-                                                    $address = $row['address'];
-                                                    $displayAddress = str_replace(',', '', $address);
-
                                                     // Determine the status display and color
                                                     if ($status_filter == 'unregister') {
                                                         $statusDisplay = 'Unregistered';
@@ -719,7 +719,6 @@ switch ($status_filter_pdf) {
                 </div>
             </div>
             <!-- CONTAINER END -->
-
 
             <!-- PDF -->
             <div class="container mt-4 p-3 shadow bg-white rounded" style="display:none;">
@@ -813,6 +812,7 @@ switch ($status_filter_pdf) {
                                                         $status_pdf = 'Inactive';
                                                     } else {
                                                         $batch_pdf = $row_pdf["batch_startYear"] . " - " . $row_pdf["batch_endYear"];
+                                                        $status_pdf = 'Inactive';
                                                     }
 
                                                     if (!empty($row_pdf["mname"])) {
@@ -820,9 +820,6 @@ switch ($status_filter_pdf) {
                                                     } else {
                                                         $fullname_pdf = $row_pdf["lname"] . ", " . $row_pdf["fname"];
                                                     }
-
-                                                    $address_pdf = $row_pdf['address'];
-                                                    $displayAddress_pdf = str_replace(',', '', $address_pdf);
 
                                                     if ($status_filter_pdf == 'unregister') {
                                                         $statusDisplay_pdf = 'Unregistered';
@@ -857,13 +854,14 @@ switch ($status_filter_pdf) {
                                     </table>
                                 </div>
                                 <div style="display: flex; justify-content: space-between; align-items: center; padding-right: 1.5%; padding-left: 1.5%;">
-                                    <p style="margin: 0;">Page <?= $current_page_pdf ?> out of <?= $total_pages_pdf ?></p>
+                                    <p style="margin: 0;">Page <?= $current_page ?> out of <?= $total_pages ?></p>
                                     <div class="pagination" id="content">
-                                        <?php if ($current_page_pdf > 1) : ?>
-                                            <a href="?page=<?= ($current_page_pdf - 1); ?>&query=<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>" class="prev" style="border-radius:4px;background-color:#368DB8;color:white;margin-bottom:13px;">&laquo; Previous</a>
+                                        <?php if ($current_page > 1) : ?>
+                                            <a href="?page=<?= ($current_page - 1); ?>&query=<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>" class="prev" style="border-radius:4px;background-color:#368DB8;color:white;margin-bottom:13px;">&laquo; Previous</a>
                                         <?php endif; ?>
-                                        <?php if ($current_page_pdf < $total_pages_pdf) : ?>
-                                            <a href="?page=<?= ($current_page_pdf + 1); ?>&query=<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>" class="next" style="border-radius:4px;background-color:#368DB8;color:white;margin-bottom:13px;">Next &raquo;</a>
+
+                                        <?php if ($current_page < $total_pages) : ?>
+                                            <a href="?page=<?= ($current_page + 1); ?>&query=<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>" class="next" style="border-radius:4px;background-color:#368DB8;color:white;margin-bottom:13px;">Next &raquo;</a>
                                         <?php endif; ?>
                                     </div>
                                 </div>
@@ -918,55 +916,39 @@ switch ($status_filter_pdf) {
 
         // REFRESH
         document.getElementById('refresh-page').addEventListener('click', function() {
-            // Reset course filter to default (assuming default is 'all')
-            const courseFilter = document.getElementById('courseSelect');
-            if (courseFilter) {
-                courseFilter.value = 'all'; // Replace 'all' with the actual default value if different
-            }
-
-            // Reset batch filter to default (assuming default is 'all')
-            const batchFilter = document.getElementById('batchSelect');
-            if (batchFilter) {
-                batchFilter.value = 'all'; // Replace 'all' with the actual default value if different
-            }
-
-            // Reset alumni_stat filter to default (assuming default is '')
-            const alumniStatFilter = document.getElementById('alumniSelect');
-            if (alumniStatFilter) {
-                alumniStatFilter.value = ''; // Replace '' with the actual default value if different
-            }
-
-            // Remove query parameters from URL
-            const url = new URL(window.location.href);
-            url.searchParams.delete('course');
-            url.searchParams.delete('batch');
-            url.searchParams.delete('alumni_stat'); // Remove alumni_stat from URL
-            window.history.replaceState({}, document.title, url.pathname);
-
-            // Reload the page
-            location.reload(); // Reloads the entire page
-        });
-
-
-        // FOR ALUMNI STAT
-        document.addEventListener('DOMContentLoaded', function() {
-            var statusSelect = document.getElementById('statusSelect');
-            var alumniSelect = document.getElementById('alumniSelect');
-
-            // Function to update the visibility of the alumniSelect dropdown
-            function updateAlumniSelectVisibility() {
-                if (statusSelect.value === 'register') {
-                    alumniSelect.parentElement.style.display = 'block'; // Show dropdown
-                } else {
-                    alumniSelect.parentElement.style.display = 'none'; // Hide dropdown
+            // Send an AJAX request to clear session variables
+            fetch('clear_sessions.php', {
+                method: 'GET',
+                credentials: 'same-origin' // Ensures cookies/session data are sent with the request
+            }).then(() => {
+                // On successful session clearance, reset the filters and reload the page
+                const courseFilter = document.getElementById('courseSelect');
+                if (courseFilter) {
+                    courseFilter.value = 'all'; // Replace 'all' with the actual default value if different
                 }
-            }
 
-            // Initial check
-            updateAlumniSelectVisibility();
+                const batchFilter = document.getElementById('batchSelect');
+                if (batchFilter) {
+                    batchFilter.value = 'all'; // Replace 'all' with the actual default value if different
+                }
 
-            // Add event listener to update visibility on change
-            statusSelect.addEventListener('change', updateAlumniSelectVisibility);
+                const alumniStatFilter = document.getElementById('alumniSelect');
+                if (alumniStatFilter) {
+                    alumniStatFilter.value = ''; // Replace '' with the actual default value if different
+                }
+
+                // Remove query parameters from URL
+                const url = new URL(window.location.href);
+                url.searchParams.delete('course');
+                url.searchParams.delete('batch');
+                url.searchParams.delete('alumni_stat');
+                window.history.replaceState({}, document.title, url.pathname + url.search);
+
+                // Reload the page
+                location.reload();
+            }).catch(error => {
+                console.error('Error:', error);
+            });
         });
 
         // STATUS SELECTOR

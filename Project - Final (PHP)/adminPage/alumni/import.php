@@ -75,25 +75,19 @@ if (isset($_SESSION['user_id']) && isset($_SESSION['user_email'])) {
     exit();
 }
 
-
 require 'vendor/autoload.php';
-
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
 function convertToCsv($inputFile, $outputFile)
 {
     // Determine the file type
     $inputFileType = IOFactory::identify($inputFile);
-
     // Create a reader for the file type
     $reader = IOFactory::createReader($inputFileType);
-
     // Load the spreadsheet
     $spreadsheet = $reader->load($inputFile);
-
     // Create a CSV writer
     $writer = IOFactory::createWriter($spreadsheet, 'Csv');
-
     // Save the file as CSV
     $writer->save($outputFile);
 }
@@ -130,11 +124,16 @@ if (isset($_POST["Import"])) {
 
                 // Check if the first column has the value "1" to start importing
                 if (trim($emapData[0]) == "1") {
-                    $startImporting = true;
+                    $startImporting = true; // Start importing
                 }
 
                 // Skip rows until we find the row with "No. 1"
                 if (!$startImporting) {
+                    continue;
+                }
+
+                // Skip empty or malformed rows
+                if (empty($emapData[1]) || empty($emapData[10])) {
                     continue;
                 }
 
@@ -161,7 +160,7 @@ if (isset($_POST["Import"])) {
                     // Error Importing Data:
                     $_SESSION['import'] = 'errorImporting';
                     header("Location: ./list_of_graduate.php");
-                    exit;
+                    exit();
                 }
 
                 $insertCount++; // Increment the counter if insertion is successful
@@ -188,3 +187,4 @@ if (isset($_POST["Import"])) {
         mysqli_close($conn);
     }
 }
+?>
