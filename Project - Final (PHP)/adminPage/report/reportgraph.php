@@ -80,6 +80,7 @@ $start_from = ($current_page - 1) * $records_per_page;
 $course_filter = isset($_GET['course']) ? $_GET['course'] : '';
 $batch_filter = isset($_GET['batch']) ? $_GET['batch'] : '';
 $status_filter = isset($_GET['status']) ? $_GET['status'] : 'register'; // Default to 'Registered'
+$alumni_stat = isset($_GET['alumni_stat']) ? $_GET['alumni_stat'] : '';
 
 // Base SQL query depending on the status
 if ($status_filter === 'unregister') {
@@ -110,6 +111,10 @@ if ($status_filter === 'unregister') {
     if (!empty($batch_filter) && $batch_filter != 'all') {
         // Use batch_endYear for registered
         $sql .= " AND batch_endYear = '$batch_filter'";
+    }
+    if (!empty($alumni_stat) && $alumni_stat != 'all') {
+        // Use batch_endYear for registered
+        $sql .= " AND status = '$alumni_stat'";
     }
 }
 
@@ -146,6 +151,10 @@ if ($status_filter === 'unregister') {
         // Count with batch_endYear for registered
         $total_records_query .= " AND batch_endYear = '$batch_filter'";
     }
+    if (!empty($alumni_stat) && $alumni_stat != 'all') {
+        // Count with batch_endYear for registered
+        $total_records_query .= " AND status = '$alumni_stat'";
+    }
 }
 
 $total_records_result = $conn->query($total_records_query);
@@ -170,49 +179,111 @@ switch ($status_filter) {
 }
 
 
-// // PDF NOTE: itong sana ung mag kukuha ng data lahat hdipende sa filter tapos hindi ung div ang kukunin nya kundi lahat ng ng record bali gaagwa sya sariling query ganondapat, tapos may pinaka kumplikado jan ung sa list of graduate sa pag get ng batch kasi di sya naka hiwalay naka saam ung dalawa EX: 2020-2024
-// // Fetch filter parameters 
-// $status_filter = $_GET['status'] ?? '';
-// $course_filter = $_GET['course'] ?? '';
-// $batch_filter = $_GET['batch'] ?? '';
+// PDF
+$records_per_page_pdf = 500000;
+$current_page_pdf = isset($_GET['page']) ? $_GET['page'] : 1;
+$start_from_pdf = ($current_page_pdf - 1) * $records_per_page_pdf;
 
-// // Base SQL query depending on the status
-// if ($status_filter === 'unregister') {
-//     $sql = "SELECT * FROM list_of_graduate WHERE 1=1";
-//     if (!empty($course_filter) && $course_filter != 'all') {
-//         $sql .= " AND course = '$course_filter'";
-//     }
-//     if (!empty($batch_filter)) {
-//         // Special handling for batch filter
-//         $batcher = '-' . $batch_filter;
-//         $sql .= " AND batch LIKE '%$batcher%'";
-//     }
-// } elseif ($status_filter === 'inactive') {
-//     $sql = "SELECT * FROM alumni_archive WHERE 1=1";
-//     if (!empty($course_filter) && $course_filter != 'all') {
-//         $sql .= " AND course = '$course_filter'";
-//     }
-//     if (!empty($batch_filter) && $batch_filter != 'all') {
-//         $sql .= " AND batch_endYear = '$batch_filter'";
-//     }
-// } else {
-//     // Default to 'register' which means Registered Alumni
-//     $sql = "SELECT * FROM alumni WHERE 1=1";
-//     if (!empty($course_filter) && $course_filter != 'all') {
-//         $sql .= " AND course = '$course_filter'";
-//     }
-//     if (!empty($batch_filter) && $batch_filter != 'all') {
-//         $sql .= " AND batch_endYear = '$batch_filter'";
-//     }
-// }
+$course_filter_pdf = isset($_GET['course']) ? $_GET['course'] : '';
+$batch_filter_pdf = isset($_GET['batch']) ? $_GET['batch'] : '';
+$status_filter_pdf = isset($_GET['status']) ? $_GET['status'] : 'register'; // Default to 'Registered'
+$alumni_stat_pdf = isset($_GET['alumni_stat']) ? $_GET['alumni_stat'] : '';
 
-// // Execute the query and return results as JSON
-// $result = $conn->query($sql);
-// $data = [];
-// while ($row = $result->fetch_assoc()) {
-//     $data[] = $row;
-// }
-// echo json_encode($data);
+// Base SQL query depending on the status
+if ($status_filter_pdf === 'unregister') {
+    $sql_pdf = "SELECT * FROM list_of_graduate WHERE 1=1";
+    if (!empty($course_filter_pdf) && $course_filter_pdf != 'all') {
+        $sql_pdf .= " AND course = '$course_filter_pdf'";
+    }
+    if (!empty($batch_filter_pdf)) {
+        // Use LIKE to match the batch format, assuming batch is stored in '2020-2021' format
+        $batcher_pdf = '-' . $batch_filter_pdf;
+        $sql_pdf .= " AND batch LIKE '%$batcher_pdf%'";
+    }
+} elseif ($status_filter_pdf === 'inactive') {
+    $sql_pdf = "SELECT * FROM alumni_archive WHERE 1=1";
+    if (!empty($course_filter_pdf) && $course_filter_pdf != 'all') {
+        $sql_pdf .= " AND course = '$course_filter_pdf'";
+    }
+    if (!empty($batch_filter_pdf) && $batch_filter_pdf != 'all') {
+        // Use batch_endYear for inactive
+        $sql_pdf .= " AND batch_endYear = '$batch_filter_pdf'";
+    }
+} else {
+    // Default to 'register' which means Registered Alumni
+    $sql_pdf = "SELECT * FROM alumni WHERE 1=1";
+    if (!empty($course_filter_pdf) && $course_filter_pdf != 'all') {
+        $sql_pdf .= " AND course = '$course_filter_pdf'";
+    }
+    if (!empty($batch_filter_pdf) && $batch_filter_pdf != 'all') {
+        // Use batch_endYear for registered
+        $sql_pdf .= " AND batch_endYear = '$batch_filter_pdf'";
+    }
+    if (!empty($alumni_stat_pdf) && $alumni_stat_pdf != 'all') {
+        // Use batch_endYear for registered
+        $sql_pdf .= " AND status = '$alumni_stat_pdf'";
+    }
+}
+
+// Add ordering and pagination
+$sql_pdf .= " ORDER BY lname ASC LIMIT $start_from_pdf, $records_per_page_pdf";
+$result_pdf = $conn->query($sql_pdf);
+
+// Count total number of records
+if ($status_filter_pdf === 'unregister') {
+    $total_records_query_pdf = "SELECT COUNT(*) FROM list_of_graduate WHERE 1=1";
+    if (!empty($course_filter_pdf) && $course_filter_pdf != 'all') {
+        $total_records_query_pdf .= " AND course = '$course_filter_pdf'";
+    }
+    if (!empty($batch_filter_pdf)) {
+        // Count with LIKE to match the batch format
+        $total_records_query_pdf .= " AND batch LIKE '%$batch_filter_pdf%'";
+    }
+} elseif ($status_filter_pdf === 'inactive') {
+    $total_records_query_pdf = "SELECT COUNT(*) FROM alumni_archive WHERE 1=1";
+    if (!empty($course_filter_pdf) && $course_filter_pdf != 'all') {
+        $total_records_query_pdf .= " AND course = '$course_filter_pdf'";
+    }
+    if (!empty($batch_filter_pdf) && $batch_filter_pdf != 'all') {
+        // Count with batch_endYear for inactive
+        $total_records_query_pdf .= " AND batch_endYear = '$batch_filter_pdf'";
+    }
+} else {
+    // Default to 'register'
+    $total_records_query_pdf = "SELECT COUNT(*) FROM alumni WHERE 1=1";
+    if (!empty($course_filter_pdf) && $course_filter_pdf != 'all') {
+        $total_records_query_pdf .= " AND course = '$course_filter_pdf'";
+    }
+    if (!empty($batch_filter_pdf) && $batch_filter_pdf != 'all') {
+        // Count with batch_endYear for registered
+        $total_records_query_pdf .= " AND batch_endYear = '$batch_filter_pdf'";
+    }
+    if (!empty($alumni_stat_pdf) && $alumni_stat_pdf != 'all') {
+        // Count with batch_endYear for registered
+        $total_records_query_pdf .= " AND status = '$alumni_stat_pdf'";
+    }
+}
+
+$total_records_result_pdf = $conn->query($total_records_query_pdf);
+$total_records_row_pdf = $total_records_result_pdf->fetch_array();
+$total_records_pdf = $total_records_row_pdf[0];
+
+$total_pages_pdf = ceil($total_records_pdf / $records_per_page_pdf);
+
+$status_filter_pdf = isset($_GET['status']) ? $_GET['status'] : 'register'; // Default to 'register'
+// Determine the title based on the selected status
+switch ($status_filter_pdf) {
+    case 'unregister':
+        $title_pdf = 'Lists of Unregistered Alumni';
+        break;
+    case 'inactive':
+        $title_pdf = 'Lists of Inactive Alumni';
+        break;
+    case 'register':
+    default:
+        $title_pdf = 'Lists of Registered Alumni';
+        break;
+}
 
 ?>
 <!DOCTYPE html>
@@ -360,6 +431,28 @@ switch ($status_filter) {
             margin-right: 10px;
             /* Space between checkbox and label text */
         }
+
+        #statusSelect {
+            width: 410px;
+            /* Adjust the width as needed */
+            min-width: 150px;
+            /* Ensure the width is not too small */
+        }
+
+        #alumniSelect {
+            width: 195px;
+            /* Adjust the width as needed */
+            min-width: 150px;
+            /* Ensure the width is not too small */
+        }
+
+        .dropdown-container {
+            display: flex;
+            justify-content: flex-end;
+            /* Aligns child elements to the right */
+            align-items: center;
+            /* Ensures the container takes up the full width */
+        }
     </style>
 </head>
 
@@ -474,9 +567,18 @@ switch ($status_filter) {
                     </div>
                     <div class="d-flex align-items-center mb-3">
                         <h2 class="mb-0 flex-grow-1"><strong><?php echo $title; ?></strong></h2>
-                        <div class="mb-0 flex-grow-1 ms-3">
+                        <div class="dropdown-container ms-3">
+                            <label for="alumniSelect" class="form-label d-none">Status</label>
+                            <select id="alumniSelect" class="form-select" name="alumni_stat">
+                                <option value="">All Status</option>
+                                <option value="Verified" <?php echo ($alumni_stat == 'Verified') ? 'selected' : ''; ?>>Verified</option>
+                                <option value="Unverified" <?php echo ($alumni_stat == 'Unverified') ? 'selected' : ''; ?>>Unverified</option>
+                            </select>
+                        </div>
+
+                        <div class="dropdown-container ms-3">
                             <label for="statusSelect" class="form-label d-none">Status</label>
-                            <select id="statusSelect" class="form-select w-100" name="status">
+                            <select id="statusSelect" class="form-select" name="status">
                                 <option value="register" <?php echo ($status_filter == 'register') ? 'selected' : ''; ?>>Registered</option>
                                 <option value="unregister" <?php echo ($status_filter == 'unregister') ? 'selected' : ''; ?>>Unregistered</option>
                                 <option value="inactive" <?php echo ($status_filter == 'inactive') ? 'selected' : ''; ?>>Inactive</option>
@@ -614,6 +716,160 @@ switch ($status_filter) {
                 </div>
             </div>
             <!-- CONTAINER END -->
+
+
+            <!-- PDF -->
+            <div class="container mt-4 p-3 shadow bg-white rounded" style="display:none;">
+                <div class="container mt-5">
+                    <div id="hidden-content" style="display:none;">
+                        <img src="../../assets/head.jpg" id="header-image" style="width:100%; height:auto;">
+                        <br>
+                        <h2><strong><?php echo $title_pdf; ?></strong></h2>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <h2 class="mb-0 flex-grow-1"><strong><?php echo $title_pdf; ?></strong></h2>
+                        <div class="dropdown-container ms-3">
+                            <label for="alumniSelect" class="form-label d-none">Status</label>
+                            <select id="alumniSelect" class="form-select" name="alumni_stat_pdf">
+                                <option value="">All Status</option>
+                                <option value="Verified" <?php echo ($alumni_stat_pdf == 'Verified') ? 'selected' : ''; ?>>Verified</option>
+                                <option value="Unverified" <?php echo ($alumni_stat_pdf == 'Unverified') ? 'selected' : ''; ?>>Unverified</option>
+                            </select>
+                        </div>
+
+                        <div class="dropdown-container ms-3">
+                            <label for="statusSelect" class="form-label d-none">Status</label>
+                            <select id="statusSelect" class="form-select" name="status_pdf">
+                                <option value="register" <?php echo ($status_filter_pdf == 'register') ? 'selected' : ''; ?>>Registered</option>
+                                <option value="unregister" <?php echo ($status_filter_pdf == 'unregister') ? 'selected' : ''; ?>>Unregistered</option>
+                                <option value="inactive" <?php echo ($status_filter_pdf == 'inactive') ? 'selected' : ''; ?>>Inactive</option>
+                            </select>
+                        </div>
+                    </div>
+                    <form method="GET" action="">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label for="courseSelect" class="form-label">Course</label>
+                                <select id="courseSelect" class="form-select" name="course_pdf">
+                                    <option value="" selected>All Courses</option>
+                                    <option value="Bachelor of Arts in Journalism" <?php echo ($course_filter_pdf == 'Bachelor of Arts in Journalism') ? 'selected' : ''; ?>>Bachelor of Arts in Journalism</option>
+                                    <option value="Bachelor of Secondary Education" <?php echo ($course_filter_pdf == 'Bachelor of Secondary Education') ? 'selected' : ''; ?>>Bachelor of Secondary Education</option>
+                                    <option value="Bachelor of Elementary Education" <?php echo ($course_filter_pdf == 'Bachelor of Elementary Education') ? 'selected' : ''; ?>>Bachelor of Elementary Education</option>
+                                    <option value="Bachelor of Science in Business Management" <?php echo ($course_filter_pdf == 'Bachelor of Science in Business Management') ? 'selected' : ''; ?>>Bachelor of Science in Business Management</option>
+                                    <option value="Bachelor of Science in Office Administration" <?php echo ($course_filter_pdf == 'Bachelor of Science in Office Administration') ? 'selected' : ''; ?>>Bachelor of Science in Office Administration</option>
+                                    <option value="Bachelor of Science in Entrepreneurship" <?php echo ($course_filter_pdf == 'Bachelor of Science in Entrepreneurship') ? 'selected' : ''; ?>>Bachelor of Science in Entrepreneurship</option>
+                                    <option value="Bachelor of Science in Hospitality Management" <?php echo ($course_filter_pdf == 'Bachelor of Science in Hospitality Management') ? 'selected' : ''; ?>>Bachelor of Science in Hospitality Management</option>
+                                    <option value="Bachelor of Science in Information Technology" <?php echo ($course_filter_pdf == 'Bachelor of Science in Information Technology') ? 'selected' : ''; ?>>Bachelor of Science in Information Technology</option>
+                                    <option value="Bachelor of Science in Computer Science" <?php echo ($course_filter_pdf == 'Bachelor of Science in Computer Science') ? 'selected' : ''; ?>>Bachelor of Science in Computer Science</option>
+                                    <option value="Bachelor of Science in Psychology" <?php echo ($course_filter_pdf == 'Bachelor of Science in Psychology') ? 'selected' : ''; ?>>Bachelor of Science in Psychology</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label for="batchSelect" class="form-label">Year Graduated</label>
+                                <select id="batchSelect" class="form-select" name="batch_pdf">
+                                    <option value="" selected>All Batches</option>
+                                    <?php
+                                    for ($year_pdf = 2004; $year_pdf <= date("Y"); $year_pdf++) {
+                                        echo "<option value='$year_pdf' " . ($batch_filter_pdf == $year_pdf ? 'selected' : '') . ">$year_pdf</option>";
+                                    }
+                                    ?>
+                                </select>
+                            </div>
+                        </div>
+                    </form>
+                    <br>
+                    <div class="table-responsive" id="content-container">
+                        <div class="container-fluid" id="column-header">
+                            <div class="row">
+                                <!-- Left side: Search bar and dropdown (col-8) -->
+                                <br><br><br>
+                                <div class="table-content_pdf">
+                                    <table id="example" class="table-responsive table table-striped table-hover ">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col" class="inline">STUDENT ID</th>
+                                                <th scope="col" class="inline">NAME</th>
+                                                <th scope="col" class="inline">COURSE</th>
+                                                <th scope="col" class="inline">BATCH</th>
+                                                <th scope="col" class="inline">EMAIL</th>
+                                                <th scope="col" class="inline">GENDER</th>
+                                                <th scope="col" class="inline">STATUS</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php
+                                            if ($result_pdf->num_rows > 0) {
+                                                while ($row_pdf = $result_pdf->fetch_assoc()) {
+                                                    // Determine the batch value based on the SQL query
+                                                    if ($status_filter_pdf == 'unregister') {
+                                                        $batch_pdf = $row_pdf["batch"];
+                                                        $status_pdf = 'Unregistered';
+                                                    } else if ($status_filter_pdf == 'inactive') {
+                                                        $batch_pdf = $row_pdf["batch_startYear"] . " - " . $row_pdf["batch_endYear"];
+                                                        $status_pdf = 'Inactive';
+                                                    } else {
+                                                        $batch_pdf = $row_pdf["batch_startYear"] . " - " . $row_pdf["batch_endYear"];
+                                                    }
+
+                                                    if (!empty($row_pdf["mname"])) {
+                                                        $fullname_pdf = $row_pdf["lname"] . ", " . $row_pdf["fname"] . ", " . $row_pdf["mname"] . ".";
+                                                    } else {
+                                                        $fullname_pdf = $row_pdf["lname"] . ", " . $row_pdf["fname"];
+                                                    }
+
+                                                    $address_pdf = $row_pdf['address'];
+                                                    $displayAddress_pdf = str_replace(',', '', $address_pdf);
+
+                                                    if ($status_filter_pdf == 'unregister') {
+                                                        $statusDisplay_pdf = 'Unregistered';
+                                                        $color_pdf = '#e6b800';
+                                                    } else if ($status_filter_pdf == 'inactive') {
+                                                        $statusDisplay_pdf = 'Inactive';
+                                                        $color_pdf = '#e6b800';
+                                                    } else {
+                                                        $statusDisplay_pdf = ($row_pdf['status'] == 'Verified' || $row_pdf['status'] == 'Unverified') ? $row_pdf['status'] : $status_pdf;
+                                                        $color_pdf = ($row_pdf['status'] == 'Verified') ? 'green' : 'red';
+                                                    }
+                                            ?>
+                                                    <tr>
+                                                        <td class="inline"><?php echo $row_pdf['student_id']; ?></td>
+                                                        <td class="inline"><?php echo htmlspecialchars($fullname_pdf); ?></td>
+                                                        <td class="inline"><?php echo $row_pdf['course']; ?></td>
+                                                        <td class="inline"><?php echo htmlspecialchars($batch_pdf); ?></td>
+                                                        <td class="inline"><?php echo $row_pdf['email']; ?></td>
+                                                        <td class="inline"><?php echo $row_pdf['gender']; ?></td>
+                                                        <td class="inline" style="color: <?php echo $color_pdf; ?>">
+                                                            <?php echo $statusDisplay_pdf; ?>
+                                                        </td>
+                                                    </tr>
+                                            <?php
+                                                }
+                                            } else {
+                                                $current_page_pdf = 0;
+                                                echo '<tr><td colspan="12" style="text-align: center;">No records found</td></tr>';
+                                            }
+                                            ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding-right: 1.5%; padding-left: 1.5%;">
+                                    <p style="margin: 0;">Page <?= $current_page_pdf ?> out of <?= $total_pages_pdf ?></p>
+                                    <div class="pagination" id="content">
+                                        <?php if ($current_page_pdf > 1) : ?>
+                                            <a href="?page=<?= ($current_page_pdf - 1); ?>&query=<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>" class="prev" style="border-radius:4px;background-color:#368DB8;color:white;margin-bottom:13px;">&laquo; Previous</a>
+                                        <?php endif; ?>
+                                        <?php if ($current_page_pdf < $total_pages_pdf) : ?>
+                                            <a href="?page=<?= ($current_page_pdf + 1); ?>&query=<?php echo isset($_GET['query']) ? $_GET['query'] : ''; ?>" class="next" style="border-radius:4px;background-color:#368DB8;color:white;margin-bottom:13px;">Next &raquo;</a>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- END -->
         </main>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js"></script>
@@ -621,108 +877,30 @@ switch ($status_filter) {
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
     <script>
         // PDF
-        // document.getElementById('download-pdf').addEventListener('click', () => {
-        //     // Get filter values
-        //     const statusSelect = document.getElementById('statusSelect').value;
-        //     const courseSelect = document.getElementById('courseSelect').value;
-        //     const batchSelect = document.getElementById('batchSelect').value;
-
-        //     // Fetch all filtered data from the backend
-        //     fetch(`fetch_all_data.php?status=${statusSelect}&course=${courseSelect}&batch=${batchSelect}`)
-        //         .then(response => response.json())
-        //         .then(data => {
-        //             // Create a table to display all data
-        //             let tableHtml = '<table border="1" style="width:100%; border-collapse: collapse;"><thead><tr><th>STUDENT ID</th><th>NAME</th><th>COURSE</th><th>BATCH</th><th>EMAIL</th><th>GENDER</th><th>STATUS</th></tr></thead><tbody>';
-
-        //             data.forEach(row => {
-        //                 let batch = '';
-        //                 if (statusSelect === 'unregister') {
-        //                     batch = row.batch;
-        //                 } else {
-        //                     batch = `${row.batch_startYear} - ${row.batch_endYear}`;
-        //                 }
-
-        //                 const statusColor = row.status === 'Verified' ? 'green' : 'red';
-        //                 tableHtml += `<tr>
-        //             <td>${row.student_id}</td>
-        //             <td>${row.lname}, ${row.fname} ${row.mname ? row.mname + '.' : ''}</td>
-        //             <td>${row.course}</td>
-        //             <td>${batch}</td>
-        //             <td>${row.email}</td>
-        //             <td>${row.gender}</td>
-        //             <td style="color: ${statusColor};">${row.status}</td>
-        //         </tr>`;
-        //             });
-
-        //             tableHtml += '</tbody></table>';
-
-        //             // Combine header and table for PDF
-        //             const hiddenContent = document.getElementById('hidden-content').innerHTML;
-        //             const tempContainer = document.createElement('div');
-        //             tempContainer.innerHTML = hiddenContent + '<br><br>' + tableHtml;
-        //             tempContainer.querySelector('#header-image').style.display = 'block';
-
-        //             // Set the style for the temporary container
-        //             tempContainer.style.display = 'block';
-        //             tempContainer.style.width = '100%';
-        //             tempContainer.style.fontSize = '12px'; // Adjusted font size for better readability
-
-        //             const currentDate = new Date();
-        //             const formattedDate = currentDate.toISOString().slice(0, 10);
-
-        //             // PDF options
-        //             const opt = {
-        //                 margin: 0.50,
-        //                 filename: `graduates-report-${formattedDate}.pdf`,
-        //                 image: {
-        //                     type: 'jpeg',
-        //                     quality: 0.98
-        //                 },
-        //                 html2canvas: {
-        //                     scale: 2
-        //                 },
-        //                 jsPDF: {
-        //                     unit: 'in',
-        //                     format: 'legal',
-        //                     orientation: 'portrait'
-        //                 }
-        //             };
-
-        //             // Generate the PDF from the temporary container
-        //             html2pdf().from(tempContainer).set(opt).save().then(() => {
-        //                 // Clean up: remove the temporary container
-        //                 tempContainer.remove();
-        //             });
-        //         })
-        //         .catch(error => console.error('Error fetching data:', error));
-        // });
-
         document.getElementById('download-pdf').addEventListener('click', () => {
-            const selectedCourse = courseSelect.value;
-            displayGraduates(selectedCourse);
-            const graduatesTable = document.getElementById('graduatesTable');
             const hiddenContent = document.getElementById('hidden-content').innerHTML;
-            const tempContainer = document.createElement('div');
-            tempContainer.innerHTML = hiddenContent + graduatesTable.outerHTML;
-            tempContainer.querySelector('#header-image').style.display = 'block';
-            tempContainer.querySelector('#graduatesTable').style.display = 'block';
+            const graduatesTable = document.querySelector('.table-content_pdf').innerHTML;
 
-            tempContainer.style.display = 'block';
-            tempContainer.style.width = '100%';
-            tempContainer.style.fontSize = '11px';
-            const currentDate = new Date();
-            const formattedDate = currentDate.toISOString().slice(0, 10);
+            // Combine header and graduates list content
+            const tempContainer = document.createElement('div');
+            tempContainer.innerHTML = hiddenContent + graduatesTable;
+
+            // Ensure header image is displayed
+            const headerImage = tempContainer.querySelector('#header-image');
+            if (headerImage) {
+                headerImage.style.display = 'block';
+            }
 
             // PDF options
             const opt = {
-                margin: 0.50,
-                filename: `graduates-report-${formattedDate}.pdf`,
+                margin: 0.30,
+                filename: `graduates-report-${new Date().toISOString().slice(0, 10)}.pdf`,
                 image: {
                     type: 'jpeg',
-                    quality: 0.98
+                    quality: 1
                 },
                 html2canvas: {
-                    scale: 2
+                    scale: 3
                 },
                 jsPDF: {
                     unit: 'in',
@@ -730,11 +908,9 @@ switch ($status_filter) {
                     orientation: 'portrait'
                 }
             };
-            // Generate the PDF from the temporary container
-            html2pdf().from(tempContainer).set(opt).save().then(() => {
-                // Clean up: remove the temporary container
-                tempContainer.remove();
-            });
+
+            // Generate PDF
+            html2pdf().from(tempContainer).set(opt).save();
         });
 
         // REFRESH
@@ -751,10 +927,17 @@ switch ($status_filter) {
                 batchFilter.value = 'all'; // Replace 'all' with the actual default value if different
             }
 
+            // Reset alumni_stat filter to default (assuming default is '')
+            const alumniStatFilter = document.getElementById('alumniSelect');
+            if (alumniStatFilter) {
+                alumniStatFilter.value = ''; // Replace '' with the actual default value if different
+            }
+
             // Remove query parameters from URL
             const url = new URL(window.location.href);
             url.searchParams.delete('course');
             url.searchParams.delete('batch');
+            url.searchParams.delete('alumni_stat'); // Remove alumni_stat from URL
             window.history.replaceState({}, document.title, url.pathname);
 
             // Reload the page
@@ -762,26 +945,51 @@ switch ($status_filter) {
         });
 
 
+        // FOR ALUMNI STAT
+        document.addEventListener('DOMContentLoaded', function() {
+            var statusSelect = document.getElementById('statusSelect');
+            var alumniSelect = document.getElementById('alumniSelect');
+
+            // Function to update the visibility of the alumniSelect dropdown
+            function updateAlumniSelectVisibility() {
+                if (statusSelect.value === 'register') {
+                    alumniSelect.parentElement.style.display = 'block'; // Show dropdown
+                } else {
+                    alumniSelect.parentElement.style.display = 'none'; // Hide dropdown
+                }
+            }
+
+            // Initial check
+            updateAlumniSelectVisibility();
+
+            // Add event listener to update visibility on change
+            statusSelect.addEventListener('change', updateAlumniSelectVisibility);
+        });
+
         // STATUS SELECTOR
         document.getElementById('statusSelect').addEventListener('change', function() {
             const status = this.value;
             const course = document.getElementById('courseSelect').value;
             const batch = document.getElementById('batchSelect').value;
+            const alumniStat = document.getElementById('alumniSelect').value; // Get the value of alumniSelect
+
             const query = new URLSearchParams(window.location.search);
             query.set('status', status);
             query.set('course', course);
             query.set('batch', batch);
+            query.set('alumni_stat', alumniStat); // Add alumni_stat to query parameters
+
             window.location.search = query.toString();
         });
 
         document.getElementById('refresh-page').addEventListener('click', function() {
-            // Reset course filter to default (assuming default is 'all')
+            // Reset course filter to default (assuming default is '')
             const courseFilter = document.getElementById('courseSelect');
             if (courseFilter) {
                 courseFilter.value = ''; // Set to default value
             }
 
-            // Reset batch filter to default (assuming default is 'all')
+            // Reset batch filter to default (assuming default is '')
             const batchFilter = document.getElementById('batchSelect');
             if (batchFilter) {
                 batchFilter.value = ''; // Set to default value
@@ -793,11 +1001,18 @@ switch ($status_filter) {
                 statusFilter.value = 'register'; // Set to default value
             }
 
+            // Reset alumni_stat filter to default (assuming default is '')
+            const alumniStatFilter = document.getElementById('alumniSelect');
+            if (alumniStatFilter) {
+                alumniStatFilter.value = ''; // Set to default value
+            }
+
             // Remove query parameters from URL
             const url = new URL(window.location.href);
             url.searchParams.delete('course');
             url.searchParams.delete('batch');
             url.searchParams.delete('status');
+            url.searchParams.delete('alumni_stat'); // Remove alumni_stat from URL
             window.history.replaceState({}, document.title, url.pathname);
 
             // Reload the page
@@ -833,18 +1048,23 @@ switch ($status_filter) {
         document.addEventListener('DOMContentLoaded', function() {
             const courseSelect = document.getElementById('courseSelect');
             const batchSelect = document.getElementById('batchSelect');
+            const alumniStatSelect = document.getElementById('alumniSelect'); // Get the alumniStat dropdown
 
             function updateUrl() {
                 const course = courseSelect.value;
                 const batch = batchSelect.value;
+                const alumniStat = alumniStatSelect.value; // Get the value of alumniStat
                 const query = new URLSearchParams(window.location.search);
                 query.set('course', course);
                 query.set('batch', batch);
+                query.set('alumni_stat', alumniStat); // Add alumni_stat to query parameters
                 window.location.search = query.toString();
             }
 
+            // Add event listeners to all dropdowns
             courseSelect.addEventListener('change', updateUrl);
             batchSelect.addEventListener('change', updateUrl);
+            alumniStatSelect.addEventListener('change', updateUrl); // Add event listener for alumniStat
         });
     </script>
 </body>
