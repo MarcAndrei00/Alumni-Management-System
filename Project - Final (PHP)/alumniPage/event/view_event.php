@@ -385,8 +385,6 @@ $date = date('F j, Y', strtotime($row['date_created']));
         .title{
             overflow: hidden;
         }
-        
-
         .confirm-button-class,
         .cancel-button-class {
             width: 150px;
@@ -707,7 +705,9 @@ $date = date('F j, Y', strtotime($row['date_created']));
                         cancelButtonText: 'Cancel',
                         customClass: {
                             confirmButton: 'confirm-button-class',
-                            cancelButton: 'cancel-button-class'
+                            cancelButton: 'cancel-button-class',
+                            icon: 'icon',
+                            title: 'title',
                         }
                     }).then((result) => {
                         if (result.isConfirmed) {
