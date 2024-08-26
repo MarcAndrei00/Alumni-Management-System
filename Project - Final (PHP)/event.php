@@ -1028,17 +1028,7 @@ if ($result->num_rows > 0) {
     document.getElementById('donationForm').addEventListener('submit', function(event) {
         var donationAmount = document.getElementById('donationAmount').value;
 
-        if (donationAmount <= 0) {
-            // Prevent form submission
-            event.preventDefault();
-
-            // Show SweetAlert warning
-            Swal.fire({
-                icon: 'warning',
-                title: 'You cannot donate a negative or zero value',
-                text: 'Please input an appropriate amount.'
-            });
-        }else if (donationAmount < 100) {
+        if (donationAmount < 100) {
             // Prevent form submission
             event.preventDefault();
 

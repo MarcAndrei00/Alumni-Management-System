@@ -170,6 +170,10 @@ $dateCreation = date('F j, Y, g:i A', strtotime($row['date_created']));
             /* Ensures text is centered */
         }
 
+        .title{
+            overflow: hidden;
+        }
+
         .buttons {
             display: flex;
             gap: 10px;
@@ -380,7 +384,8 @@ $dateCreation = date('F j, Y, g:i A', strtotime($row['date_created']));
                 iconHtml: iconHtml, // Custom icon using Font Awesome
                 title: title,
                 customClass: {
-                    popup: 'swal-custom'
+                    popup: 'swal-custom',
+                    title: 'title'
                 },
                 showConfirmButton: true,
                 confirmButtonColor: '#4CAF50',

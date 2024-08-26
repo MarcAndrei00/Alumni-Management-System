@@ -210,6 +210,9 @@ $result = $conn->query($sql);
             height: 200px;
             resize: none;
         }
+        .announcement-item{
+            cursor: pointer;
+        }
     </style>
 </head>
 

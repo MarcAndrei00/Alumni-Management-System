@@ -379,6 +379,13 @@ $date = date('F j, Y', strtotime($row['date_created']));
             padding-bottom: 30px;
             /* Adjust the padding as needed */
         }
+        .icon{
+            overflow-y: hidden;
+        }
+        .title{
+            overflow: hidden;
+        }
+        
 
         .confirm-button-class,
         .cancel-button-class {
@@ -813,25 +820,19 @@ $date = date('F j, Y', strtotime($row['date_created']));
         document.getElementById('donationForm').addEventListener('submit', function(event) {
             var donationAmount = document.getElementById('donationAmount').value;
 
-            if (donationAmount <= 0) {
+            if (donationAmount < 100) {
                 // Prevent form submission
                 event.preventDefault();
 
                 // Show SweetAlert warning
                 Swal.fire({
                     icon: 'warning',
-                    title: 'You cannot donate a negative or zero value',
-                    text: 'Please input an appropriate amount.'
-                });
-            }else if (donationAmount < 100) {
-                // Prevent form submission
-                event.preventDefault();
-
-                // Show SweetAlert warning
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Sorry for',
-                    text: 'Please input an appropriate amount.'
+                    title: 'Sorry for interruption.',
+                    text: 'Minimum donation is 100. Thank you!',
+                    customClass: {
+                        icon: 'icon',
+                        title: 'title'
+                    }
                 });
             }
         });

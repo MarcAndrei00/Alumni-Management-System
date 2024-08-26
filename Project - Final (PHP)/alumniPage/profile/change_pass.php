@@ -205,6 +205,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             padding-bottom: 30px;
             /* Adjust the padding as needed */
         }
+        .title,.icon{
+            overflow: hidden;
+        }
 
         .confirm-button-class,
         .cancel-button-class {
@@ -375,7 +378,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         cancelButtonText: 'Cancel',
                         customClass: {
                             confirmButton: 'confirm-button-class',
-                            cancelButton: 'cancel-button-class'
+                            cancelButton: 'cancel-button-class',
+                            title: 'title',
+                            icon: 'icon'
                         }
                     }).then((result) => {
                         if (result.isConfirmed) {
@@ -478,7 +483,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 title: title,
                 text: text,
                 customClass: {
-                    popup: 'swal-custom'
+                    popup: 'swal-custom',
+                    title: 'title'
                 },
                 showConfirmButton: true,
                 confirmButtonColor: '#4CAF50',
